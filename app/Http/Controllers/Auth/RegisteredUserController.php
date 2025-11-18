@@ -31,7 +31,6 @@ class RegisteredUserController extends Controller
     {
         $coursePrice = \App\Models\Setting::get('course_price', env('VITE_COURSE_PRICE', 500000));
         $duitkuScriptUrl = \App\Models\Setting::get('duitku_script_url', env('VITE_DUITKU_SCRIPT_URL', ''));
-        
         return Inertia::render('auth/register', [
             'coursePrice' => $coursePrice,
             'duitkuScriptUrl' => $duitkuScriptUrl,
