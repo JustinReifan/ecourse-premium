@@ -15,11 +15,12 @@ interface Milestone {
 }
 
 interface ConfigFormData {
-    [key: string]: string | boolean | Milestone[];
+    [key: string]: string | boolean | Milestone[] | File | undefined;
     landing_headline: string;
     landing_subheadline: string;
     landing_badge: string;
     landing_vsl_thumbnail: string;
+    vsl_thumbnail?: File;
     course_price: string;
     owner_whatsapp: string;
     duitku_api_key: string;
@@ -43,7 +44,7 @@ interface ConfigPageProps {
 export default function ConfigIndex({ settings }: ConfigPageProps) {
     const breadcrumbs = [{ title: 'Admin', href: '/admin' }, { title: 'Configuration' }];
 
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         landing_headline: settings.landing_headline || '',
         landing_subheadline: settings.landing_subheadline || '',
         landing_badge: settings.landing_badge || '',
@@ -65,14 +66,16 @@ export default function ConfigIndex({ settings }: ConfigPageProps) {
     } as any) as {
         data: ConfigFormData;
         setData: (key: keyof ConfigFormData | string, value: any) => void;
-        put: (url: string) => void;
+        post: (url: string, options?: any) => void;
         processing: boolean;
         errors: Partial<Record<keyof ConfigFormData, string>>;
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        put('/admin/config');
+        post('/admin/config', {
+            forceFormData: true,
+        });
     };
 
     const addMilestone = () => {
@@ -153,19 +156,30 @@ export default function ConfigIndex({ settings }: ConfigPageProps) {
                                         {errors.landing_subheadline && <p className="text-destructive mt-1 text-sm">{errors.landing_subheadline}</p>}
                                     </div>
 
-                                    <div>
-                                        <Label htmlFor="landing_vsl_thumbnail">VSL Thumbnail URL</Label>
-                                        <Input
-                                            id="landing_vsl_thumbnail"
-                                            type="url"
-                                            value={data.landing_vsl_thumbnail}
-                                            onChange={(e) => setData('landing_vsl_thumbnail', e.target.value)}
-                                            placeholder="https://example.com/thumbnail.jpg"
-                                        />
-                                        {errors.landing_vsl_thumbnail && (
-                                            <p className="text-destructive mt-1 text-sm">{errors.landing_vsl_thumbnail}</p>
-                                        )}
-                                    </div>
+                    <div>
+                        <Label htmlFor="vsl_thumbnail">VSL Thumbnail</Label>
+                        {settings.landing_vsl_thumbnail && (
+                            <div className="mb-2">
+                                <img
+                                    src={settings.landing_vsl_thumbnail}
+                                    alt="Current VSL Thumbnail"
+                                    className="h-32 w-auto rounded-md border border-border/50"
+                                />
+                            </div>
+                        )}
+                        <Input
+                            id="vsl_thumbnail"
+                            type="file"
+                            accept="image/jpeg,image/png,image/jpg,image/webp"
+                            onChange={(e) => {
+                                if (e.target.files?.[0]) {
+                                    setData('vsl_thumbnail', e.target.files[0]);
+                                }
+                            }}
+                        />
+                        <p className="text-muted-foreground mt-1 text-sm">Max 2MB. Formats: JPEG, PNG, JPG, WEBP</p>
+                        {errors.vsl_thumbnail && <p className="text-destructive mt-1 text-sm">{errors.vsl_thumbnail}</p>}
+                    </div>
                                 </CardContent>
                             </Card>
 

@@ -12,10 +12,14 @@ class DuitkuController extends Controller
 
     public function __construct()
     {
+        $apiKey = \App\Models\Setting::get('duitku_api_key', env('DUITKU_SERVER_KEY'));
+        $merchantCode = \App\Models\Setting::get('duitku_merchant_code', env('DUITKU_MERCHANT_CODE'));
+        $sandboxMode = (bool) \App\Models\Setting::get('duitku_sandbox_mode', env('DUITKU_SANDBOX_MODE', false));
+
         $this->duitkuConfig = new \Duitku\Config(
-            env('DUITKU_SERVER_KEY'),
-            env('DUITKU_MERCHANT_CODE'),
-            (bool) env('DUITKU_SANDBOX_MODE', false),
+            $apiKey,
+            $merchantCode,
+            $sandboxMode,
             true,
             false
         );

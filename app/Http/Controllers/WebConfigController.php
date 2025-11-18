@@ -41,7 +41,7 @@ class WebConfigController extends Controller
             'landing_headline' => 'nullable|string|max:500',
             'landing_subheadline' => 'nullable|string|max:1000',
             'landing_badge' => 'nullable|string|max:255',
-            'landing_vsl_thumbnail' => 'nullable|url|max:500',
+            'vsl_thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'course_price' => 'required|numeric|min:0',
             'owner_whatsapp' => 'nullable|string|max:20',
             'duitku_api_key' => 'nullable|string|max:500',
@@ -60,6 +60,14 @@ class WebConfigController extends Controller
             'affiliate_milestones.*.target' => 'required|integer|min:1',
             'affiliate_milestones.*.bonus_percent' => 'required|numeric|min:0|max:100',
         ]);
+
+        // Handle file upload for VSL thumbnail
+        if ($request->hasFile('vsl_thumbnail')) {
+            $file = $request->file('vsl_thumbnail');
+            $path = $file->store('settings', 'public');
+            $validated['landing_vsl_thumbnail'] = asset('storage/' . $path);
+            unset($validated['vsl_thumbnail']);
+        }
 
         // Handle milestones as JSON
         if (isset($validated['affiliate_milestones'])) {

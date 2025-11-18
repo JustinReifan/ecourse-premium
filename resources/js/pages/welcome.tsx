@@ -17,8 +17,16 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { useEffect, useState } from 'react';
+interface WelcomeProps {
+    landingHeadline: string;
+    landingSubheadline: string;
+    landingBadge: string;
+    landingVslThumbnail?: string;
+    coursePrice: number;
+}
+
 export default function Welcome() {
-    const { auth } = usePage<SharedData>().props;
+    const { auth, landingHeadline, landingSubheadline, landingBadge, landingVslThumbnail } = usePage<SharedData & WelcomeProps>().props;
     const { trackVisit } = useAnalytics();
     const [isHovered, setIsHovered] = useState(false);
 
@@ -105,7 +113,7 @@ export default function Welcome() {
                     <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="space-y-8 text-center">
                             <div data-aos="fade-up">
-                                <HeroBadge text="Premium Canva Masterclass" />
+                                <HeroBadge text={landingBadge} />
                             </div>
 
                             {/* Glow effect */}
@@ -135,14 +143,13 @@ export default function Welcome() {
 
                             <div className="space-y-6" data-aos="fade-up">
                                 <h1 className="text-foreground mx-auto max-w-6xl text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl">
-                                    Strategi Jadi Canva Creator Sukses:{' '}
+                                    {landingHeadline.split(':')[0]}:{' '}
                                     <span className="from-primary via-primary/80 to-primary animate-gradient-x bg-gradient-to-r bg-clip-text text-transparent">
-                                        Dari Nol Sampai Cuan Pertama di Dunia Digital
+                                        {landingHeadline.split(':')[1] || landingHeadline}
                                     </span>
                                 </h1>
-                                {/* harusnya text-muted-foreground */}
                                 <p className="text-muted-foreground mx-auto max-w-4xl text-base leading-relaxed md:text-xl">
-                                    Dibimbing Langsung Dari Nol Sampai Bisa Ngasilin Cuan dari Canva
+                                    {landingSubheadline}
                                 </p>
                             </div>
 
@@ -167,6 +174,7 @@ export default function Welcome() {
                                     src="https://youtu.be/pBQPWmvHLd0"
                                     title="VSL - Belajar Canva"
                                     className="aspect-video w-full lg:h-[600px]"
+                                    thumbnailUrl={landingVslThumbnail}
                                 />
 
                                 {/* kalau gak ada vsl, thumbnail doang */}

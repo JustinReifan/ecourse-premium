@@ -209,9 +209,10 @@ class AffiliateService
         try {
             // Get commission rate - prioritize: product rate > campaign rate > default rate
             $campaign = $click->campaign;
-            $commissionPercent = config('affiliate.default_commission_percent', 10);
+            $commissionPercent = \App\Models\Setting::get('affiliate_commission_percent', 10);
 
-            // Check for product-specific commission rate
+            // Calculate commission based on product, campaign, or default rate
+            $productCommissionRate = null;
             if ($productId) {
                 $product = \App\Models\Product::find($productId);
                 if ($product && $product->affiliate_commission_rate !== null) {
@@ -425,28 +426,61 @@ class AffiliateService
      */
     protected function checkAndAwardMilestones(Affiliate $affiliate): void
     {
-        $weekStart = Carbon::now()->startOfWeek();
-        $weeklyConversions = $affiliate->conversions()
-            ->where('status', 'approved')
-            ->where('created_at', '>=', $weekStart)
-            ->count();
+        // Fetch milestones from database settings
+        $milestonesJson = \App\Models\Setting::get('affiliate_milestones_json');
+        if (!$milestonesJson) {
+            return;
+        }
 
-        $milestones = config('affiliate.milestones.weekly', []);
+        $milestones = json_decode($milestonesJson, true);
+        if (!is_array($milestones)) {
+            return;
+        }
 
         foreach ($milestones as $milestone) {
-            if ($weeklyConversions >= $milestone['target']) {
-                // Check if bonus already awarded this week
+            $period = $milestone['period'] ?? 'weekly';
+            $target = $milestone['target'] ?? 0;
+            $bonusPercent = $milestone['bonus_percent'] ?? 0;
+
+            // Determine date range based on period
+            switch ($period) {
+                case 'daily':
+                    $periodStart = Carbon::now()->startOfDay();
+                    $periodKey = $periodStart->format('Y-m-d');
+                    $periodLabel = 'day';
+                    break;
+                case 'monthly':
+                    $periodStart = Carbon::now()->startOfMonth();
+                    $periodKey = $periodStart->format('Y-m');
+                    $periodLabel = 'month';
+                    break;
+                case 'weekly':
+                default:
+                    $periodStart = Carbon::now()->startOfWeek();
+                    $periodKey = $periodStart->format('Y-W');
+                    $periodLabel = 'week';
+                    break;
+            }
+
+            // Count conversions in the period
+            $periodConversions = $affiliate->conversions()
+                ->where('status', 'approved')
+                ->where('created_at', '>=', $periodStart)
+                ->count();
+
+            if ($periodConversions >= $target) {
+                // Check if bonus already awarded for this period
                 $existingBonus = AffiliateConversion::where('affiliate_id', $affiliate->id)
                     ->where('status', 'approved')
-                    ->where('meta->milestone_week', $weekStart->format('Y-W'))
-                    ->where('meta->milestone_target', $milestone['target'])
+                    ->where('meta->milestone_period', $periodKey)
+                    ->where('meta->milestone_target', $target)
                     ->exists();
 
                 if (!$existingBonus) {
                     $bonusAmount = ($affiliate->conversions()
                         ->where('status', 'approved')
-                        ->where('created_at', '>=', $weekStart)
-                        ->sum('commission_amount') * $milestone['bonus_percent']) / 100;
+                        ->where('created_at', '>=', $periodStart)
+                        ->sum('commission_amount') * $bonusPercent) / 100;
 
                     // Create bonus conversion
                     $bonusConversion = AffiliateConversion::create([
@@ -457,9 +491,10 @@ class AffiliateService
                         'status' => 'approved',
                         'meta' => [
                             'type' => 'milestone_bonus',
-                            'milestone_target' => $milestone['target'],
-                            'milestone_week' => $weekStart->format('Y-W'),
-                            'bonus_percent' => $milestone['bonus_percent'],
+                            'milestone_target' => $target,
+                            'milestone_period' => $periodKey,
+                            'milestone_type' => $period,
+                            'bonus_percent' => $bonusPercent,
                         ],
                     ]);
 
@@ -474,12 +509,13 @@ class AffiliateService
                         'balance_after' => $affiliate->balance,
                         'reference_type' => 'milestone_bonus',
                         'reference_id' => $bonusConversion->id,
-                        'note' => "Milestone bonus: {$milestone['target']} conversions in a week",
+                        'note' => "Milestone bonus: {$target} conversions in a {$periodLabel}",
                     ]);
 
                     Log::info('Milestone bonus awarded', [
                         'affiliate_id' => $affiliate->id,
-                        'target' => $milestone['target'],
+                        'period' => $period,
+                        'target' => $target,
                         'bonus' => $bonusAmount,
                     ]);
                 }

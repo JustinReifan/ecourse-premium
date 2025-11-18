@@ -5,12 +5,13 @@ import { useEffect, useRef, useState } from 'react';
 interface VideoPlayerProps {
     src: string;
     title: string;
+    thumbnailUrl?: string;
     onProgress?: (progress: number) => void;
     onComplete?: () => void;
     className?: string;
 }
 
-export function VideoPlayer({ src, title, onProgress, onComplete, className }: VideoPlayerProps) {
+export function VideoPlayer({ src, title, thumbnailUrl, onProgress, onComplete, className }: VideoPlayerProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const progressBarRef = useRef<HTMLDivElement>(null);

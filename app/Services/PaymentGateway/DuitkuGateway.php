@@ -14,8 +14,8 @@ class DuitkuGateway implements PaymentGatewayInterface
 
     public function __construct()
     {
-        $this->merchantKey = env('DUITKU_SERVER_KEY');
-        $this->duitkuController = new DuitkuController(); // Atau inject via constructor
+        $this->merchantKey = \App\Models\Setting::get('duitku_api_key', env('DUITKU_SERVER_KEY'));
+        $this->duitkuController = new DuitkuController();
     }
 
     public function createPaymentRequest(Order $order, array $customerData): array

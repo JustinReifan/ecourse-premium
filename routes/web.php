@@ -18,11 +18,11 @@ Route::get('/', function () {
     $settings = \App\Models\Setting::getAllCached();
     
     return Inertia::render('welcome', [
-        'landingHeadline' => $settings['landing_headline'] ?? 'Master Canva Design',
-        'landingSubheadline' => $settings['landing_subheadline'] ?? 'Learn professional design skills',
-        'landingBadge' => $settings['landing_badge'] ?? 'New Course',
-        'landingVslThumbnail' => $settings['landing_vsl_thumbnail'] ?? '',
-        'coursePrice' => $settings['course_price'] ?? env('VITE_COURSE_PRICE', 500000),
+        'landingHeadline' => $settings['landing_headline'] ?? 'Strategi Jadi Canva Creator Sukses: Dari Nol Sampai Cuan Pertama di Dunia Digital',
+        'landingSubheadline' => $settings['landing_subheadline'] ?? 'Dibimbing Langsung Dari Nol Sampai Bisa Ngasilin Cuan dari Canva',
+        'landingBadge' => $settings['landing_badge'] ?? 'Premium Canva Masterclass',
+        'landingVslThumbnail' => $settings['landing_vsl_thumbnail'] ?? null,
+        'coursePrice' => $settings['course_price'] ?? 0,
     ]);
 })->name('home');
 
