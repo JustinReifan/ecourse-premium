@@ -40,9 +40,12 @@ type RegisterForm = {
     password_confirmation: string;
 };
 
-export default function Register() {
-    const coursePrice = import.meta.env.VITE_COURSE_PRICE;
+interface RegisterProps {
+    coursePrice: number;
+    duitkuScriptUrl: string;
+}
 
+export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps) {
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [appliedVoucher, setAppliedVoucher] = useState<any>(null);
@@ -51,8 +54,7 @@ export default function Register() {
     const [isSendingNotif, setIsSendingNotif] = useState(false);
     const [selectedGateway, setSelectedGateway] = useState('duitku'); // pilihan payment gateway
 
-    const formatRupiah = (number) => {
-        // Formatter akan dibuat ulang setiap kali fungsi ini dipanggil
+    const formatRupiah = (number: number) => {
         return new Intl.NumberFormat('id-ID').format(number);
     };
 
@@ -73,11 +75,12 @@ export default function Register() {
         // script.type = 'text/javascript';
         // script.async = true;
 
-        // Duitku
-        // get from .env
-        script.src = import.meta.env.VITE_DUITKU_SCRIPT_URL;
+        // Duitku - use the script URL from props (database)
+        script.src = duitkuScriptUrl || import.meta.env.VITE_DUITKU_SCRIPT_URL || '';
 
-        document.body.appendChild(script);
+        if (script.src) {
+            document.body.appendChild(script);
+        }
     }, []);
 
     const handleVoucherApplied = (voucherData: any) => {

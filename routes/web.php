@@ -15,7 +15,15 @@ use App\Http\Controllers\ProductPurchaseController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 
 Route::get('/', function () {
-    return Inertia::render('welcome');
+    $settings = \App\Models\Setting::getAllCached();
+    
+    return Inertia::render('welcome', [
+        'landingHeadline' => $settings['landing_headline'] ?? 'Master Canva Design',
+        'landingSubheadline' => $settings['landing_subheadline'] ?? 'Learn professional design skills',
+        'landingBadge' => $settings['landing_badge'] ?? 'New Course',
+        'landingVslThumbnail' => $settings['landing_vsl_thumbnail'] ?? '',
+        'coursePrice' => $settings['course_price'] ?? env('VITE_COURSE_PRICE', 500000),
+    ]);
 })->name('home');
 
 
@@ -78,6 +86,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Payout Methods
         Route::resource('payout-methods', \App\Http\Controllers\PayoutMethodController::class);
+        
+        // Web Configuration
+        Route::get('/config', [\App\Http\Controllers\WebConfigController::class, 'index'])->name('config');
+        Route::put('/config', [\App\Http\Controllers\WebConfigController::class, 'update'])->name('config.update');
     });
 });
 

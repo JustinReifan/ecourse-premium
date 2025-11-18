@@ -27,6 +27,7 @@ import {
     LayoutGrid,
     Library,
     Megaphone,
+    Settings,
     ShoppingBag,
     SquarePlay,
     TicketPercent,
@@ -71,6 +72,11 @@ const mainNavItems: NavItem[] = [
         title: 'Vouchers',
         href: '/admin/vouchers',
         icon: TicketPercent,
+    },
+    {
+        title: 'Configuration',
+        href: '/admin/config',
+        icon: Settings,
     },
 ];
 
