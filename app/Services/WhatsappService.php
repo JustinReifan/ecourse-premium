@@ -13,8 +13,8 @@ class WhatsappService
 
     public function __construct()
     {
-        // Ambil konfigurasi dari config/services.php
-        $this->apiKey = env("WHATSAPP_APIKEY");
+        // Fetch configuration from database settings
+        $this->apiKey = \App\Models\Setting::get('whatsapp_api_key');
         $this->baseUrl = env("WHATSAPP_BASE_URL");
 
         if (!$this->apiKey || !$this->baseUrl) {
