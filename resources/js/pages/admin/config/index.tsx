@@ -1,12 +1,12 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/layouts/admin-layout';
 import { Head, useForm } from '@inertiajs/react';
 import { Plus, Save, Settings, Trash2 } from 'lucide-react';
-
 interface Milestone {
     [key: string]: string | number;
     period: string;
@@ -19,6 +19,7 @@ interface ConfigFormData {
     landing_headline: string;
     landing_subheadline: string;
     landing_badge: string;
+    landing_vsl_url: string;
     landing_vsl_thumbnail: string;
     vsl_thumbnail?: File;
     course_price: string;
@@ -32,6 +33,7 @@ interface ConfigFormData {
     midtrans_merchant_id: string;
     midtrans_base_url: string;
     whatsapp_api_key: string;
+    whatsapp_base_url: string;
     affiliate_commission_percent: string;
     affiliate_minimum_payout: string;
     affiliate_milestones: Milestone[];
@@ -48,6 +50,7 @@ export default function ConfigIndex({ settings }: ConfigPageProps) {
         landing_headline: settings.landing_headline || '',
         landing_subheadline: settings.landing_subheadline || '',
         landing_badge: settings.landing_badge || '',
+        landing_vsl_url: settings.landing_vsl_url || '',
         landing_vsl_thumbnail: settings.landing_vsl_thumbnail || '',
         course_price: settings.course_price || '0',
         owner_whatsapp: settings.owner_whatsapp || '',
@@ -60,6 +63,7 @@ export default function ConfigIndex({ settings }: ConfigPageProps) {
         midtrans_merchant_id: settings.midtrans_merchant_id || '',
         midtrans_base_url: settings.midtrans_base_url || '',
         whatsapp_api_key: settings.whatsapp_api_key || '',
+        whatsapp_base_url: settings.whatsapp_base_url || '',
         affiliate_commission_percent: settings.affiliate_commission_percent || '10',
         affiliate_minimum_payout: settings.affiliate_minimum_payout || '100000',
         affiliate_milestones: settings.affiliate_milestones || [],
@@ -135,11 +139,12 @@ export default function ConfigIndex({ settings }: ConfigPageProps) {
 
                                     <div>
                                         <Label htmlFor="landing_headline">Headline</Label>
-                                        <Input
+                                        <Textarea
                                             id="landing_headline"
                                             value={data.landing_headline}
                                             onChange={(e) => setData('landing_headline', e.target.value)}
-                                            placeholder="Main headline for the hero section"
+                                            placeholder="Main headline for the hero section (HTML Allowed)"
+                                            rows={3}
                                         />
                                         {errors.landing_headline && <p className="text-destructive mt-1 text-sm">{errors.landing_headline}</p>}
                                     </div>
@@ -151,35 +156,46 @@ export default function ConfigIndex({ settings }: ConfigPageProps) {
                                             value={data.landing_subheadline}
                                             onChange={(e) => setData('landing_subheadline', e.target.value)}
                                             placeholder="Supporting text for the hero section"
-                                            rows={3}
+                                            rows={2}
                                         />
                                         {errors.landing_subheadline && <p className="text-destructive mt-1 text-sm">{errors.landing_subheadline}</p>}
                                     </div>
 
-                    <div>
-                        <Label htmlFor="vsl_thumbnail">VSL Thumbnail</Label>
-                        {settings.landing_vsl_thumbnail && (
-                            <div className="mb-2">
-                                <img
-                                    src={settings.landing_vsl_thumbnail}
-                                    alt="Current VSL Thumbnail"
-                                    className="h-32 w-auto rounded-md border border-border/50"
-                                />
-                            </div>
-                        )}
-                        <Input
-                            id="vsl_thumbnail"
-                            type="file"
-                            accept="image/jpeg,image/png,image/jpg,image/webp"
-                            onChange={(e) => {
-                                if (e.target.files?.[0]) {
-                                    setData('vsl_thumbnail', e.target.files[0]);
-                                }
-                            }}
-                        />
-                        <p className="text-muted-foreground mt-1 text-sm">Max 2MB. Formats: JPEG, PNG, JPG, WEBP</p>
-                        {errors.vsl_thumbnail && <p className="text-destructive mt-1 text-sm">{errors.vsl_thumbnail}</p>}
-                    </div>
+                                    <div>
+                                        <Label htmlFor="landing_vsl_url">VSL Youtube Url</Label>
+                                        <Input
+                                            id="landing_vsl_url"
+                                            value={data.landing_vsl_url}
+                                            onChange={(e) => setData('landing_vsl_url', e.target.value)}
+                                            placeholder="https://youtu.be/xxxxx"
+                                        />
+                                        {errors.landing_vsl_url && <p className="text-destructive mt-1 text-sm">{errors.landing_vsl_url}</p>}
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="vsl_thumbnail">VSL Thumbnail</Label>
+                                        {settings.landing_vsl_thumbnail && (
+                                            <div className="mb-2">
+                                                <img
+                                                    src={settings.landing_vsl_thumbnail}
+                                                    alt="Current VSL Thumbnail"
+                                                    className="border-border/50 h-32 w-auto rounded-md border"
+                                                />
+                                            </div>
+                                        )}
+                                        <Input
+                                            id="vsl_thumbnail"
+                                            type="file"
+                                            accept="image/jpeg,image/png,image/jpg,image/webp"
+                                            onChange={(e) => {
+                                                if (e.target.files?.[0]) {
+                                                    setData('vsl_thumbnail', e.target.files[0]);
+                                                }
+                                            }}
+                                        />
+                                        <p className="text-muted-foreground mt-1 text-sm">Max 5MB. Formats: JPEG, PNG, JPG, WEBP</p>
+                                        {errors.vsl_thumbnail && <p className="text-destructive mt-1 text-sm">{errors.vsl_thumbnail}</p>}
+                                    </div>
                                 </CardContent>
                             </Card>
 
@@ -189,6 +205,18 @@ export default function ConfigIndex({ settings }: ConfigPageProps) {
                                     <CardTitle>WhatsApp Gateway</CardTitle>
                                     <CardDescription>Configure WhatsApp notifications</CardDescription>
                                 </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div>
+                                        <Label htmlFor="whatsapp_base_url">Base URL</Label>
+                                        <Input
+                                            id="whatsapp_base_url"
+                                            value={data.whatsapp_base_url}
+                                            onChange={(e) => setData('whatsapp_base_url', e.target.value)}
+                                            placeholder="WhatsApp API base URL"
+                                        />
+                                        {errors.whatsapp_base_url && <p className="text-destructive mt-1 text-sm">{errors.whatsapp_api_key}</p>}
+                                    </div>
+                                </CardContent>
                                 <CardContent className="space-y-4">
                                     <div>
                                         <Label htmlFor="whatsapp_api_key">API Key</Label>
@@ -303,6 +331,8 @@ export default function ConfigIndex({ settings }: ConfigPageProps) {
                                                 </div>
                                             </Card>
                                         ))}
+
+                                        <p className="text-muted-foreground mt-1 text-sm">Period: daily, weekly, monthly</p>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -336,7 +366,7 @@ export default function ConfigIndex({ settings }: ConfigPageProps) {
                                             id="owner_whatsapp"
                                             value={data.owner_whatsapp}
                                             onChange={(e) => setData('owner_whatsapp', e.target.value)}
-                                            placeholder="+628123456789"
+                                            placeholder="628123456789"
                                         />
                                         {errors.owner_whatsapp && <p className="text-destructive mt-1 text-sm">{errors.owner_whatsapp}</p>}
                                     </div>
@@ -388,11 +418,10 @@ export default function ConfigIndex({ settings }: ConfigPageProps) {
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                        <input
-                                            type="checkbox"
+                                        <Checkbox
                                             id="duitku_sandbox_mode"
-                                            checked={data.duitku_sandbox_mode}
-                                            onChange={(e) => setData('duitku_sandbox_mode', e.target.checked)}
+                                            checked={Number(data.duitku_sandbox_mode) === 1}
+                                            onCheckedChange={(checked) => setData('duitku_sandbox_mode', checked)}
                                             className="h-4 w-4 rounded border-zinc-700"
                                         />
                                         <Label htmlFor="duitku_sandbox_mode" className="cursor-pointer">

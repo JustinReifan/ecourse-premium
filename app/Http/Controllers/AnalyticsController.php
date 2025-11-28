@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use Inertia\Inertia;
+use App\Models\Setting;
 use App\Models\UserAnalytic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
-use Inertia\Inertia;
 
 class AnalyticsController extends Controller
 {
@@ -83,7 +84,9 @@ class AnalyticsController extends Controller
             ->where('event_data->status', 'success')
             ->count();
 
-        $revenue = $payments * env("COURSE_PRICE"); // Rp 499,000 per registration
+        $course_price = Setting::get('course_price', 100000);
+
+        $revenue = $payments * $course_price; 
 
         return [
             'total_visits' => $totalVisits,

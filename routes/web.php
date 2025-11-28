@@ -16,12 +16,13 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 
 Route::get('/', function () {
     $settings = \App\Models\Setting::getAllCached();
-    
+
     return Inertia::render('welcome', [
         'landingHeadline' => $settings['landing_headline'] ?? 'Strategi Jadi Canva Creator Sukses: Dari Nol Sampai Cuan Pertama di Dunia Digital',
         'landingSubheadline' => $settings['landing_subheadline'] ?? 'Dibimbing Langsung Dari Nol Sampai Bisa Ngasilin Cuan dari Canva',
         'landingBadge' => $settings['landing_badge'] ?? 'Premium Canva Masterclass',
         'landingVslThumbnail' => $settings['landing_vsl_thumbnail'] ?? null,
+        'landingVslUrl' => $settings['landing_vsl_url'] ?? null,
         'coursePrice' => $settings['course_price'] ?? 0,
     ]);
 })->name('home');
@@ -86,10 +87,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Payout Methods
         Route::resource('payout-methods', \App\Http\Controllers\PayoutMethodController::class);
-        
+
         // Web Configuration
         Route::get('/config', [\App\Http\Controllers\WebConfigController::class, 'index'])->name('config');
-        Route::put('/config', [\App\Http\Controllers\WebConfigController::class, 'update'])->name('config.update');
+        Route::post('/config', [\App\Http\Controllers\WebConfigController::class, 'update'])->name('config.update');
     });
 });
 

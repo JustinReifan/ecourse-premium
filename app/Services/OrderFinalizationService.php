@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Setting;
 use App\Models\UserPurchase;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
@@ -15,11 +16,13 @@ class OrderFinalizationService
 {
     protected AffiliateService $affiliateService;
     protected WhatsappService $waService;
+    protected $adminNumber;
 
     public function __construct(AffiliateService $affiliateService, WhatsappService $waService)
     {
         $this->affiliateService = $affiliateService;
         $this->waService = $waService;
+        $this->adminNumber  = Setting::get('owner_whatsapp', env('ADMIN_WA_NUMBER'));
     }
 
     /**
@@ -119,8 +122,7 @@ class OrderFinalizationService
             }
 
             // 2b. Kirim Pesan Notifikasi ke Owner/Admin Website
-            $adminPhone = env('ADMIN_WA_NUMBER'); // Ambil dari .env
-            if ($adminPhone) {
+            if ($this->adminNumber) {
                 $affiliatorName = $affiliator->name; // Ambil nama dari data affiliate
 
                 $messageToAdmin = "Halo Bos! Ada komisi baru masuk nih 🤑\n\n"
@@ -131,7 +133,7 @@ class OrderFinalizationService
                     . $adminUrl;
 
                 // $this->waService->sendMessage($adminPhone, $messageToAdmin);
-                SendWhatsappNotificationJob::dispatch($adminPhone, $messageToAdmin);
+                SendWhatsappNotificationJob::dispatch($this->adminNumber, $messageToAdmin);
             }
         }
     }
@@ -275,8 +277,7 @@ class OrderFinalizationService
             }
 
             // 2b. Ke Admin
-            $adminPhone = env('ADMIN_WA_NUMBER');
-            if ($adminPhone) {
+            if ($this->adminNumber) {
                 $messageToAdmin = "Info Bos! Ada penjualan upsell 📈\n\n"
                     . "Affiliator: *{$affiliator->name}*\n"
                     . "Member: *{$user->name}*\n"
@@ -284,7 +285,7 @@ class OrderFinalizationService
                     . "Komisi: *{$commissionAmount}*\n\n"
                     . "Link approval: {$adminUrl}";
                 // $this->waService->sendMessage($adminPhone, $messageToAdmin);
-                SendWhatsappNotificationJob::dispatch($adminPhone, $messageToAdmin);
+                SendWhatsappNotificationJob::dispatch($this->adminNumber, $messageToAdmin);
             }
         }
     }

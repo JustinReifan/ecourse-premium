@@ -40,8 +40,9 @@ class WebConfigController extends Controller
         $validated = $request->validate([
             'landing_headline' => 'nullable|string|max:500',
             'landing_subheadline' => 'nullable|string|max:1000',
+            'landing_vsl_url' => 'nullable|url|max:1000',
             'landing_badge' => 'nullable|string|max:255',
-            'vsl_thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'vsl_thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'course_price' => 'required|numeric|min:0',
             'owner_whatsapp' => 'nullable|string|max:20',
             'duitku_api_key' => 'nullable|string|max:500',
@@ -52,6 +53,7 @@ class WebConfigController extends Controller
             'midtrans_client_key' => 'nullable|string|max:500',
             'midtrans_merchant_id' => 'nullable|string|max:255',
             'midtrans_base_url' => 'nullable|url|max:500',
+            'whatsapp_base_url' => 'nullable|url|max:500',
             'whatsapp_api_key' => 'nullable|string|max:500',
             'affiliate_commission_percent' => 'required|numeric|min:0|max:100',
             'affiliate_minimum_payout' => 'required|numeric|min:0',

@@ -200,7 +200,7 @@ export function VideoPlayer({ src, title, thumbnailUrl, onProgress, onComplete, 
 
     const isYouTube = isYouTubeUrl(src);
     const videoId = isYouTube ? getYouTubeId(src) : null;
-    const thumbnail = videoId ? `/storage/landing/vsl.webp` : null;
+    const thumbnail = videoId ? thumbnailUrl : null;
 
     return (
         <div

@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Inertia\Inertia;
+use App\Models\Setting;
 use App\Models\Voucher;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class VoucherController extends Controller
 {
@@ -73,7 +74,8 @@ class VoucherController extends Controller
             return response()->json(['error' => 'Voucher is not valid or has expired'], 400);
         }
 
-        $originalPrice = env('COURSE_PRICE'); // Your course price
+
+        $originalPrice =  Setting::get('course_price', 100000); // Your course price
         $discount = $voucher->calculateDiscount($originalPrice);
         $finalPrice = $originalPrice - $discount;
 

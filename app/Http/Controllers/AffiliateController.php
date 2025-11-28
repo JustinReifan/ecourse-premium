@@ -12,6 +12,7 @@ use App\Models\AffiliateClick;
 use App\Models\AffiliateLedger;
 use App\Services\AffiliateService;
 use App\Models\AffiliateConversion;
+use App\Models\Setting;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -88,6 +89,9 @@ class AffiliateController extends Controller
             })
             ->get();
 
+        // minimum payouts
+        $minimumPayouts = Setting::get('affiliate_minimum_payout', 100000);
+
         return Inertia::render('affiliate/dashboard', [
             'affiliate' => $affiliate,
             'stats' => $stats,
@@ -96,6 +100,7 @@ class AffiliateController extends Controller
             'payouts' => $payouts,
             'shareLink' => $shareLink,
             'activeCampaigns' => $activeCampaigns,
+            'minimumPayouts' => $minimumPayouts,
         ]);
     }
 

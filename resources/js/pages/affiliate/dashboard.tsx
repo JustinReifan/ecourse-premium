@@ -73,9 +73,10 @@ interface Props {
     payouts: Payout[];
     shareLink: string;
     activeCampaigns: Campaign[];
+    minimumPayouts: number;
 }
 
-export default function AffiliateDashboard({ affiliate, stats, conversions, ledger, payouts, shareLink, activeCampaigns }: Props) {
+export default function AffiliateDashboard({ affiliate, stats, conversions, ledger, payouts, shareLink, activeCampaigns, minimumPayouts }: Props) {
     const [payoutAmount, setPayoutAmount] = useState('');
     const [payoutMethodId, setPayoutMethodId] = useState('');
     const [accountName, setAccountName] = useState('');
@@ -234,11 +235,11 @@ export default function AffiliateDashboard({ affiliate, stats, conversions, ledg
                 <Card>
                     <CardHeader>
                         <CardTitle>Request Payout</CardTitle>
-                        <CardDescription>Minimum payout: {formatCurrency(100000)}</CardDescription>
+                        <CardDescription>Minimum payout: {formatCurrency(minimumPayouts)}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {!showPayoutForm ? (
-                            <Button onClick={() => setShowPayoutForm(true)} disabled={stats.available_balance < 100000}>
+                            <Button onClick={() => setShowPayoutForm(true)} disabled={stats.available_balance < minimumPayouts}>
                                 Request Payout
                             </Button>
                         ) : (

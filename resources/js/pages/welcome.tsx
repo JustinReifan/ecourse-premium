@@ -16,17 +16,20 @@ import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import DOMPurify from 'dompurify';
 import { useEffect, useState } from 'react';
 interface WelcomeProps {
     landingHeadline: string;
     landingSubheadline: string;
     landingBadge: string;
     landingVslThumbnail?: string;
+    landingVslUrl?: string;
     coursePrice: number;
 }
 
 export default function Welcome() {
-    const { auth, landingHeadline, landingSubheadline, landingBadge, landingVslThumbnail } = usePage<SharedData & WelcomeProps>().props;
+    const { auth, landingHeadline, landingSubheadline, landingBadge, landingVslThumbnail, landingVslUrl } = usePage<SharedData & WelcomeProps>()
+        .props;
     const { trackVisit } = useAnalytics();
     const [isHovered, setIsHovered] = useState(false);
 
@@ -142,15 +145,11 @@ export default function Welcome() {
                             </div>
 
                             <div className="space-y-6" data-aos="fade-up">
-                                <h1 className="text-foreground mx-auto max-w-6xl text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl">
-                                    {landingHeadline.split(':')[0]}:{' '}
-                                    <span className="from-primary via-primary/80 to-primary animate-gradient-x bg-gradient-to-r bg-clip-text text-transparent">
-                                        {landingHeadline.split(':')[1] || landingHeadline}
-                                    </span>
-                                </h1>
-                                <p className="text-muted-foreground mx-auto max-w-4xl text-base leading-relaxed md:text-xl">
-                                    {landingSubheadline}
-                                </p>
+                                <h1
+                                    className="text-foreground mx-auto max-w-6xl text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl"
+                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(landingHeadline) }}
+                                ></h1>
+                                <p className="text-muted-foreground mx-auto max-w-4xl text-base leading-relaxed md:text-xl">{landingSubheadline}</p>
                             </div>
 
                             {/* <div className="animate-fade-in" style={{ animationDelay: '400ms', animationFillMode: 'both' }}>
@@ -171,7 +170,7 @@ export default function Welcome() {
                             <div data-aos="fade-up">
                                 {/* Video utama di atas background */}
                                 <VideoPlayer
-                                    src="https://youtu.be/pBQPWmvHLd0"
+                                    src={landingVslUrl}
                                     title="VSL - Belajar Canva"
                                     className="aspect-video w-full lg:h-[600px]"
                                     thumbnailUrl={landingVslThumbnail}

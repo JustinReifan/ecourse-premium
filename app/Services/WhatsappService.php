@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use GuzzleHttp\Client;
+use App\Models\Setting;
 use Illuminate\Support\Facades\Log;
 
 class WhatsappService
@@ -14,8 +15,8 @@ class WhatsappService
     public function __construct()
     {
         // Fetch configuration from database settings
-        $this->apiKey = \App\Models\Setting::get('whatsapp_api_key');
-        $this->baseUrl = env("WHATSAPP_BASE_URL");
+        $this->apiKey = Setting::get('whatsapp_api_key');
+        $this->baseUrl = Setting::get('whatsapp_base_url');
 
         if (!$this->apiKey || !$this->baseUrl) {
             Log::error('WA Service: API Key or Base URL is not set.');

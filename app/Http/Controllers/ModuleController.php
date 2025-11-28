@@ -45,7 +45,7 @@ class ModuleController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'video_path' => 'required|file|mimetypes:video/mp4|max:202400',
+            'video_path' => 'required|file|mimetypes:video/mp4',
             'order' => 'nullable|integer|min:0',
             'status' => 'required|in:draft,published',
             'course_id' => 'required|exists:courses,id'

@@ -367,7 +367,7 @@ class AffiliateService
         }
 
         // Validate minimum payout
-        $minPayout = config('affiliate.minimum_payout', 10000);
+        $minPayout = \App\Models\Setting::get('affiliate_minimum_payout', 100000);
         if ($amount < $minPayout) {
             throw new \Exception("Minimum payout is {$minPayout}");
         }
