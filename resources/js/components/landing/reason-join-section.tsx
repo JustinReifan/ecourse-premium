@@ -137,7 +137,7 @@ export function ReasonJoinSection() {
                                 {/* Stats overlay */}
                                 <div className="absolute right-4 bottom-4 left-4">
                                     <div className="flex items-center justify-between gap-4">
-                                        <div className="bg-background/90 border-border/20 rounded-xl border px-4 py-2 backdrop-blur-xl">
+                                        <div className="bg-primary/10 border-border/20 rounded-xl border px-4 py-2 backdrop-blur-xl">
                                             <div className="flex items-center gap-2">
                                                 <Users className="text-primary h-4 w-4" />
                                                 <span className="text-foreground text-sm font-semibold">100M+ Users</span>

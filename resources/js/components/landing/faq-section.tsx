@@ -138,7 +138,7 @@ export function FaqSection() {
                                     </span>
                                 </h2>
                                 <p className="text-muted-foreground text-xl leading-relaxed">
-                                    kontak email dibawah untuk pertanyaan! : grafispondok@gmail.com
+                                    kontak email dibawah untuk pertanyaan! : gumpreneur91@gmail.com
                                 </p>
                             </div>
                         </div>
@@ -152,7 +152,7 @@ export function FaqSection() {
                                     </div>
                                     <div>
                                         <h3 className="text-foreground font-semibold">Whatsapp</h3>
-                                        <p className="text-muted-foreground text-sm">+6285778251548</p>
+                                        <p className="text-muted-foreground text-sm">+6282253204242</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
@@ -162,7 +162,8 @@ export function FaqSection() {
                                     <div>
                                         <h3 className="text-foreground font-semibold">Alamat</h3>
                                         <p className="text-muted-foreground text-sm">
-                                            Kp. Babakan Masjid RT/RW 01/01 Desa Pasar Keong, Kecamatan Cibadak, Lebak, Banten
+                                            Toko (LATHEEFA) SEBRANG MUSHOLA AL-HUDA Link Ciberko Kecil Rt.1 Rw.3 No 12, 42424, Kalitimbang, Cibeber,
+                                            Kota Cilegon, Cibeber, Banten, Indonesia 
                                         </p>
                                     </div>
                                 </div>

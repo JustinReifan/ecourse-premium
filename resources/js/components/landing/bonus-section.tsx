@@ -76,7 +76,7 @@ export const bonusData = {
             id: 1,
             badge: 'Bonus #01',
             title: 'Akses 30+ video tutorial lynk.id, editing capcut & canva',
-            value: 'Rp 699.000',
+            value: 'Rp 399.000',
             description:
                 'Selain kurikulum dari kelas ini, kamu juga bakal dapet akses ke 30+ video tutorial lynk.id, editing capcut, editing canva, dari O sampai siap jual beserta update materinya',
             image: '/storage/landing/bonus/1.png',
@@ -106,7 +106,7 @@ export const bonusData = {
             id: 4,
             badge: 'Bonus #04',
             title: '170+ Video aesthetic untuk bahan latihan ngonten',
-            value: 'Rp 39.000',
+            value: 'Rp 149.000',
             description:
                 'Gak PD nampil muka? Atau lagi males syuting? Tenang, aku kasih stok 170+ video estetik siap pakai. Tinggal templok teks, upload, beres! Gak ada alasan kehabisan stok konten',
             image: '/storage/landing/bonus/4.png',
@@ -126,7 +126,7 @@ export const bonusData = {
             id: 6,
             badge: 'Bonus #06',
             title: 'Bimbingan Personal Via WhatsApp',
-            value: 'Rp 3.999.000',
+            value: 'Rp 2.999.000',
             description:
                 'Bingung pas praktek? Chat aku aja! Ini jalur VIP khusus buat kamu tanya-tanya sepuasnya langsung ke WhatsApp pribadiku. Serasa punya mentor privat!',
             image: '/storage/landing/bonus/6.png',
@@ -136,7 +136,7 @@ export const bonusData = {
             id: 7,
             badge: 'Bonus #07',
             title: 'Grup bimbingan latihan bahan konten reels via telegram',
-            value: 'Rp 399.000',
+            value: 'Rp 1.499.000',
             description:
                 'Lingkungan itu pengaruh banget. Gabung bareng temen-temen seperjuangan, kita saling support, koreksi konten, dan tumbuh bareng biar semangatmu gak kendor.',
             image: '/storage/landing/bonus/7.png',
@@ -146,7 +146,7 @@ export const bonusData = {
             id: 8,
             badge: 'Bonus #08',
             title: 'Fasilitas Mentorship Live 2 minggu 1x',
-            value: 'Rp 599.000',
+            value: 'Rp 4.599.000',
             description:
                 'Kita tatap muka virtual rutin tiap 2 minggu! Sesi bedah akun, evaluasi progress, dan tanya jawab langsung biar kamu dipastikan nggak salah arah. ',
             image: '/storage/landing/bonus/8.png',
@@ -193,7 +193,7 @@ export function BonusSection() {
         }
     };
 
-    const totalValue = 1924000; // Rp 1,190,000
+    const totalValue = 10792000; // Rp 1,190,000
 
     return (
         <section className="relative overflow-hidden py-20 lg:py-32">

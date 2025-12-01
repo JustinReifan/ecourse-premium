@@ -63,7 +63,7 @@ export default function Welcome() {
 
     return (
         <>
-            <Head title="Belajar Canva Masterclass">
+            <Head title="Landing">
                 <link rel="preconnect" href="https://fonts.bunny.net" />
                 <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700,800" rel="stylesheet" />
             </Head>
@@ -274,7 +274,7 @@ export default function Welcome() {
                                 </div>
                                 {/* <span className="text-foreground text-xl font-bold">Editor Amplifier</span> */}
                             </div>
-                            <p className="text-muted-foreground text-sm">© 2025 Pondok Grafis. All rights reserved.</p>
+                            <p className="text-muted-foreground text-sm">© 2025 Affiliate Jago Jualan. All rights reserved.</p>
                         </div>
                     </div>
                 </footer>

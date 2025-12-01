@@ -8,18 +8,18 @@ import { useState } from 'react';
 const benefits = [
     {
         title: '50+ Modul Pembelajaran',
-        description: 'Tutorial step-by-step dari basic hingga advanced editing techniques',
+        description: 'Tutorial step-by-step dari O sampai siap cuan',
     },
     {
-        title: 'Asset Editing Siap Pakai',
-        description: 'Akses Ke Ratusan Aset Editing Siap Pakai',
+        title: 'Sertifikat Digital',
+        description: 'Dapatkan sertifikat digital setelah menyelesaikan kelas',
     },
     {
-        title: 'Private Community Access',
+        title: 'Grup Telegram Eksklusif',
         description: 'Bergabung dengan 12,000+ video creator di komunitas eksklusif',
     },
     {
-        title: 'Lifetime Updates',
+        title: 'Update Materi Terbaru',
         description: 'Dapatkan update materi terbaru selamanya tanpa biaya tambahan',
     },
     {
@@ -27,8 +27,8 @@ const benefits = [
         description: 'Akses material course lengkap dari basic hingga advanced techniques',
     },
     {
-        title: 'Materi Daging Youtube',
-        description: 'Akses Ke Puluhan Materi Daging Youtube',
+        title: 'Bimbingan 1 on 1',
+        description: 'Dapatkan bimbingan langsung dari mentor terbaik',
     },
 ];
 
