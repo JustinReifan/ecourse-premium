@@ -69,6 +69,8 @@ class MemberController extends Controller
                 ->orderBy('name', 'asc');
         }]);
 
+        $course->load('product');
+
         // Add placeholder thumbnail if none exists
         if (!$course->thumbnail) {
             $placeholders = [

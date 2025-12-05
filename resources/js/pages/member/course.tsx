@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import AppHeaderLayout from '@/layouts/app/app-header-layout';
 import { type Course, type Module } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { ArrowLeft, BookCopy, CheckCircle, ChevronDown, Clock, Play } from 'lucide-react';
 import { useState } from 'react';
 
@@ -12,7 +12,16 @@ interface CoursePageProps {
             is_completed: boolean;
             duration: string;
         })[];
+        product: Product;
     };
+}
+
+interface Product {
+    id: number;
+    title: string;
+    slug: string;
+    description: string;
+    thumbnail: string | null;
 }
 
 function visitModule(slug: string) {
@@ -87,10 +96,28 @@ export default function Course({ course }: CoursePageProps) {
         return sections;
     }, []);
 
+    function truncateString(str: string) {
+        const maxLength = 35;
+        if (str.length > maxLength) {
+            // Potong string dari indeks 0 sampai maxLength
+            return str.substring(0, maxLength) + '...';
+        } else {
+            // Jika string tidak terlalu panjang, kembalikan string aslinya
+            return str;
+        }
+    }
+
     // const mobileSidebarContent = <CourseMobileSidebar course={course} />;
 
     return (
-        <AppHeaderLayout breadcrumbs={[{ title: 'Courses', href: route('member.index') }, { title: course.name }]}>
+        <AppHeaderLayout
+            breadcrumbs={[
+                { title: 'Library', href: route('member.index') },
+                { title: truncateString(course.product.title), href: route('member.product.show', { product: course.product.slug }) },
+                { title: truncateString(course.name) },
+                // { title: truncateString(course.product.title), href: route('member.product.show', { product: course.slug }) },
+            ]}
+        >
             <Head title={course.name} />
 
             <div className="min-h-screen bg-black">
@@ -106,13 +133,15 @@ export default function Course({ course }: CoursePageProps) {
                     </div>
 
                     <div className="relative mx-auto max-w-6xl px-4 pt-8 pb-12 md:pt-16 md:pb-20">
-                        <div className="mb-6 lg:hidden">
-                            <Link href="/">
-                                <Button variant="ghost" className="p-0 text-neutral-400 hover:text-white">
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Back to Courses
-                                </Button>
-                            </Link>
+                        <div className="mb-6">
+                            <Button
+                                variant="outline"
+                                onClick={() => router.get(route('member.product.show', { product: course.product.slug }))}
+                                className="p-0"
+                            >
+                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                Back to Product
+                            </Button>
                         </div>
 
                         <div className="grid gap-8 lg:grid-cols-3 lg:gap-12">

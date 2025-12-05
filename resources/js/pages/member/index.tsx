@@ -189,7 +189,7 @@ export default function MemberProducts({ ownedProducts, availableProducts, selec
                                     {ownedProducts.map((product) => (
                                         <Card
                                             key={product.id}
-                                            className="group border-border/50 bg-card/50 hover:border-primary/50 cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-lg"
+                                            className="group border-primary/50 bg-card/50 cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-lg"
                                             onClick={() => handleProductClick(product)}
                                         >
                                             <div className="from-secondary to-muted relative aspect-video overflow-hidden bg-gradient-to-br">

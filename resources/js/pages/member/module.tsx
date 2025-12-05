@@ -218,7 +218,7 @@ export default function Module({ module, prevModule, nextModule }: ModulePagePro
     return (
         <AppHeaderLayout
             breadcrumbs={[
-                { title: 'Courses', href: route('member.index') },
+                { title: 'Library', href: route('member.index') },
                 { title: module.course.name, href: route('member.course', { course: module.course.slug }) },
                 { title: module.name },
             ]}
@@ -251,9 +251,9 @@ export default function Module({ module, prevModule, nextModule }: ModulePagePro
                         {/* Back Navigation */}
                         <div className="mb-6">
                             <Link href={route('member.course', { course: module.course.slug })}>
-                                <Button variant="ghost" className="h-auto items-center p-0 text-left text-neutral-400 hover:text-white">
+                                <Button variant="outline">
                                     <ArrowLeft className="mr-2 h-4 w-4 flex-shrink-0" />
-                                    <span className="whitespace-normal">Back to {module.course.name}</span>
+                                    <span className="whitespace-normal">Back to Course</span>
                                 </Button>
                             </Link>
                         </div>

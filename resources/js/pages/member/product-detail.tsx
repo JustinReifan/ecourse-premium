@@ -33,11 +33,22 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         router.get(route('member.course', { course: slug }));
     };
 
+    function truncateString(str: string) {
+        const maxLength = 35;
+        if (str.length > maxLength) {
+            // Potong string dari indeks 0 sampai maxLength
+            return str.substring(0, maxLength) + '...';
+        } else {
+            // Jika string tidak terlalu panjang, kembalikan string aslinya
+            return str;
+        }
+    }
+
     return (
         <>
             <Head title={product.title} />
 
-            <AppLayout>
+            <AppLayout breadcrumbs={[{ title: 'Library', href: route('member.index') }, { title: truncateString(product.title) }]}>
                 <div className="from-background via-background to-secondary/10 min-h-screen bg-gradient-to-br">
                     {/* Header */}
                     <div className="border-border/50 from-background via-primary/5 to-background relative overflow-hidden border-b bg-gradient-to-r">
@@ -47,14 +58,22 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                                 Back to Library
                             </Button>
 
-                            <div className="space-y-4">
-                                <h1 className="animate-gradient-x from-foreground via-primary to-foreground bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent md:text-6xl">
-                                    {product.title}
-                                </h1>
-                                {product.description && <p className="text-muted-foreground max-w-2xl text-xl">{product.description}</p>}
-                                <Badge className="rounded-full px-3 text-base">
-                                    {product.courses.length} Course{product.courses.length !== 1 ? 's' : ''}
-                                </Badge>
+                            <div className="space-y-6">
+                                <div className="animate-fade-in">
+                                    <h1 className="mb-4 text-4xl leading-tight font-bold text-white lg:text-5xl">
+                                        <span className="from-primary to-primary animate-gradient-x via-foreground bg-gradient-to-r bg-clip-text text-transparent">
+                                            {product.title}
+                                        </span>
+                                    </h1>
+
+                                    {product.description && (
+                                        <p className="max-w-3xl text-lg leading-relaxed text-neutral-300">{product.description}</p>
+                                    )}
+
+                                    <Badge className="rounded-full px-3 text-base">
+                                        {product.courses.length} Course{product.courses.length !== 1 ? 's' : ''}
+                                    </Badge>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -81,8 +100,8 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                                         <Card
                                             key={course.id}
                                             className={cn(
-                                                'group bg-card/50 border-border/50 overflow-hidden backdrop-blur-sm',
-                                                'hover:border-primary/50 hover:bg-card/70 hover:shadow-primary/10 hover:shadow-2xl',
+                                                'group bg-card/50 border-primary/50 overflow-hidden backdrop-blur-sm',
+                                                'hover:bg-card/70 hover:shadow-primary/10 hover:shadow-2xl',
                                                 'transition-all duration-500 hover:-translate-y-1 hover:scale-[1.02]',
                                                 'before:from-primary/5 relative cursor-pointer before:absolute before:inset-0 before:bg-gradient-to-br before:to-transparent before:opacity-0 before:transition-opacity before:duration-500 hover:before:opacity-100',
                                             )}
