@@ -11,6 +11,13 @@ interface VideoPlayerProps {
     className?: string;
 }
 
+declare global {
+    interface Window {
+        YT: any;
+        onYouTubeIframeAPIReady: () => void;
+    }
+}
+
 export function VideoPlayer({ src, title, thumbnailUrl, onProgress, onComplete, className }: VideoPlayerProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -186,6 +193,69 @@ export function VideoPlayer({ src, title, thumbnailUrl, onProgress, onComplete, 
         return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     };
 
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    const playerRef = useRef<any>(null); // Ref untuk menyimpan instance YT Player
+    const [youtubeApiReady, setYoutubeApiReady] = useState(false);
+
+    const isYouTube = isYouTubeUrl(src);
+    const videoId = isYouTube ? getYouTubeId(src) : null;
+    const thumbnail = videoId ? thumbnailUrl : null;
+
+    // 1. Load YouTube IFrame API
+    useEffect(() => {
+        if (!isYouTube) return;
+
+        // Cek apakah script sudah ada
+        if (!window.YT) {
+            const tag = document.createElement('script');
+            tag.src = 'https://www.youtube.com/iframe_api';
+            const firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+            // Callback global yang dipanggil YouTube saat API siap
+            window.onYouTubeIframeAPIReady = () => {
+                setYoutubeApiReady(true);
+            };
+        } else {
+            setYoutubeApiReady(true);
+        }
+    }, [isYouTube]);
+
+    // 2. Inisialisasi Player saat API Siap & User Klik Play (isLoaded = true)
+    useEffect(() => {
+        if (youtubeApiReady && isLoaded && videoId && !playerRef.current) {
+            playerRef.current = new window.YT.Player(`Youtubeer-${videoId}`, {
+                videoId: videoId,
+                playerVars: {
+                    autoplay: 1,
+                    modestbranding: 1,
+                    rel: 0,
+                    controls: 1, // Kita pakai kontrol bawaan YT untuk iframe
+                },
+                events: {
+                    onReady: (event: any) => {
+                        // Player siap
+                        // Anda bisa setDuration di sini jika mau: event.target.getDuration()
+                    },
+                    onStateChange: (event: any) => {
+                        // YT.PlayerState.ENDED = 0
+                        if (event.data === 0) {
+                            console.log('Video YouTube Selesai!');
+                            onComplete?.(); // <-- PANGGIL ONCOMPLETE DI SINI
+                        }
+
+                        // YT.PlayerState.PLAYING = 1
+                        if (event.data === 1) {
+                            // Mulai tracking interval untuk progress bar (opsional)
+                            // Anda bisa pakai setInterval untuk memanggil onProgress
+                        }
+                    },
+                },
+            });
+        }
+    }, [youtubeApiReady, isLoaded, videoId, onComplete]);
+
     function isYouTubeUrl(url: string) {
         return url.includes('youtube.com') || url.includes('youtu.be');
     }
@@ -196,12 +266,6 @@ export function VideoPlayer({ src, title, thumbnailUrl, onProgress, onComplete, 
         return match ? match[1] : null;
     }
 
-    const [isLoaded, setIsLoaded] = useState(false);
-
-    const isYouTube = isYouTubeUrl(src);
-    const videoId = isYouTube ? getYouTubeId(src) : null;
-    const thumbnail = videoId ? thumbnailUrl : null;
-
     return (
         <div
             ref={containerRef}
@@ -209,41 +273,22 @@ export function VideoPlayer({ src, title, thumbnailUrl, onProgress, onComplete, 
         >
             {/* YouTube Player */}
             {isYouTube && !isLoaded && (
-                <div
-                    className={cn(
-                        'absolute inset-0 flex items-center justify-center bg-black/20 transition-opacity duration-300',
-                        showControls ? 'opacity-100' : 'opacity-0',
-                    )}
-                >
-                    <button
-                        onClick={togglePlayPause}
-                        className="bg-primary/20 border-primary/50 text-primary hover:bg-primary flex h-20 w-20 items-center justify-center rounded-full border transition-all duration-300 hover:scale-110 hover:text-black"
+                <div className="absolute inset-0 z-10 cursor-pointer" onClick={() => setIsLoaded(true)}>
+                    <div
+                        className={cn(
+                            'absolute inset-0 flex items-center justify-center bg-black/20 transition-opacity duration-300',
+                            showControls ? 'opacity-100' : 'opacity-0',
+                        )}
                     >
-                        {isPlaying ? <Pause className="ml-0.5 h-8 w-8" fill="currentColor" /> : <Play className="ml-1 h-8 w-8" fill="currentColor" />}
-                    </button>
-
-                    <button
-                        className="absolute inset-0 z-10 cursor-pointer"
-                        onClick={() => {
-                            console.log('Clicked!');
-                            setIsLoaded(true);
-                        }}
-                    >
-                        {thumbnail && <img src={thumbnail} alt={title} className="h-full w-full object-cover" />}
-                    </button>
+                        <button className="bg-primary/20 border-primary/50 text-primary hover:bg-primary flex h-20 w-20 items-center justify-center rounded-full border transition-all duration-300 hover:scale-110 hover:text-black">
+                            <Play className="ml-1 h-8 w-8" fill="currentColor" />
+                        </button>
+                    </div>
+                    {thumbnail && <img src={thumbnail} alt={title} className="h-full w-full object-cover" />}
                 </div>
             )}
 
-            {isYouTube && isLoaded && (
-                <iframe
-                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1&modestbranding=1&rel=0`}
-                    title={title}
-                    className="h-full w-full"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                />
-            )}
+            {isYouTube && isLoaded && <div id={`Youtubeer-${videoId}`} className="h-full w-full" />}
 
             {!isYouTube && (
                 <>

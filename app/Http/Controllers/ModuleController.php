@@ -83,7 +83,7 @@ class ModuleController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'video_path' => 'required|string|max:255',
+            'video_path' => 'required|url',
             'order' => 'nullable|integer|min:0',
             'status' => 'required|in:draft,published',
             'course_id' => 'required|exists:courses,id'
@@ -91,8 +91,10 @@ class ModuleController extends Controller
 
         $videoId = $this->getYoutubeId($request->video_path);
 
+
         if ($videoId) {
             $duration = $this->getYoutubeDuration($videoId);
+
 
             $validated['duration'] = $duration;
         } else {
@@ -128,43 +130,30 @@ class ModuleController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'video_path' => 'nullable|string|max:255',
+            'video_path' => 'nullable|url',
             'order' => 'nullable|integer|min:0',
             'status' => 'required|in:draft,published',
             'course_id' => 'required|exists:courses,id'
         ]);
 
-        // Handle slug
-        $slug = str()->slug($request->name);
-        $validated['slug'] = $slug;
+        $validated['slug'] = str()->slug($request->name);
 
-        // Jika user upload file baru
-        // if ($request->hasFile('video_path')) {
-        //     // Hapus file lama jika ada
-        //     if ($module->video_path && Storage::disk('public')->exists($module->video_path)) {
-        //         Storage::disk('public')->delete($module->video_path);
-        //     }
+        // Cek apakah user menginput video_path
+        if ($request->filled('video_path')) {
+            if ($request->video_path !== $module->video_path) {
+                $videoId = $this->getYoutubeId($request->video_path);
 
-        //     // Upload file baru
-        //     $file = $request->file('video_path');
-        //     $path = $file->store('videos', 'public');
-        //     $validated['video_path'] = $path;
+                if ($videoId) {
+                    $duration = $this->getYoutubeDuration($videoId);
+                    $validated['duration'] = $duration;
+                } else {
+                    $validated['duration'] = 0;
+                }
+            }
+        } else {
+            unset($validated['video_path']);
+        }
 
-        //     // Hitung durasi baru (pakai getID3)
-        //     $getID3 = new getID3;
-        //     $fileInfo = $getID3->analyze($file->getPathname());
-        //     $duration = isset($fileInfo['playtime_seconds'])
-        //         ? (int) ceil($fileInfo['playtime_seconds'])
-        //         : 0;
-
-        //     $validated['duration'] = $duration;
-        // } else {
-        //     // Jika tidak upload file baru → pertahankan video_path & duration lama
-        //     $validated['video_path'] = $module->video_path;
-        //     $validated['duration'] = $module->duration;
-        // }
-
-        // Update data module
         $module->update($validated);
 
         return redirect()->route('admin.modules.index')

@@ -222,7 +222,7 @@ export default function ModuleMaterialsPage({ materials, modules }: MaterialsPag
                             </Label>
                             <Textarea
                                 id="text"
-                                rows={2}
+                                rows={5}
                                 value={data.text}
                                 onChange={(e) => setData('text', e.target.value)}
                                 className="rounded-lg border-zinc-700/50 bg-zinc-800/50 text-white backdrop-blur-sm focus:border-cyan-400 focus:ring-cyan-400/20"

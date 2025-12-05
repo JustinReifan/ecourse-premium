@@ -127,8 +127,21 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
                 voucher_code: appliedVoucher?.voucher?.code || null,
                 discount_amount: appliedVoucher?.discount || 0,
             };
+
+            // check if price = 0, bypass payment
+            if (finalPrice === 0) {
+                const response = await axios.post(route('register.force'), registrationData);
+
+                if (response.data.success) {
+                    window.location.href = route('member.index');
+                } else {
+                    setToastMessage(response.data.message || 'Gagal memproses akun.');
+                    setShowToast(true);
+                    setTimeout(() => setShowToast(false), 4000);
+                }
+            }
+
             const res = await axios.post(route('register.create-payment'), registrationData);
-            paymentData = res.data;
             const checkout = window.checkout;
 
             if (res.data.type === 'duitku_reference' && checkout) {

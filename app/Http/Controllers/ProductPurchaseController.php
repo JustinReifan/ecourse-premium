@@ -164,7 +164,6 @@ class ProductPurchaseController extends Controller
             return response()->json(['message' => 'Anda sudah memiliki produk ini.'], 400);
         }
 
-        // 3. Ambil Click Afiliasi (INI MEMPERBAIKI BUG ANDA)
         $click = $affiliateService->getLastValidClickForSession($request);
 
         // 4. Buat Order 'pending'
