@@ -9,8 +9,10 @@ use App\Models\Setting;
 use App\Models\UserPurchase;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Auth\Events\Registered;
 use App\Jobs\SendWhatsappNotificationJob;
+use App\Mail\RegistrationSuccessMail;
 
 class OrderFinalizationService
 {
@@ -67,12 +69,13 @@ class OrderFinalizationService
             $defaultProduct?->id
         );
 
+
         // 6. Kirim Notifikasi Sukses
         try {
             $this->sendSuccessNotifications($user, $conversion);
         } catch (\Exception $e) {
             // Jika WA gagal, jangan gagalkan registrasi. Cukup catat.
-            Log::error('Gagal mengirim WA notifikasi sukses: ' . $e->getMessage(), [
+            Log::error('Gagal mengirim WA/Email notifikasi sukses: ' . $e->getMessage(), [
                 'user_id' => $user->id,
                 'order_id' => $order->order_id
             ]);
@@ -95,6 +98,16 @@ class OrderFinalizationService
 
         // $this->waService->sendMessage($memberPhone, $messageToMember);
         SendWhatsappNotificationJob::dispatch($memberPhone, $messageToMember);
+
+        try {
+            // Pastikan email user valid sebelum mengirim
+            if ($user->email) {
+                Mail::to($user->email)->send(new RegistrationSuccessMail($user));
+                Log::info("Email sukses dikirim ke: " . $user->email);
+            }
+        } catch (\Exception $e) {
+            Log::error("Gagal mengirim email ke member: " . $e->getMessage());
+        }
 
         // 2. Ke Affiliator & Admin (hanya jika ada komisi)
         if ($conversion) {

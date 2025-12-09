@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\RegistrationSuccessMail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Auth\Events\Registered;
 use App\Services\PaymentGatewayService;
@@ -162,6 +164,15 @@ class RegisteredUserController extends Controller
                     'order_id' => $order->id,
                     'amount_paid' => $order->amount,
                 ]);
+            }
+
+            try {
+                if ($user->email) {
+                    Mail::to($user->email)->send(new RegistrationSuccessMail($user));
+                    Log::info("Email sukses dikirim ke: " . $user->email);
+                }
+            } catch (\Exception $e) {
+                Log::error("Gagal mengirim email ke member: " . $e->getMessage());
             }
 
             event(new Registered($user));
