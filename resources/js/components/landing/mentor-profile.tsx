@@ -199,7 +199,7 @@ export function MentorProfile() {
                         <div className="animate-fade-in">
                             <div className="bg-primary/10 border-primary/20 inline-flex items-center gap-2 rounded-full border px-4 py-2 backdrop-blur-sm">
                                 <div className="bg-primary h-2 w-2 animate-pulse rounded-full" />
-                                <span className="text-primary text-sm font-medium">Mentor Ekslusif</span>
+                                <span className="text-primary text-sm font-medium">Mentor Exclusive</span>
                             </div>
                         </div>
 

@@ -26,6 +26,8 @@ class ModuleController extends Controller
 
         $courses = Course::orderBy('name')->get();
 
+        
+
         return Inertia::render('admin/modules', [
             'modules' => $modules,
             'courses' => $courses

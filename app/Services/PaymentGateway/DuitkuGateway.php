@@ -2,10 +2,11 @@
 
 namespace App\Services\PaymentGateway;
 
-use App\Http\Controllers\DuitkuController; // Asumsi DuitkuController masih dipakai
-use App\Interfaces\PaymentGatewayInterface;
 use App\Models\Order;
+use App\Models\Product;
 use Illuminate\Http\Request;
+use App\Interfaces\PaymentGatewayInterface;
+use App\Http\Controllers\DuitkuController; // Asumsi DuitkuController masih dipakai
 
 class DuitkuGateway implements PaymentGatewayInterface
 {
@@ -20,10 +21,22 @@ class DuitkuGateway implements PaymentGatewayInterface
 
     public function createPaymentRequest(Order $order, array $customerData): array
     {
+
+        // $defaultProduct = Product::where('is_default', true)->first();
+
+        // if (!$defaultProduct) {
+        //     logger()->error('Produk default tidak ditemukan.');
+        //     throw new \Exception('Produk default tidak ditemukan.');
+        // }
+
+        // $productName = ($order->type == 'registration') ? $defaultProduct->title : ($order->meta['product_title'] ?? 'Produk Digital');
+
+
         $response = $this->duitkuController->create(
             $order->order_id,
             $order->amount,
             $customerData['email'],
+            // $productName,
             null
         );
 

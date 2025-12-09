@@ -26,7 +26,7 @@ class DuitkuController extends Controller
     }
 
 
-    public function create($merchantRef, $price, $email, $return_url)
+    public function create($merchantRef, $price, $email,  $return_url)
     {
         // duitku
 
@@ -36,7 +36,7 @@ class DuitkuController extends Controller
         $params = array(
             'paymentAmount'     => $price,
             'merchantOrderId'   => $merchantRef,
-            'productDetails'    => "Pondok Grafis",
+            'productDetails'    => 'Produk Digital',
             'email'             => $email,
             'callbackUrl'       => url('api/callback/duitku'),
             'returnUrl'         => $return_url,

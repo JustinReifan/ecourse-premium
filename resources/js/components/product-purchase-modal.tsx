@@ -129,7 +129,7 @@ export function ProductPurchaseModal({ open, onOpenChange, product, triggerToast
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="border-border/50 bg-card sm:max-w-[500px]">
+            <DialogContent className="border-border/50 bg-background/90 sm:max-w-[500px]">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-2xl">
                         <Lock className="text-primary h-6 w-6" />
