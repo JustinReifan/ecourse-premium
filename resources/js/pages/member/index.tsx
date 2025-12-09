@@ -36,6 +36,24 @@ interface ProductsPageProps extends PageProps {
     selectedProduct: Product | null;
 }
 
+declare global {
+    interface Window {
+        checkout: {
+            process: (
+                reference: string,
+                options: {
+                    defaultLanguage?: string;
+                    currency?: string;
+                    successEvent?: (result: any) => void;
+                    pendingEvent?: (result: any) => void;
+                    errorEvent?: (result: any) => void;
+                    closeEvent?: (result: any) => void;
+                },
+            ) => void;
+        };
+    }
+}
+
 export default function MemberProducts({ ownedProducts, availableProducts, selectedProduct }: ProductsPageProps) {
     const [selectedCatalogProduct, setSelectedCatalogProduct] = useState<Product | null>(selectedProduct);
     const [purchaseModalOpen, setPurchaseModalOpen] = useState(false);
