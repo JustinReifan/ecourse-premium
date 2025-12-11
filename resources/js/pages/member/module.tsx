@@ -273,7 +273,10 @@ export default function Module({ module, prevModule, nextModule }: ModulePagePro
                             <h1 className="text-foreground mb-4 text-4xl font-bold lg:text-5xl">{module.name}</h1>
 
                             {module.description && (
-                                <p className="text-muted-foreground mb-4 max-w-3xl text-lg leading-relaxed">{module.description}</p>
+                                <div 
+                                    className="prose prose-invert max-w-3xl text-muted-foreground mb-4 prose-p:text-lg prose-p:leading-relaxed prose-li:text-base"
+                                    dangerouslySetInnerHTML={{ __html: module.description }}
+                                />
                             )}
 
                             <div className="text-foreground flex items-center space-x-6">

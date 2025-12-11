@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import AdminLayout from '@/layouts/admin-layout';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { Calendar, Database, PlayCircle, Upload, Zap } from 'lucide-react';
@@ -264,15 +264,12 @@ export default function ModulesPage({ modules, courses }: ModulesPageProps) {
                             <Label htmlFor="description" className="font-mono text-sm tracking-wider text-gray-300 uppercase">
                                 Description
                             </Label>
-                            <Textarea
-                                id="description"
-                                rows={10}
+                            <RichTextEditor
                                 value={data.description}
-                                onChange={(e) => setData('description', e.target.value)}
-                                className="rounded-lg border-zinc-700/50 bg-zinc-800/50 text-white backdrop-blur-sm focus:border-cyan-400 focus:ring-cyan-400/20"
+                                onChange={(value) => setData('description', value)}
+                                error={errors.description}
                                 placeholder="Enter description"
                             />
-                            {errors.description && <p className="mt-1 font-mono text-sm text-red-400">{errors.description}</p>}
                         </div>
 
                         <div className="space-y-2">
