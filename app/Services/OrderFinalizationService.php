@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Setting;
 use App\Models\Voucher;
+use App\Models\UserAnalytic;
 use App\Models\UserPurchase;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
@@ -90,6 +91,8 @@ class OrderFinalizationService
             }
         }
 
+        $this->trackPaymentSuccess($order, $user);
+
 
         // 7. Kirim Notifikasi Sukses
         try {
@@ -102,6 +105,98 @@ class OrderFinalizationService
             ]);
         }
         return $user;
+    }
+
+
+    public function finalizeProductPurchase(Order $order): ?UserPurchase
+    {
+        // 1. Dapatkan User (User PASTI ada di order produk)
+        $user = $order->user;
+        if (!$user) {
+            Log::error('Gagal finalisasi produk: User tidak ditemukan di order.', ['order_id' => $order->order_id]);
+            return null;
+        }
+
+        // 2. Dapatkan Product
+        $productId = $order->meta['product']['id'] ?? null;
+        $product = Product::find($productId);
+        if (!$product) {
+            Log::error('Gagal finalisasi produk: Produk tidak ditemukan di meta.', ['order_id' => $order->order_id]);
+            return null;
+        }
+
+        // 3. Buat UserPurchase (catat kepemilikan)
+        $purchase = UserPurchase::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'order_id' => $order->id,
+            'amount_paid' => $order->amount,
+        ]);
+
+        // potong voucher usage
+        if (!empty($order->meta['voucher_code'])) {
+            $voucher = Voucher::where('code', $order->meta['voucher_code'])->first();
+            if ($voucher) {
+                $voucher->increment('used_count');
+                Log::info("Voucher used for product purchase: {$voucher->code}");
+            }
+        }
+
+        // 4. Berikan Komisi Affiliate (Upsell)
+        // Ini akan otomatis menggunakan 'affiliate_click_id' dari meta order
+        $conversion = $this->affiliateService->awardConversion(
+            $order,
+            $user,
+            $order->amount,
+            ['registration' => false, 'product_upsell' => true],
+            $product->id
+        );
+
+        // 5. Kirim Notifikasi WA (Sukses)
+        try {
+            $this->sendProductSuccessNotifications($user, $product, $conversion);
+        } catch (\Exception $e) {
+            Log::error('Gagal kirim WA notifikasi produk: ' . $e->getMessage(), [
+                'user_id' => $user->id,
+                'order_id' => $order->order_id
+            ]);
+        }
+
+        return $purchase;
+    }
+
+    protected function trackPaymentSuccess(Order $order, User $user)
+    {
+        try {
+            // Kita coba ambil session ID dari request saat ini (karena triggered by axios dari frontend)
+            $sessionId = request()->session()->getId();
+
+            // Siapkan data event
+            $eventData = [
+                'status' => 'success',
+                'amount' => $order->amount,
+                'payment_method' => $order->payment_method,
+                'order_id' => $order->order_id,
+                'voucher_code' => $order->meta['voucher_code'] ?? null,
+                'discount_amount' => $order->meta['discount_amount'] ?? 0,
+                'product_title' => $order->meta['product']['title'] ?? 'Product',
+            ];
+
+            UserAnalytic::create([
+                'session_id' => $sessionId,
+                'user_id' => $user->id,
+                'event_type' => 'payment',
+                'event_data' => $eventData,
+                'ip_hash' => hash('sha256', request()->ip() . config('app.key')),
+                'user_agent' => request()->userAgent(),
+                'created_at' => now(),
+            ]);
+
+            Log::info("Analytics tracked: Payment success for Order {$order->order_id}");
+        } catch (\Exception $e) {
+            // Jangan sampai error analytics mengganggu flow utama pembelian
+            Log::error("Failed to track payment analytics: " . $e->getMessage());
+        }
     }
 
     public function sendSuccessNotifications(User $user, $conversion): void
@@ -249,62 +344,7 @@ class OrderFinalizationService
         $this->waService->sendMessage($phone, $messageToMember);
     }
 
-    public function finalizeProductPurchase(Order $order): ?UserPurchase
-    {
-        // 1. Dapatkan User (User PASTI ada di order produk)
-        $user = $order->user;
-        if (!$user) {
-            Log::error('Gagal finalisasi produk: User tidak ditemukan di order.', ['order_id' => $order->order_id]);
-            return null;
-        }
 
-        // 2. Dapatkan Product
-        $productId = $order->meta['product_id'] ?? null;
-        $product = Product::find($productId);
-        if (!$product) {
-            Log::error('Gagal finalisasi produk: Produk tidak ditemukan di meta.', ['order_id' => $order->order_id]);
-            return null;
-        }
-
-        // 3. Cek Idempotency (jika sudah dibeli, jangan proses lagi)
-        if ($product->isOwnedBy($user->id)) {
-            Log::info('Finalisasi produk dilewati: User sudah memiliki produk.', [
-                'order_id' => $order->order_id,
-                'user_id' => $user->id
-            ]);
-            return null; // Berhenti di sini
-        }
-
-        // 4. Buat UserPurchase (catat kepemilikan)
-        $purchase = UserPurchase::create([
-            'user_id' => $user->id,
-            'product_id' => $product->id,
-            'order_id' => $order->id,
-            'amount_paid' => $order->amount,
-        ]);
-
-        // 5. Berikan Komisi Affiliate (Upsell)
-        // Ini akan otomatis menggunakan 'affiliate_click_id' dari meta order
-        $conversion = $this->affiliateService->awardConversion(
-            $order,
-            $user,
-            $order->amount,
-            ['registration' => false, 'product_upsell' => true],
-            $product->id
-        );
-
-        // 6. Kirim Notifikasi WA (Sukses)
-        try {
-            $this->sendProductSuccessNotifications($user, $product, $conversion);
-        } catch (\Exception $e) {
-            Log::error('Gagal kirim WA notifikasi produk: ' . $e->getMessage(), [
-                'user_id' => $user->id,
-                'order_id' => $order->order_id
-            ]);
-        }
-
-        return $purchase;
-    }
 
     /**
      * Mengirim notifikasi WA & Email untuk pembelian produk (upsell)

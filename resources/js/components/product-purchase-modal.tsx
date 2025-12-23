@@ -1,10 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
+import { VoucherInput } from '@/components/voucher-input'; // Pastikan path import benar
 import { router } from '@inertiajs/react';
 import axios from 'axios';
-import { Lock, ShoppingCart } from 'lucide-react';
-import { useState } from 'react';
+import { LoaderCircle, Lock, ShoppingCart } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
 interface Product {
     id: number;
     title: string;
@@ -23,117 +24,122 @@ interface ProductPurchaseModalProps {
 
 export function ProductPurchaseModal({ open, onOpenChange, product, triggerToast }: ProductPurchaseModalProps) {
     const [isProcessing, setIsProcessing] = useState(false);
-    const { success, error } = useToast();
+
+    // State untuk Voucher
+    const [appliedVoucher, setAppliedVoucher] = useState<any>(null);
+    const [finalPrice, setFinalPrice] = useState(0);
+
+    // Reset state saat modal dibuka/tutup atau produk berubah
+    useEffect(() => {
+        if (product) {
+            setFinalPrice(product.price);
+            setAppliedVoucher(null);
+        }
+    }, [product, open]);
 
     if (!product) return null;
+
+    // Handle Voucher Applied
+    const handleVoucherApplied = (voucherData: any) => {
+        setAppliedVoucher(voucherData);
+
+        setFinalPrice(voucherData.final_price);
+    };
+
+    const handleVoucherRemoved = () => {
+        setAppliedVoucher(null);
+        setFinalPrice(product.price);
+    };
 
     const handlePurchase = async () => {
         setIsProcessing(true);
 
-        if (product.price == 0) {
-            triggerToast('Memproses pesanan...', 'success');
+        const payload = {
+            product_id: product.id,
+            final_price: finalPrice,
+            gateway: 'duitku',
+            voucher_code: appliedVoucher?.voucher?.code || null,
+            discount_amount: appliedVoucher?.discount || 0,
+        };
 
-            const response = await axios.post(route('products.force-purchase'), {
-                product_id: product.id,
-                gateway: 'duitku', // Kirim gateway yang dipilih
-            });
-
-            if (response.data.success) {
-                triggerToast('Sukses membuat pesanan! redirecting...', 'success');
-
-                setTimeout(() => {
-                    router.visit(route('member.index'));
-                }, 2000);
-            } else {
-                triggerToast('Gagal membuat pesanan!', 'error');
-                setIsProcessing(false);
-            }
-            return;
-        }
-
-        if (typeof window.checkout === 'undefined') {
-            // Coba tunggu sebentar (retry mechanism sederhana)
-            console.warn('Duitku script not ready, waiting...');
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-
-            if (typeof window.checkout === 'undefined') {
-                triggerToast('Gagal memuat sistem pembayaran. Mohon refresh halaman atau cek koneksi internet.', 'error');
-                setIsProcessing(false);
-                return;
-            }
-        }
-
-        const checkout = window.checkout;
-
-        let paymentData;
         try {
-            const res = await axios.post(route('products.create-payment'), {
-                product_id: product.id,
-                gateway: 'duitku', // Kirim gateway yang dipilih
-            });
+            if (finalPrice <= 0) {
+                triggerToast('Memproses pesanan...', 'success');
 
-            paymentData = res.data;
+                const response = await axios.post(route('products.force-purchase'), payload);
 
-            if (!paymentData || !paymentData.reference) {
-                triggerToast(res.data.message || 'Gagal mendapatkan referensi pembayaran.', 'error');
-                setIsProcessing(false);
-                return;
+                if (response.data.success) {
+                    triggerToast('Sukses membuat pesanan! redirecting...', 'success');
+                    onOpenChange(false);
+                    setTimeout(() => {
+                        router.visit(route('member.index'));
+                    }, 1000);
+                }
+            } else {
+                triggerToast('Membuat pembayaran...', 'success');
+
+                const response = await axios.post(route('products.create-payment'), payload);
+
+                // 2. JIKA DAPAT REFERENSI: Tutup modal
+                onOpenChange(false);
+
+                // 3. Panggil Duitku SETELAH modal ditutup
+                if (response.data.paymentUrl) {
+                    if (window.checkout && response.data.reference) {
+                        window.checkout.process(response.data.reference, {
+                            defaultLanguage: 'id',
+                            currency: 'IDR',
+
+                            // --- INI PERUBAHAN BESARNYA ---
+                            successEvent: async (result: any) => {
+                                // result berisi: { reference, merchantOrderId }
+                                // 'merchantOrderId' adalah 'order_id' kita
+
+                                triggerToast('Pembayaran berhasil! Memproses produk...', 'success');
+
+                                try {
+                                    const response = await axios.post('/api/payments/confirm-instant', {
+                                        reference: result.reference,
+                                        order_id: result.merchantOrderId,
+                                    });
+
+                                    // Jika back-end konfirmasi sukses
+                                    if (response.data.success) {
+                                        triggerToast('Produk berhasil ditambahkan! Memuat ulang...', 'success');
+                                        setTimeout(() => {
+                                            // Reload halaman untuk melihat produk baru
+                                            router.visit(route('member.index'));
+                                        }, 500);
+                                    } else {
+                                        triggerToast(response.data.message || 'Gagal memproses pembelian.', 'error');
+                                    }
+                                } catch (err: any) {
+                                    triggerToast(err.response?.data?.message || err.message || 'Terjadi kesalahan.', 'error');
+                                }
+                            },
+
+                            pendingEvent: (result: any) => {
+                                triggerToast('Pembayaran ditutup, silakan coba lagi.', 'error');
+                            },
+                            errorEvent: (errorMsg: any) => {
+                                triggerToast(errorMsg.message || 'Gagal memproses pembayaran.', 'error');
+                            },
+                            closeEvent: (result: any) => {
+                                // User sengaja menutup popup, tidak perlu error
+                                triggerToast('Pembayaran dibatalkan.', 'error');
+                            },
+                        });
+                    } else {
+                        // Fallback jika pakai redirect url
+                        window.location.href = response.data.paymentUrl;
+                    }
+                }
             }
         } catch (err: any) {
             triggerToast(err.response?.data?.message || err.message || 'Gagal memproses.', 'error');
             setIsProcessing(false);
             return;
         }
-
-        // 2. JIKA DAPAT REFERENSI: Tutup modal
-        onOpenChange(false);
-
-        // 3. Panggil Duitku SETELAH modal ditutup
-        setTimeout(() => {
-            checkout.process(paymentData.reference, {
-                defaultLanguage: 'id',
-                currency: 'IDR',
-
-                // --- INI PERUBAHAN BESARNYA ---
-                successEvent: async (result: any) => {
-                    // result berisi: { reference, merchantOrderId }
-                    // 'merchantOrderId' adalah 'order_id' kita
-
-                    triggerToast('Pembayaran berhasil! Memproses produk...', 'success');
-
-                    try {
-                        const response = await axios.post('/api/payments/confirm-instant', {
-                            reference: result.reference,
-                            order_id: result.merchantOrderId,
-                        });
-
-                        // Jika back-end konfirmasi sukses
-                        if (response.data.success) {
-                            triggerToast('Produk berhasil ditambahkan! Memuat ulang...', 'success');
-                            setTimeout(() => {
-                                // Reload halaman untuk melihat produk baru
-                                router.visit(route('member.index'));
-                            }, 500);
-                        } else {
-                            triggerToast(response.data.message || 'Gagal memproses pembelian.', 'error');
-                        }
-                    } catch (err: any) {
-                        triggerToast(err.response?.data?.message || err.message || 'Terjadi kesalahan.', 'error');
-                    }
-                },
-
-                pendingEvent: (result: any) => {
-                    triggerToast('Pembayaran ditutup, silakan coba lagi.', 'error');
-                },
-                errorEvent: (errorMsg: any) => {
-                    triggerToast(errorMsg.message || 'Gagal memproses pembayaran.', 'error');
-                },
-                closeEvent: (result: any) => {
-                    // User sengaja menutup popup, tidak perlu error
-                    triggerToast('Pembayaran dibatalkan.', 'error');
-                },
-            });
-        }, 200); // 200ms delay untuk transisi modal
     };
 
     return (
@@ -142,7 +148,7 @@ export function ProductPurchaseModal({ open, onOpenChange, product, triggerToast
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-2xl">
                         <Lock className="text-primary h-6 w-6" />
-                        Unlock This Product
+                        Purchase This Product
                     </DialogTitle>
                     <DialogDescription>Purchase this product to access all its content</DialogDescription>
                 </DialogHeader>
@@ -159,21 +165,34 @@ export function ProductPurchaseModal({ open, onOpenChange, product, triggerToast
                         {product.description && <p className="text-muted-foreground text-sm leading-relaxed">{product.description}</p>}
                     </div>
 
-                    <div className="bg-primary/10 border-primary/30 rounded-lg border p-4">
-                        <div className="flex items-baseline justify-between">
-                            <span className="text-muted-foreground text-sm">Price</span>
-                            <span className="text-primary text-3xl font-bold">Rp {product.price.toLocaleString('id-ID')}</span>
-                        </div>
+                    <div className="space-y-2">
+                        <VoucherInput
+                            onVoucherApplied={handleVoucherApplied}
+                            onVoucherRemoved={handleVoucherRemoved}
+                            originalPrice={product.price}
+                            disabled={isProcessing}
+                        />
                     </div>
+
+                    {!appliedVoucher && (
+                        <div className="bg-primary/10 border-primary/30 rounded-lg border p-4">
+                            <div className="flex flex-col gap-1">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-muted-foreground text-sm">Price</span>
+                                    <span className="text-primary text-3xl font-bold">Rp {product.price.toLocaleString('id-ID')}</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
-                <DialogFooter className="gap-2 sm:gap-0">
+                <DialogFooter className="gap-2">
                     <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isProcessing}>
                         Cancel
                     </Button>
                     <Button type="button" onClick={handlePurchase} disabled={isProcessing} className="bg-primary hover:bg-primary/90">
-                        <ShoppingCart className="mr-2 h-4 w-4" />
-                        {isProcessing ? 'Processing...' : 'Purchase Now'}
+                        {isProcessing ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <ShoppingCart className="mr-2 h-4 w-4" />}
+                        {finalPrice == 0 ? 'Claim for Free' : 'Purchase Now'}
                     </Button>
                 </DialogFooter>
             </DialogContent>

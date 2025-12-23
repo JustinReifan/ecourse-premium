@@ -79,14 +79,18 @@ class AnalyticsController extends Controller
             ->where('event_data->type', 'registration')
             ->count();
 
-        $payments = UserAnalytic::where('event_type', 'payment')
+        $paymentAnalytics = UserAnalytic::where('event_type', 'payment')
             ->where('created_at', '>=', $startDate)
             ->where('event_data->status', 'success')
-            ->count();
+            ->get();
 
-        $course_price = Setting::get('course_price', 100000);
+        $payments = $paymentAnalytics->count();
 
-        $revenue = $payments * $course_price; 
+        $revenue = $paymentAnalytics->sum(function ($analytic) {
+            // Pastikan casting ke integer/float aman
+            return (float) ($analytic->event_data['amount'] ?? 0);
+        });
+
 
         return [
             'total_visits' => $totalVisits,

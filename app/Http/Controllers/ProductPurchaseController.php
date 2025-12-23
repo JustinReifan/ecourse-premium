@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Voucher;
 use Illuminate\Support\Str;
 use App\Models\UserPurchase;
 use Illuminate\Http\Request;
@@ -19,11 +20,22 @@ class ProductPurchaseController extends Controller
     /**
      * Handle product purchase
      */
+
+    protected $orderFinalizationService;
+
+    public function __construct(OrderFinalizationService $orderFinalizationService)
+    {
+        $this->orderFinalizationService = $orderFinalizationService;
+    }
+
     public function forcePurchase(Request $request, AffiliateService $affiliateService)
     {
         $validated = $request->validate([
             'product_id' => 'required|integer|exists:products,id',
+            'final_price' => 'required|numeric',
             'gateway' => 'required|string|in:duitku,midtrans',
+            'voucher_code' => 'nullable|string',
+            'discount_amount' => 'nullable|numeric',
         ]);
 
         $gatewayDriver = $request->input('gateway', 'duitku');
@@ -40,36 +52,31 @@ class ProductPurchaseController extends Controller
 
         $click = $affiliateService->getLastValidClickForSession($request);
 
+        $productDetails = [
+            'id' => $product->id,
+            'title' => $product->title,
+            'type' => $product->type,
+        ];
+
         // Create order
         $order = Order::create([
             'order_id' => 'ORDFREE-' . strtoupper(Str::random(10)),
             'user_id' => $user->id,
-            'amount' => $product->price,
+            'amount' => 0,
             'status' => 'completed',
             'type' => 'product',
             'payment_method' => $gatewayDriver,
             'meta' => [
-                'product_id' => $product->id,
-                'product_title' => $product->title,
-                'product_type' => $product->type,
+                'product' => $productDetails,
                 'affiliate_click_id' => $click ? $click->id : null,
-
+                'voucher_code' => $request->voucher_code ?? null,
+                'discount_amount' => $request->discount_amount ?? 0,
             ],
         ]);
 
-        // Create purchase record
-        UserPurchase::create([
-            'user_id' => $user->id,
-            'product_id' => $product->id,
-            'order_id' => $order->id,
-            'amount_paid' => $product->price,
-        ]);
+        $this->orderFinalizationService->finalizeProductPurchase($order);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Product purchased successfully!',
-            'order_id' => $order->order_id,
-        ]);
+        return response()->json(['success' => true, 'message' => 'Produk berhasil ditambahkan.']);
     }
 
     public function confirmInstantPayment(Request $request, OrderFinalizationService $orderService)
@@ -156,7 +163,7 @@ class ProductPurchaseController extends Controller
     }
 
 
-    public function createProductPaymentRequest(
+    public function createPaymentRequest(
         Request $request,
         PaymentGatewayService $paymentGateway,
         AffiliateService $affiliateService
@@ -164,37 +171,47 @@ class ProductPurchaseController extends Controller
         // 1. Validasi
         $validated = $request->validate([
             'product_id' => 'required|integer|exists:products,id',
-            'gateway' => 'required|string|in:duitku,midtrans', // Terima gateway
+            'final_price' => 'required|numeric',
+            'gateway' => 'required|string|in:duitku,midtrans',
+            'voucher_code' => 'nullable|string',
+            'discount_amount' => 'nullable|numeric',
         ]);
 
         $gatewayDriver = $request->input('gateway', 'duitku');
         $product = Product::findOrFail($validated['product_id']);
         $user = $request->user();
 
+
         // 2. Cek jika sudah punya
         if ($product->isOwnedBy($user->id)) {
             return response()->json(['message' => 'Anda sudah memiliki produk ini.'], 400);
         }
 
-        $click = $affiliateService->getLastValidClickForSession($request);
+        $productDetails = [
+            'id' => $product->id,
+            'title' => $product->title,
+            'type' => $product->type,
+        ];
 
-        // 4. Buat Order 'pending'
+        // 3. Buat Order 'pending'
         $order = Order::create([
             'order_id' => 'ORD-' . Str::uuid(),
             'user_id' => $user->id, // User sudah login
-            'amount' => $product->price,
+            'amount' => $request->final_price,
             'status' => 'pending',
             'payment_method' => $gatewayDriver,
             'type' => 'product',
             'meta' => [
-                'product_id' => $product->id,
+                'product' => $productDetails,
                 'product_title' => $product->title,
-                'affiliate_click_id' => $click ? $click->id : null, // <-- SIMPAN CLICK
+                'voucher_code' => $request->voucher_code,
+                'discount_amount' => $request->discount_amount ?? 0,
+                'affiliate_click_id' => null,
                 'follow_up_sent' => false,
             ],
         ]);
 
-        // 5. Buat Permintaan Pembayaran
+        // 4. Buat Permintaan Pembayaran
         try {
             $gateway = $paymentGateway->getGateway($gatewayDriver);
             $paymentDetails = $gateway->createPaymentRequest($order, [
@@ -203,7 +220,7 @@ class ProductPurchaseController extends Controller
                 'phone' => $user->phone,
             ]);
 
-            // 6. Simpan URL Pembayaran (untuk follow-up)
+            // 5. Simpan URL Pembayaran (untuk follow-up)
             $meta = $order->meta;
             if (isset($paymentDetails['paymentUrl'])) {
                 $meta['payment_url'] = $paymentDetails['paymentUrl'];
@@ -214,7 +231,7 @@ class ProductPurchaseController extends Controller
             $order->meta = $meta;
             $order->save();
 
-            // 7. Kirim data ke front-end
+            // 6. Kirim data ke front-end
             return response()->json($paymentDetails);
         } catch (\Exception $e) {
             logger()->error("Gagal membuat permintaan pembayaran produk: " . $e->getMessage());

@@ -38,8 +38,7 @@ Route::post('/api/payments/confirm-registration', [ProductPurchaseController::cl
 
 // Product purchase routes (public, requires auth)
 Route::middleware('auth')->group(function () {
-    Route::post('/products/create-payment', [ProductPurchaseController::class, 'createProductPaymentRequest'])
-        ->middleware('auth')
+    Route::post('/products/create-payment', [ProductPurchaseController::class, 'createPaymentRequest'])
         ->name('products.create-payment');
     Route::post('/api/payments/confirm-instant', [ProductPurchaseController::class, 'confirmInstantPayment']);
     Route::post('/api/products/purchase', [\App\Http\Controllers\ProductPurchaseController::class, 'forcePurchase'])->name('products.force-purchase');

@@ -190,7 +190,7 @@ class AffiliateService
 
             if (!$click) {
                 Log::info('No valid affiliate click found for order', ['order_id' => $order->order_id]);
-                // return null; // Error Anda sebelumnya terjadi di sini
+                return null; // Error Anda sebelumnya terjadi di sini
             }
 
             $affiliate = $click->affiliate;
@@ -263,23 +263,6 @@ class AffiliateService
 
             // Mark click as converted
             $click->markConverted();
-
-            // Track conversion via analytics
-            UserAnalytic::create([
-                'session_id' => session()->getId(),
-                'event_type' => 'conversion',
-                'event_data' => [
-                    'action' => 'affiliate_conversion',
-                    'affiliate_id' => $affiliate->id,
-                    'conversion_id' => $conversion->id,
-                    'order_id' => $order->order_id,
-                    'commission_amount' => $commissionAmount,
-                ],
-                'user_id' => $buyerUser->id,
-                'ip_hash' => hash('sha256', request()->ip()),
-                'user_agent' => request()->userAgent(),
-                'created_at' => now(),
-            ]);
 
             // Check and award milestone bonuses
             $this->checkAndAwardMilestones($affiliate);

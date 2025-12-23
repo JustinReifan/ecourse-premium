@@ -10,6 +10,7 @@ use App\Models\Order;
 use Inertia\Response;
 use App\Models\Product;
 use Illuminate\Support\Str;
+use App\Models\UserAnalytic;
 use App\Models\UserPurchase;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules;
@@ -97,6 +98,27 @@ class RegisteredUserController extends Controller
                 $meta['payment_url'] = $paymentDetails['paymentUrl'];
                 $order->meta = $meta;
                 $order->save();
+            }
+
+            try {
+                UserAnalytic::create([
+                    'session_id' => $request->session()->getId(),
+                    'event_type' => 'conversion',
+                    'event_data' => [
+                        'type' => 'registration',
+                        'order_id' => $order->order_id,
+                        'name' => $validated['name'],
+                        'email' => $validated['email'],
+                        'step' => 'payment_request_created'
+                    ],
+                    'ip_hash' => hash('sha256', $request->ip() . config('app.key')),
+                    'user_agent' => $request->userAgent(),
+                    'user_id' => null,
+                    'created_at' => now(),
+                ]);
+            } catch (\Exception $e) {
+                // Silent fail agar tidak mengganggu proses pembayaran utama
+                Log::error('Analytics Conversion Tracking Failed: ' . $e->getMessage());
             }
 
 

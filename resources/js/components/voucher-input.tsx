@@ -95,19 +95,19 @@ export function VoucherInput({ onVoucherApplied, onVoucherRemoved, originalPrice
                 </div>
 
                 {/* Discount breakdown */}
-                <div className="space-y-2 rounded-lg border border-zinc-700/50 bg-zinc-800/30 p-4">
+                <div className="bg-primary/10 border-primary/30 space-y-2 rounded-lg border p-4">
                     <div className="flex justify-between text-sm">
-                        <span className="text-gray-400">Harga asli:</span>
-                        <span className="font-mono text-white">Rp {originalPrice.toLocaleString()}</span>
+                        <span className="text-muted-foreground">Harga asli:</span>
+                        <span className="text-foregroun font-mono">Rp {originalPrice.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                        <span className="text-green-400">Diskon:</span>
-                        <span className="font-mono text-green-400">-Rp {appliedVoucher.discount.toLocaleString()}</span>
+                        <span className="text-muted-foreground">Diskon:</span>
+                        <span className="text-foreground font-mono">-Rp {appliedVoucher.discount.toLocaleString()}</span>
                     </div>
-                    <div className="border-t border-zinc-700/50 pt-2">
+                    <div className="border-foreground border-t border-dashed pt-2">
                         <div className="flex justify-between font-bold">
-                            <span className="text-white">Harga setelah diskon:</span>
-                            <span className="font-mono text-lg text-white">Rp {appliedVoucher.final_price.toLocaleString()}</span>
+                            <span className="text-primary">Harga setelah diskon:</span>
+                            <span className="text-primary font-mono text-lg">Rp {appliedVoucher.final_price.toLocaleString()}</span>
                         </div>
                     </div>
                 </div>

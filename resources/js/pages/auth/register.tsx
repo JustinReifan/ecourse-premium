@@ -116,7 +116,6 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        trackConversion('registration');
 
         let paymentData;
 
@@ -169,14 +168,6 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
                         setShowToast(true);
                         setTimeout(() => setShowToast(false), 5000); // Durasi lebih lama
 
-                        trackPayment('success', {
-                            payment_method: 'duitku',
-                            amount: finalPrice,
-                            original_amount: coursePrice,
-                            discount_amount: appliedVoucher?.discount || 0,
-                            voucher_code: appliedVoucher?.voucher?.code || null,
-                        });
-
                         try {
                             const response = await axios.post(route('payments.confirm-registration'), {
                                 reference: result.reference,
@@ -200,19 +191,16 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
                         setToastMessage('Payment pending, silakan selesaikan pembayaran.');
                         setShowToast(true);
                         setTimeout(() => setShowToast(false), 4000);
-                        trackPayment('pending');
                     },
                     errorEvent: function (error: any) {
                         setToastMessage('Payment failed, please try again.');
                         setShowToast(true);
                         setTimeout(() => setShowToast(false), 4000);
-                        trackPayment('failed', { error: error.message });
                     },
                     closeEvent: function (result: any) {
                         setToastMessage('Payment canceled');
                         setShowToast(true);
                         setTimeout(() => setShowToast(false), 4000);
-                        trackPayment('closed');
                     },
                 });
             } else if (!checkout) {
