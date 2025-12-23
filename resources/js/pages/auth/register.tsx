@@ -133,16 +133,29 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
 
             // check if price = 0, bypass payment
             if (finalPrice === 0) {
+                setToastMessage('Memproses akun...');
+                setShowToast(true);
+                setTimeout(() => setShowToast(false), 3000);
+
                 const response = await axios.post(route('register.force'), registrationData);
 
                 if (response.data.success) {
+                    setToastMessage('Sukses membuat akun! Redirecting...');
+                    setShowToast(true);
+                    setTimeout(() => setShowToast(false), 4000);
+
                     window.location.href = route('member.index');
                 } else {
                     setToastMessage(response.data.message || 'Gagal memproses akun.');
                     setShowToast(true);
                     setTimeout(() => setShowToast(false), 4000);
                 }
+                return;
             }
+
+            setToastMessage('Memproses pembayaran...');
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 3000);
 
             const res = await axios.post(route('register.create-payment'), registrationData);
             const checkout = window.checkout;
@@ -420,8 +433,14 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
                     </div>
 
                     <Button type="submit" className="mt-2 w-full" tabIndex={6} disabled={processing}>
-                        {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        Gabung Sekarang
+                        {processing ? (
+                            <>
+                                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                                Memproses Pembayaran...
+                            </>
+                        ) : (
+                            'Gabung Sekarang'
+                        )}
                     </Button>
                 </div>
 

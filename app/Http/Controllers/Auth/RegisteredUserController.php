@@ -24,6 +24,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Auth\Events\Registered;
 use App\Services\PaymentGatewayService;
 use App\Http\Controllers\DuitkuController;
+use App\Services\OrderFinalizationService;
 use App\Mail\Registration\UserRegistrationMail;
 
 class RegisteredUserController extends Controller
@@ -31,6 +32,14 @@ class RegisteredUserController extends Controller
     /**
      * Show the registration page.
      */
+
+    protected $orderFinalizationService;
+
+    public function __construct(OrderFinalizationService $orderFinalizationService)
+    {
+        $this->orderFinalizationService = $orderFinalizationService;
+    }
+
     public function create(): Response
     {
         $coursePrice = \App\Models\Setting::get('course_price', env('VITE_COURSE_PRICE', 500000));
@@ -117,24 +126,9 @@ class RegisteredUserController extends Controller
                 'password' => ['required', 'confirmed', Rules\Password::defaults()],
             ]);
 
-            $defaultProduct = Product::where('is_default', true)->first();
-
-            if (!$defaultProduct) {
-                Log::error('Gagal: Produk tidak ditemukan');
-                return response()->json(['success' => false, 'message' => 'Produk tidak ditemukan.'], 404);
-            }
-
-            $user = User::create([
-                'username' => $validated['username'],
-                'name' => $validated['name'],
-                'phone' => $validated['phone'],
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
-            ]);
-
             $order = Order::create([
                 'order_id' => 'REGFREE-' . Str::uuid(),
-                'user_id' => $user->id,
+                'user_id' => null,
                 'amount' => 0,
                 'status' => 'completed',
                 'type' => 'registration',
@@ -148,32 +142,7 @@ class RegisteredUserController extends Controller
                 ],
             ]);
 
-            // 3. Cek Idempotency (jika sudah dibeli, jangan proses lagi)
-            if ($defaultProduct->isOwnedBy($user->id)) {
-                Log::info('User sudah memiliki produk.', [
-                    'order_id' => $order->order_id,
-                    'user_id' => $user->id
-                ]);
-                return response()->json(['success' => false, 'message' => 'User sudah memiliki produk.'], 404);
-            }
-
-            if ($defaultProduct) {
-                UserPurchase::create([
-                    'user_id' => $user->id,
-                    'product_id' => $defaultProduct->id,
-                    'order_id' => $order->id,
-                    'amount_paid' => $order->amount,
-                ]);
-            }
-
-            try {
-                if ($user->email) {
-                    Mail::to($user->email)->send(new UserRegistrationMail($user));
-                    Log::info("Email sukses dikirim ke: " . $user->email);
-                }
-            } catch (\Exception $e) {
-                Log::error("Gagal mengirim email ke member: " . $e->getMessage());
-            }
+            $user = $this->orderFinalizationService->finalizeRegistration($order);
 
             event(new Registered($user));
             Auth::login($user);

@@ -29,8 +29,15 @@ class DuitkuGateway implements PaymentGatewayInterface
             throw new \Exception('Produk default tidak ditemukan.');
         }
 
-        $productName = ($order->type == 'registration') ? $defaultProduct->title : ($order->meta['product_title'] ?? 'Produk Digital');
-        logger()->info("Order Meta: " . $order->meta['product_title']);
+        // logger()->info("Order" . json_encode($order));
+
+        $meta = $order->meta ?? [];
+
+        $productName = ($order->type == "registration")
+            ? $defaultProduct->title
+            : ($meta['product_title'] ?? 'Produk Digital');
+
+        // logger()->info("Order Meta Product Title: " . ($meta['product_title'] ?? 'Tidak ada title'));
 
         $response = $this->duitkuController->create(
             $order->order_id,

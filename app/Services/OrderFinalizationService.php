@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Setting;
+use App\Models\Voucher;
 use App\Models\UserPurchase;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
@@ -15,9 +16,9 @@ use App\Mail\Purchase\AdminNewOrderMail;
 use App\Jobs\SendWhatsappNotificationJob;
 use App\Mail\Purchase\AffiliateNewSaleMail;
 use App\Mail\Purchase\ProductPurchasedMail;
+use App\Mail\Registration\UserRegistrationMail;
 use App\Mail\Registration\AdminRegistrationNotificationMail;
 use App\Mail\Registration\AffiliateRegistrationCommissionMail;
-use App\Mail\Registration\UserRegistrationMail;
 
 class OrderFinalizationService
 {
@@ -76,8 +77,21 @@ class OrderFinalizationService
             $defaultProduct?->id
         );
 
+        // 6. Jika ada voucher, increment penggunaan
+        if (!empty($order->meta['voucher_code'])) {
+            $voucherCode = $order->meta['voucher_code'];
 
-        // 6. Kirim Notifikasi Sukses
+            $voucher = Voucher::where('code', $voucherCode)->first();
+
+            if ($voucher) {
+                $voucher->increment('usage_count');
+
+                Log::info("Voucher usage incremented: {$voucherCode} for Order: {$order->order_id}");
+            }
+        }
+
+
+        // 7. Kirim Notifikasi Sukses
         try {
             $this->sendSuccessNotifications($user, $conversion);
         } catch (\Exception $e) {

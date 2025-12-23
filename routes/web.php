@@ -82,6 +82,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('courses', CourseController::class);
         Route::resource('modules', ModuleController::class);
         Route::resource('module-materials', ModuleMaterialController::class);
+        
+        // Users (export route before resource to avoid ID collision)
+        Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
         Route::resource('users', UserController::class);
         Route::resource('vouchers', \App\Http\Controllers\VoucherController::class);
 

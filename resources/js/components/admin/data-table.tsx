@@ -20,6 +20,7 @@ interface DataTableProps<T> {
     searchPlaceholder?: string;
     title: string;
     addButtonText?: string;
+    headerActions?: React.ReactNode;
 }
 
 export function DataTable<T extends Record<string, any>>({
@@ -31,6 +32,7 @@ export function DataTable<T extends Record<string, any>>({
     searchPlaceholder = 'Search...',
     title,
     addButtonText = 'Add New',
+    headerActions,
 }: DataTableProps<T>) {
     const [search, setSearch] = useState('');
     const [sortColumn, setSortColumn] = useState<keyof T | null>(null);
@@ -93,16 +95,19 @@ export function DataTable<T extends Record<string, any>>({
                         </div>
                     </div>
                 </div>
-                {onAdd && (
-                    <Button
-                        onClick={onAdd}
-                        className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-3 font-semibold text-white shadow-lg shadow-cyan-500/25 transition-all duration-300 hover:scale-105 hover:from-cyan-600 hover:to-blue-600 hover:shadow-cyan-500/40"
-                    >
-                        <Plus className="mr-2 h-5 w-5" />
-                        {addButtonText}
-                        <Zap className="ml-2 h-4 w-4" />
-                    </Button>
-                )}
+                <div className="flex items-center gap-3">
+                    {headerActions}
+                    {onAdd && (
+                        <Button
+                            onClick={onAdd}
+                            className="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-3 font-semibold text-white shadow-lg shadow-cyan-500/25 transition-all duration-300 hover:scale-105 hover:from-cyan-600 hover:to-blue-600 hover:shadow-cyan-500/40"
+                        >
+                            <Plus className="mr-2 h-5 w-5" />
+                            {addButtonText}
+                            <Zap className="ml-2 h-4 w-4" />
+                        </Button>
+                    )}
+                </div>
             </div>
 
             {/* Enhanced Search */}
