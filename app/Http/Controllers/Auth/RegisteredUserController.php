@@ -20,11 +20,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\RegistrationSuccessMail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Auth\Events\Registered;
 use App\Services\PaymentGatewayService;
 use App\Http\Controllers\DuitkuController;
+use App\Mail\Registration\UserRegistrationMail;
 
 class RegisteredUserController extends Controller
 {
@@ -168,7 +168,7 @@ class RegisteredUserController extends Controller
 
             try {
                 if ($user->email) {
-                    Mail::to($user->email)->send(new RegistrationSuccessMail($user));
+                    Mail::to($user->email)->send(new UserRegistrationMail($user));
                     Log::info("Email sukses dikirim ke: " . $user->email);
                 }
             } catch (\Exception $e) {

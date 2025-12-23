@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
-import { CheckCircle2, Clock, Copy, DollarSign, Megaphone, MousePointerClick } from 'lucide-react';
+import { CheckCircle2, Clock, Copy, DollarSign, Megaphone, MousePointerClick, Trophy } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface Stats {
@@ -129,15 +129,27 @@ export default function AffiliateDashboard({ affiliate, stats, conversions, ledg
         );
     };
 
+    const handleLeaderboardClick = () => {
+        window.open(route('affiliate.leaderboard'));
+    };
+
     return (
         <AppLayout>
             <Head title="Affiliate Dashboard" />
 
             <div className="container mx-auto space-y-8 p-6">
                 {/* Header */}
-                <div>
-                    <h1 className="text-foreground text-3xl font-bold">Affiliate Dashboard</h1>
-                    <p className="text-muted-foreground mt-2">Track your performance and earnings</p>
+                <div className="flex justify-between">
+                    <div>
+                        <h1 className="text-foreground text-3xl font-bold">Affiliate Dashboard</h1>
+                        <p className="text-muted-foreground mt-2">Track your performance and earnings</p>
+                    </div>
+                    <div>
+                        <Button onClick={handleLeaderboardClick}>
+                            <Trophy className="mr-2 h-4 w-4" />
+                            Leaderboard
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Stats Grid */}

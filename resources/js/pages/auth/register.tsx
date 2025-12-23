@@ -9,7 +9,7 @@ import { useAnalytics } from '@/hooks/use-analytics';
 import AuthLayout from '@/layouts/auth-layout';
 import { Head, useForm } from '@inertiajs/react';
 import axios from 'axios';
-import { CheckCircle, LoaderCircle } from 'lucide-react';
+import { CheckCircle, Eye, EyeOff, LoaderCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 // Declare global checkout variable for Duitku
@@ -66,6 +66,9 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
         password: '',
         password_confirmation: '',
     });
+
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     useEffect(() => {
         // Dynamically load Midtrans script
@@ -334,36 +337,56 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
                     <div className="grid gap-4 lg:grid-cols-2">
                         <div className="grid gap-4">
                             <Label htmlFor="password">Password</Label>
-                            <Input
-                                id="password"
-                                type="password"
-                                required
-                                tabIndex={3}
-                                autoComplete="new-password"
-                                value={data.password}
-                                onChange={(e) => setData('password', e.target.value)}
-                                onFocus={() => handleFieldFocus('password')}
-                                onBlur={() => handleFieldBlur('password')}
-                                disabled={processing}
-                                placeholder="Password"
-                            />
+                            <div className="relative">
+                                <Input
+                                    id="password"
+                                    type={showPassword ? 'text' : 'password'}
+                                    required
+                                    tabIndex={3}
+                                    autoComplete="new-password"
+                                    value={data.password}
+                                    onChange={(e) => setData('password', e.target.value)}
+                                    onFocus={() => handleFieldFocus('password')}
+                                    onBlur={() => handleFieldBlur('password')}
+                                    disabled={processing}
+                                    placeholder="Password"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                                    tabIndex={-1}
+                                >
+                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </button>
+                            </div>
                             <InputError message={errors.password} />
                         </div>
                         <div className="grid gap-4">
                             <Label htmlFor="password_confirmation">Confirm password</Label>
-                            <Input
-                                id="password_confirmation"
-                                type="password"
-                                required
-                                tabIndex={4}
-                                autoComplete="new-password"
-                                value={data.password_confirmation}
-                                onChange={(e) => setData('password_confirmation', e.target.value)}
-                                onFocus={() => handleFieldFocus('password_confirmation')}
-                                onBlur={() => handleFieldBlur('password_confirmation')}
-                                disabled={processing}
-                                placeholder="Confirm password"
-                            />
+                            <div className="relative">
+                                <Input
+                                    id="password_confirmation"
+                                    type={showConfirmPassword ? 'text' : 'password'}
+                                    required
+                                    tabIndex={4}
+                                    autoComplete="new-password"
+                                    value={data.password_confirmation}
+                                    onChange={(e) => setData('password_confirmation', e.target.value)}
+                                    onFocus={() => handleFieldFocus('password_confirmation')}
+                                    onBlur={() => handleFieldBlur('password_confirmation')}
+                                    disabled={processing}
+                                    placeholder="Confirm password"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                                    tabIndex={-1}
+                                >
+                                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </button>
+                            </div>
                             <InputError message={errors.password_confirmation} />
                         </div>
                     </div>

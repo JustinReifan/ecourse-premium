@@ -190,7 +190,7 @@ class AffiliateService
 
             if (!$click) {
                 Log::info('No valid affiliate click found for order', ['order_id' => $order->order_id]);
-                return null; // Error Anda sebelumnya terjadi di sini
+                // return null; // Error Anda sebelumnya terjadi di sini
             }
 
             $affiliate = $click->affiliate;
@@ -243,6 +243,9 @@ class AffiliateService
                 ]),
             ]);
 
+            // auto approve
+            $this->approveCommission($conversion->id);
+
             // Update affiliate pending balance
             $affiliate->increment('pending_balance', $commissionAmount);
             $affiliate->refresh();
@@ -255,7 +258,7 @@ class AffiliateService
                 'balance_after' => $affiliate->pending_balance,
                 'reference_type' => 'conversion',
                 'reference_id' => $conversion->id,
-                'note' => "Commission from order {$order->order_id} (pending approval)",
+                'note' => "Commission from order {$order->order_id}",
             ]);
 
             // Mark click as converted
