@@ -290,7 +290,7 @@ export default function ProductForm({ product, courses }: ProductFormProps) {
                                 </div>
                             )}
 
-                            {(data.type === 'ebook' || data.type === 'template') && (
+                            {data.type === 'template' && (
                                 <div className="space-y-2">
                                     <Label htmlFor="file" className="font-mono text-sm tracking-wider text-gray-500 uppercase">
                                         Upload File
@@ -310,22 +310,23 @@ export default function ProductForm({ product, courses }: ProductFormProps) {
                                 </div>
                             )}
 
-                            {data.type === 'affiliate_link' && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="external_url" className="font-mono text-sm tracking-wider text-gray-500 uppercase">
-                                        External URL
-                                    </Label>
-                                    <Input
-                                        id="external_url"
-                                        type="url"
-                                        value={data.external_url}
-                                        onChange={(e) => setData('external_url', e.target.value)}
-                                        className="border-primary/20 bg-primary-foreground/70 text-foreground backdrop-blur-sm focus:border-cyan-400"
-                                        placeholder="https://example.com"
-                                    />
-                                    {errors.external_url && <p className="font-mono text-sm text-red-400">{errors.external_url}</p>}
-                                </div>
-                            )}
+                            {data.type === 'affiliate_link' ||
+                                (data.type === 'ebook' && (
+                                    <div className="space-y-2">
+                                        <Label htmlFor="external_url" className="font-mono text-sm tracking-wider text-gray-500 uppercase">
+                                            URL
+                                        </Label>
+                                        <Input
+                                            id="external_url"
+                                            type="url"
+                                            value={data.external_url}
+                                            onChange={(e) => setData('external_url', e.target.value)}
+                                            className="border-primary/20 bg-primary-foreground/70 text-foreground backdrop-blur-sm focus:border-cyan-400"
+                                            placeholder="https://example.com"
+                                        />
+                                        {errors.external_url && <p className="font-mono text-sm text-red-400">{errors.external_url}</p>}
+                                    </div>
+                                ))}
 
                             {/* Files */}
                             <div className="grid gap-6 md:grid-cols-2">

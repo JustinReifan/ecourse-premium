@@ -5,7 +5,6 @@ import { router } from '@inertiajs/react';
 import axios from 'axios';
 import { Lock, ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
-
 interface Product {
     id: number;
     title: string;
@@ -30,6 +29,27 @@ export function ProductPurchaseModal({ open, onOpenChange, product, triggerToast
 
     const handlePurchase = async () => {
         setIsProcessing(true);
+
+        if (product.price == 0) {
+            triggerToast('Memproses pesanan...', 'success');
+
+            const response = await axios.post(route('products.force-purchase'), {
+                product_id: product.id,
+                gateway: 'duitku', // Kirim gateway yang dipilih
+            });
+
+            if (response.data.success) {
+                triggerToast('Sukses membuat pesanan! redirecting...', 'success');
+
+                setTimeout(() => {
+                    router.visit(route('member.index'));
+                }, 2000);
+            } else {
+                triggerToast('Gagal membuat pesanan!', 'error');
+                setIsProcessing(false);
+            }
+            return;
+        }
 
         if (typeof window.checkout === 'undefined') {
             // Coba tunggu sebentar (retry mechanism sederhana)

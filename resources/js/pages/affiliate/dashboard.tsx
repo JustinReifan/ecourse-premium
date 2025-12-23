@@ -139,7 +139,7 @@ export default function AffiliateDashboard({ affiliate, stats, conversions, ledg
 
             <div className="container mx-auto space-y-8 p-6">
                 {/* Header */}
-                <div className="flex justify-between">
+                <div className="block space-y-4 md:flex md:justify-between">
                     <div>
                         <h1 className="text-foreground text-3xl font-bold">Affiliate Dashboard</h1>
                         <p className="text-muted-foreground mt-2">Track your performance and earnings</p>

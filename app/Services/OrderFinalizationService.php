@@ -84,7 +84,7 @@ class OrderFinalizationService
             $voucher = Voucher::where('code', $voucherCode)->first();
 
             if ($voucher) {
-                $voucher->increment('usage_count');
+                $voucher->increment('used_count');
 
                 Log::info("Voucher usage incremented: {$voucherCode} for Order: {$order->order_id}");
             }

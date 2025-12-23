@@ -274,7 +274,9 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
                 <div className="grid gap-6">
                     <div className="grid gap-4 md:grid-cols-2">
                         <div className="grid gap-4">
-                            <Label htmlFor="username">Username</Label>
+                            <Label htmlFor="username">
+                                Username <span className="text-muted-foreground ml-1 text-[11px] font-normal">(Tanpa spasi & simbol)</span>
+                            </Label>
                             <Input
                                 id="username"
                                 type="text"
@@ -283,21 +285,38 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
                                 tabIndex={1}
                                 autoComplete="username"
                                 value={data.username}
-                                onChange={(e) => setData('username', e.target.value)}
+                                onChange={(e) => {
+                                    let val = e.target.value;
+
+                                    // 1. Ubah ke huruf kecil semua (opsional, tapi disarankan)
+                                    val = val.toLowerCase();
+
+                                    // 2. Hapus Spasi & Simbol (Hanya terima a-z dan 0-9)
+                                    // Regex ini berarti: Ganti karakter APAPUN yang BUKAN huruf kecil/angka dengan string kosong
+                                    val = val.replace(/[^a-z0-9]/g, '');
+
+                                    setData('username', val);
+                                }}
+                                // --------------------------
                                 onFocus={() => handleFieldFocus('username')}
                                 onBlur={() => handleFieldBlur('username')}
                                 disabled={processing}
-                                placeholder="Username"
+                                placeholder="contoh: sariputri88"
                             />
+
+                            {/* Helper Text untuk memperjelas */}
+                            {/* <p className="text-muted-foreground -mt-2 text-[11px]">*Hanya huruf dan angka, disambung</p> */}
+
                             <InputError message={errors.username} className="mt-2" />
                         </div>
                         <div className="grid gap-4">
-                            <Label htmlFor="name">Name</Label>
+                            <Label htmlFor="name">
+                                Name <span className="text-muted-foreground ml-1 text-[11px] font-normal">(Nama lengkap, boleh spasi)</span>
+                            </Label>
                             <Input
                                 id="name"
                                 type="text"
                                 required
-                                autoFocus
                                 tabIndex={1}
                                 autoComplete="name"
                                 value={data.name}
@@ -305,7 +324,7 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
                                 onFocus={() => handleFieldFocus('name')}
                                 onBlur={() => handleFieldBlur('name')}
                                 disabled={processing}
-                                placeholder="Full name"
+                                placeholder="Nama lengkap anda"
                             />
                             <InputError message={errors.name} className="mt-2" />
                         </div>
@@ -324,7 +343,7 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
                             onFocus={() => handleFieldFocus('email')}
                             onBlur={() => handleFieldBlur('email')}
                             disabled={processing}
-                            placeholder="email@example.com"
+                            placeholder="nama@gmail.com"
                         />
                         <InputError message={errors.email} />
                     </div>
@@ -389,7 +408,7 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
                                     onFocus={() => handleFieldFocus('password_confirmation')}
                                     onBlur={() => handleFieldBlur('password_confirmation')}
                                     disabled={processing}
-                                    placeholder="Confirm password"
+                                    placeholder="Konfirmasi password"
                                 />
                                 <button
                                     type="button"

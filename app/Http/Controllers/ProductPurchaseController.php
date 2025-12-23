@@ -19,46 +19,58 @@ class ProductPurchaseController extends Controller
     /**
      * Handle product purchase
      */
-    // public function purchase(Request $request, Product $product)
-    // {
-    //     $user = auth()->user();
+    public function forcePurchase(Request $request, AffiliateService $affiliateService)
+    {
+        $validated = $request->validate([
+            'product_id' => 'required|integer|exists:products,id',
+            'gateway' => 'required|string|in:duitku,midtrans',
+        ]);
 
-    //     // Check if already purchased
-    //     if ($product->isOwnedBy($user->id)) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'You already own this product.',
-    //         ], 400);
-    //     }
+        $gatewayDriver = $request->input('gateway', 'duitku');
+        $product = Product::findOrFail($validated['product_id']);
+        $user = $request->user();
 
-    //     // Create order
-    //     $order = Order::create([
-    //         'order_id' => 'ORD-' . strtoupper(Str::random(10)),
-    //         'user_id' => $user->id,
-    //         'amount' => $product->price,
-    //         'status' => 'completed', // Assuming instant completion for now
-    //         'payment_method' => $request->input('payment_method', 'manual'),
-    //         'meta' => [
-    //             'product_id' => $product->id,
-    //             'product_title' => $product->title,
-    //             'product_type' => $product->type,
-    //         ],
-    //     ]);
+        // Check if already purchased
+        if ($product->isOwnedBy($user->id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You already own this product.',
+            ], 400);
+        }
 
-    //     // Create purchase record
-    //     UserPurchase::create([
-    //         'user_id' => $user->id,
-    //         'product_id' => $product->id,
-    //         'order_id' => $order->id,
-    //         'amount_paid' => $product->price,
-    //     ]);
+        $click = $affiliateService->getLastValidClickForSession($request);
 
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Product purchased successfully!',
-    //         'order_id' => $order->order_id,
-    //     ]);
-    // }
+        // Create order
+        $order = Order::create([
+            'order_id' => 'ORDFREE-' . strtoupper(Str::random(10)),
+            'user_id' => $user->id,
+            'amount' => $product->price,
+            'status' => 'completed',
+            'type' => 'product',
+            'payment_method' => $gatewayDriver,
+            'meta' => [
+                'product_id' => $product->id,
+                'product_title' => $product->title,
+                'product_type' => $product->type,
+                'affiliate_click_id' => $click ? $click->id : null,
+
+            ],
+        ]);
+
+        // Create purchase record
+        UserPurchase::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'order_id' => $order->id,
+            'amount_paid' => $product->price,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product purchased successfully!',
+            'order_id' => $order->order_id,
+        ]);
+    }
 
     public function confirmInstantPayment(Request $request, OrderFinalizationService $orderService)
     {

@@ -42,7 +42,7 @@ Route::middleware('auth')->group(function () {
         ->middleware('auth')
         ->name('products.create-payment');
     Route::post('/api/payments/confirm-instant', [ProductPurchaseController::class, 'confirmInstantPayment']);
-    // Route::post('/api/products/{product}/purchase', [\App\Http\Controllers\ProductPurchaseController::class, 'purchase'])->name('products.purchase');
+    Route::post('/api/products/purchase', [\App\Http\Controllers\ProductPurchaseController::class, 'forcePurchase'])->name('products.force-purchase');
     Route::get('/api/products/{product}/download', [\App\Http\Controllers\ProductPurchaseController::class, 'download'])->name('products.download');
 });
 
@@ -82,7 +82,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('courses', CourseController::class);
         Route::resource('modules', ModuleController::class);
         Route::resource('module-materials', ModuleMaterialController::class);
-        
+
         // Users (export route before resource to avoid ID collision)
         Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
         Route::resource('users', UserController::class);

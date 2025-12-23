@@ -114,10 +114,10 @@ export default function MemberProducts({ ownedProducts, availableProducts, selec
     const handleProductClick = (product: Product) => {
         if (product.type === 'ecourse') {
             router.get(route('member.product.show', { product: product.slug }));
-        } else if (product.type === 'ebook' || product.type === 'template') {
+        } else if (product.type === 'template') {
             // Trigger download
             window.location.href = `/api/products/${product.id}/download`;
-        } else if (product.type === 'affiliate_link' && product.external_url) {
+        } else if (product.type === 'affiliate_link' || (product.type === 'ebook' && product.external_url)) {
             window.open(product.external_url, '_blank');
         }
     };
