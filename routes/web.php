@@ -51,6 +51,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [MemberProductController::class, 'index'])->name('index');
         Route::get('/products', [MemberProductController::class, 'index'])->name('products');
         Route::get('/products/{product:slug}', [MemberProductController::class, 'showProduct'])->name('product.show');
+        Route::post('/survey', [UserController::class, 'updateSurvey'])->name('survey');
         Route::get('course/{course:slug}', [MemberController::class, 'course'])->name('course');
         Route::get('module/{module:slug}', [MemberController::class, 'module'])->name('module');
         Route::post('module/complete/{module}', [MemberController::class, 'markComplete'])->name('module.complete');
@@ -86,6 +87,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
         Route::resource('users', UserController::class);
         Route::resource('vouchers', \App\Http\Controllers\VoucherController::class);
+
+        // Orders (export route before resource to avoid ID collision)
+        Route::get('/orders/export', [\App\Http\Controllers\OrderController::class, 'export'])->name('orders.export');
+        Route::resource('orders', \App\Http\Controllers\OrderController::class);
 
         // Payout Methods
         Route::resource('payout-methods', \App\Http\Controllers\PayoutMethodController::class);

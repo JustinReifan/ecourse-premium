@@ -159,4 +159,23 @@ class UserController extends Controller
             fclose($handle);
         }, 200, $headers);
     }
+
+    /**
+     * Update user survey data (age and referral source).
+     */
+    public function updateSurvey(Request $request)
+    {
+        $validated = $request->validate([
+            'customer_age' => 'required|string|max:10',
+            'referral_source' => 'required|string|max:50',
+        ]);
+
+        $user = auth()->user();
+        $user->update([
+            'customer_age' => $validated['customer_age'],
+            'referral_source' => $validated['referral_source'],
+        ]);
+
+        return redirect()->back()->with('success', 'Survey saved successfully.');
+    }
 }

@@ -27,6 +27,7 @@ import {
     LayoutGrid,
     Library,
     Megaphone,
+    Receipt,
     Settings,
     ShoppingBag,
     SquarePlay,
@@ -47,6 +48,11 @@ const mainNavItems: NavItem[] = [
         title: 'Users',
         href: '/admin/users',
         icon: Users,
+    },
+    {
+        title: 'Orders',
+        href: '/admin/orders',
+        icon: Receipt,
     },
     {
         title: 'Products',

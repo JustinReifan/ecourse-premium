@@ -93,8 +93,10 @@ class OrderFinalizationService
 
         $this->trackPaymentSuccess($order, $user);
 
+        // 7. Flash session to trigger survey modal on member index
+        session()->flash('trigger_survey', true);
 
-        // 7. Kirim Notifikasi Sukses
+        // 8. Kirim Notifikasi Sukses
         try {
             $this->sendSuccessNotifications($user, $conversion);
         } catch (\Exception $e) {

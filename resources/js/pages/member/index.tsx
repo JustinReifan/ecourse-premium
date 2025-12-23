@@ -3,10 +3,13 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import MemberLayout from '@/layouts/member-layout';
 import type { PageProps } from '@/types';
-import { Head, router } from '@inertiajs/react';
-import { AlertTriangle, BookOpen, CheckCircle, Download, Lock, Package } from 'lucide-react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { AlertTriangle, BookOpen, CheckCircle, Download, Lock, Package, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface Course {
@@ -35,6 +38,7 @@ interface ProductsPageProps extends PageProps {
     availableProducts: Product[];
     selectedProduct: Product | null;
     duitkuScriptUrl: string;
+    triggerSurvey?: boolean;
 }
 
 declare global {
@@ -55,22 +59,38 @@ declare global {
     }
 }
 
-export default function MemberProducts({ ownedProducts, availableProducts, selectedProduct, duitkuScriptUrl }: ProductsPageProps) {
+const REFERRAL_SOURCES = [
+    { value: 'tiktok', label: 'TikTok' },
+    { value: 'facebook', label: 'Facebook' },
+    { value: 'instagram', label: 'Instagram' },
+    { value: 'youtube', label: 'YouTube' },
+    { value: 'threads', label: 'Threads' },
+    { value: 'twitter', label: 'Twitter/X' },
+    { value: 'friend', label: 'Teman/Keluarga' },
+    { value: 'google', label: 'Google Search' },
+    { value: 'other', label: 'Lainnya' },
+];
+
+export default function MemberProducts({ ownedProducts, availableProducts, selectedProduct, duitkuScriptUrl, triggerSurvey }: ProductsPageProps) {
     const [selectedCatalogProduct, setSelectedCatalogProduct] = useState<Product | null>(selectedProduct);
     const [purchaseModalOpen, setPurchaseModalOpen] = useState(false);
     const [productToPurchase, setProductToPurchase] = useState<Product | null>(null);
+    const [surveyModalOpen, setSurveyModalOpen] = useState(false);
 
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
-    // State tambahan untuk membedakan style toast sukses dan error
     const [toastType, setToastType] = useState<'success' | 'error'>('success');
+
+    const surveyForm = useForm({
+        customer_age: '',
+        referral_source: '',
+    });
 
     const triggerToast = (message: string, type: 'success' | 'error') => {
         setToastMessage(message);
         setToastType(type);
         setShowToast(true);
 
-        // Sembunyikan toast secara otomatis setelah 4 detik
         setTimeout(() => {
             setShowToast(false);
             setToastMessage('');
@@ -84,16 +104,34 @@ export default function MemberProducts({ ownedProducts, availableProducts, selec
         if (!existingScript && duitkuScriptUrl) {
             const script = document.createElement('script');
             script.src = duitkuScriptUrl;
-            script.async = true; // atau false jika ingin blocking
+            script.async = true;
             document.body.appendChild(script);
 
-            // Opsional: Log jika script loaded
             script.onload = () => console.log('Duitku script loaded');
         }
     }, [duitkuScriptUrl]);
 
+    // Trigger survey modal for fresh registrations
+    useEffect(() => {
+        if (triggerSurvey) {
+            setSurveyModalOpen(true);
+        }
+    }, [triggerSurvey]);
+
+    const handleSurveySubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        surveyForm.post('/member/survey', {
+            onSuccess: () => {
+                setSurveyModalOpen(false);
+                triggerToast('Terima kasih telah mengisi survey!', 'success');
+            },
+            onError: () => {
+                triggerToast('Gagal menyimpan survey. Silakan coba lagi.', 'error');
+            },
+        });
+    };
+
     const handleCatalogFilter = (product: Product) => {
-        // if product is affiliate_link, redirect to external_url
         if (product.type === 'affiliate_link' && product.external_url) {
             window.open(product.external_url, '_blank');
             return;
@@ -115,10 +153,11 @@ export default function MemberProducts({ ownedProducts, availableProducts, selec
         if (product.type === 'ecourse') {
             router.get(route('member.product.show', { product: product.slug }));
         } else if (product.type === 'template') {
-            // Trigger download
             window.location.href = `/api/products/${product.id}/download`;
         } else if (product.type === 'affiliate_link' || (product.type === 'ebook' && product.external_url)) {
-            window.open(product.external_url, '_blank');
+            if (product.external_url) {
+                window.open(product.external_url, '_blank');
+            }
         }
     };
 
@@ -308,6 +347,74 @@ export default function MemberProducts({ ownedProducts, availableProducts, selec
                     product={productToPurchase}
                     triggerToast={triggerToast}
                 />
+
+                {/* Survey Modal */}
+                <Dialog open={surveyModalOpen} onOpenChange={() => {}}>
+                    <DialogContent className="bg-card/95 border-primary/20 max-w-md border backdrop-blur-xl sm:max-w-lg" onInteractOutside={(e) => e.preventDefault()}>
+                        <DialogHeader className="text-center">
+                            <div className="bg-primary/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+                                <Sparkles className="text-primary h-8 w-8" />
+                            </div>
+                            <DialogTitle className="text-foreground text-2xl font-bold">
+                                Selamat Datang! 🎉
+                            </DialogTitle>
+                            <DialogDescription className="text-muted-foreground mt-2">
+                                Sebelum mulai belajar, bantu kami mengenal kamu lebih baik dengan mengisi survey singkat ini.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <form onSubmit={handleSurveySubmit} className="mt-6 space-y-5">
+                            <div className="space-y-2">
+                                <Label htmlFor="customer_age" className="text-foreground font-medium">
+                                    Berapa umur kamu?
+                                </Label>
+                                <Input
+                                    id="customer_age"
+                                    type="text"
+                                    placeholder="Contoh: 25"
+                                    value={surveyForm.data.customer_age}
+                                    onChange={(e) => surveyForm.setData('customer_age', e.target.value)}
+                                    className="border-border/50 bg-background/50 focus:border-primary h-12 text-lg"
+                                    required
+                                />
+                                {surveyForm.errors.customer_age && (
+                                    <p className="text-sm text-red-400">{surveyForm.errors.customer_age}</p>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="referral_source" className="text-foreground font-medium">
+                                    Dari mana kamu tau tentang kami?
+                                </Label>
+                                <select
+                                    id="referral_source"
+                                    value={surveyForm.data.referral_source}
+                                    onChange={(e) => surveyForm.setData('referral_source', e.target.value)}
+                                    className="border-border/50 bg-background/50 focus:border-primary text-foreground h-12 w-full rounded-lg border px-4 text-lg focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
+                                    required
+                                >
+                                    <option value="">Pilih sumber...</option>
+                                    {REFERRAL_SOURCES.map((source) => (
+                                        <option key={source.value} value={source.value}>
+                                            {source.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                {surveyForm.errors.referral_source && (
+                                    <p className="text-sm text-red-400">{surveyForm.errors.referral_source}</p>
+                                )}
+                            </div>
+
+                            <Button
+                                type="submit"
+                                disabled={surveyForm.processing}
+                                className="bg-primary hover:bg-primary/90 h-12 w-full text-lg font-semibold text-white shadow-lg transition-all duration-300"
+                            >
+                                {surveyForm.processing ? 'Menyimpan...' : 'Mulai Belajar 🚀'}
+                            </Button>
+                        </form>
+                    </DialogContent>
+                </Dialog>
             </MemberLayout>
         </>
     );
