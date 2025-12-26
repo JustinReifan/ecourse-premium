@@ -58,12 +58,14 @@ class OrderFinalizationService
 
         event(new Registered($user));
 
-        // 4. Berikan produk default
-        $defaultProduct = Product::where('is_default', true)->first();
-        if ($defaultProduct) {
+        // 4. Berikan produk berdasarkan order meta (PWYW support)
+        $productId = $order->meta['product_id'] ?? null;
+        $product = $productId ? Product::find($productId) : Product::where('is_default', true)->first();
+        
+        if ($product) {
             UserPurchase::create([
                 'user_id' => $user->id,
-                'product_id' => $defaultProduct->id,
+                'product_id' => $product->id,
                 'order_id' => $order->id,
                 'amount_paid' => $order->amount,
             ]);
@@ -75,7 +77,7 @@ class OrderFinalizationService
             $user,
             $order->amount,
             ['registration' => true, 'voucher_applied' => !empty($order->meta['voucher_code'])],
-            $defaultProduct?->id
+            $product?->id
         );
 
         // 6. Jika ada voucher, increment penggunaan

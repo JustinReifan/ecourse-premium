@@ -43,16 +43,21 @@ type RegisterForm = {
 interface RegisterProps {
     coursePrice: number;
     duitkuScriptUrl: string;
+    registrationType?: 'standard' | 'lead_magnet';
+    minLeadMagnetPrice?: number;
 }
 
-export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps) {
+export default function Register({ coursePrice, duitkuScriptUrl, registrationType = 'standard', minLeadMagnetPrice = 10000 }: RegisterProps) {
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [appliedVoucher, setAppliedVoucher] = useState<any>(null);
     const [finalPrice, setFinalPrice] = useState(coursePrice);
+    const [customAmount, setCustomAmount] = useState<number>(minLeadMagnetPrice);
     const { trackEngagement, trackConversion, trackPayment } = useAnalytics();
     const [isSendingNotif, setIsSendingNotif] = useState(false);
-    const [selectedGateway, setSelectedGateway] = useState('duitku'); // pilihan payment gateway
+    const [selectedGateway, setSelectedGateway] = useState('duitku');
+
+    const isLeadMagnet = registrationType === 'lead_magnet';
 
     const formatRupiah = (number: number) => {
         return new Intl.NumberFormat('id-ID').format(number);
@@ -117,7 +122,18 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        // For lead magnet, validate minimum amount
+        if (isLeadMagnet && customAmount < minLeadMagnetPrice) {
+            setToastMessage(`Minimal pembayaran adalah Rp ${formatRupiah(minLeadMagnetPrice)}`);
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 4000);
+            return;
+        }
+
         let paymentData;
+
+        // Determine the final price to use
+        const priceToCharge = isLeadMagnet ? customAmount : finalPrice;
 
         try {
             // 1. Minta Snap Token + validasi form
@@ -125,13 +141,15 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
                 ...data,
                 register: true,
                 gateway: selectedGateway,
-                final_price: finalPrice,
+                final_price: priceToCharge,
                 voucher_code: appliedVoucher?.voucher?.code || null,
                 discount_amount: appliedVoucher?.discount || 0,
+                registration_type: registrationType,
+                payment_amount: isLeadMagnet ? customAmount : null,
             };
 
             // check if price = 0, bypass payment
-            if (finalPrice === 0) {
+            if (priceToCharge === 0) {
                 setToastMessage('Memproses akun...');
                 setShowToast(true);
                 setTimeout(() => setShowToast(false), 3000);
@@ -411,26 +429,57 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
                         </div>
                     </div>
 
-                    {/* Voucher Section */}
-                    <div className="grid gap-4">
-                        <VoucherInput
-                            onVoucherApplied={handleVoucherApplied}
-                            onVoucherRemoved={handleVoucherRemoved}
-                            originalPrice={coursePrice}
-                            disabled={processing}
-                        />
-                    </div>
+                    {/* Voucher Section - Only show for standard registration */}
+                    {!isLeadMagnet && (
+                        <div className="grid gap-4">
+                            <VoucherInput
+                                onVoucherApplied={handleVoucherApplied}
+                                onVoucherRemoved={handleVoucherRemoved}
+                                originalPrice={coursePrice}
+                                disabled={processing}
+                            />
+                        </div>
+                    )}
+
+                    {/* PWYW Input - Only show for lead magnet */}
+                    {isLeadMagnet && (
+                        <div className="grid gap-4">
+                            <Label htmlFor="custom_amount">Nominal Pembayaran (Pay What You Want)</Label>
+                            <div className="relative">
+                                <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2 text-sm">Rp</span>
+                                <Input
+                                    id="custom_amount"
+                                    type="number"
+                                    min={minLeadMagnetPrice}
+                                    value={customAmount}
+                                    onChange={(e) => setCustomAmount(Math.max(0, parseInt(e.target.value) || 0))}
+                                    disabled={processing}
+                                    className="pl-10"
+                                    placeholder={`Minimal ${formatRupiah(minLeadMagnetPrice)}`}
+                                />
+                            </div>
+                            <p className="text-muted-foreground text-xs">
+                                Minimal pembayaran: Rp {formatRupiah(minLeadMagnetPrice)}
+                            </p>
+                        </div>
+                    )}
 
                     {/* Final Price Display */}
                     <div className="grid gap-4">
                         <div className="relative">
                             <div className="border-primary/50 from-primary/5 to-primary/10 rounded-lg border bg-gradient-to-r p-4">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-foreground text-sm font-medium">Harga:</span>
+                                    <span className="text-foreground text-sm font-medium">
+                                        {isLeadMagnet ? 'Total Pembayaran:' : 'Harga:'}
+                                    </span>
                                     <div className="text-right">
-                                        {appliedVoucher && <div className="text-xs text-gray-500 line-through">Rp {formatRupiah(coursePrice)}</div>}
-                                        <div className="text-primary text-lg font-bold">Rp {formatRupiah(finalPrice)}</div>
-                                        {appliedVoucher && (
+                                        {!isLeadMagnet && appliedVoucher && (
+                                            <div className="text-xs text-gray-500 line-through">Rp {formatRupiah(coursePrice)}</div>
+                                        )}
+                                        <div className="text-primary text-lg font-bold">
+                                            Rp {formatRupiah(isLeadMagnet ? customAmount : finalPrice)}
+                                        </div>
+                                        {!isLeadMagnet && appliedVoucher && (
                                             <div className="text-xs text-green-400">Hemat Rp {formatRupiah(appliedVoucher.discount)}!</div>
                                         )}
                                     </div>

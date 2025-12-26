@@ -36,7 +36,24 @@ class Product extends Model
         'order',
         'status',
         'is_default',
+        'is_lead_magnet',
     ];
+
+    /**
+     * Get the lead magnet product
+     */
+    public static function getLeadMagnetProduct(): ?self
+    {
+        return static::where('is_lead_magnet', true)->first();
+    }
+
+    /**
+     * Get the default product
+     */
+    public static function getDefaultProduct(): ?self
+    {
+        return static::where('is_default', true)->first();
+    }
 
     protected $casts = [
         'price' => 'decimal:2',

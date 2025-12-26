@@ -27,6 +27,7 @@ interface Product {
     order: number;
     status: 'active' | 'inactive';
     is_default: boolean;
+    is_lead_magnet: boolean;
     courses?: Course[];
 }
 
@@ -53,6 +54,7 @@ export default function ProductForm({ product, courses }: ProductFormProps) {
         order: product?.order || 0,
         status: product?.status || ('active' as const),
         is_default: product?.is_default || false,
+        is_lead_magnet: product?.is_lead_magnet || false,
         course_ids: selectedCourseIds,
     });
 
@@ -262,6 +264,25 @@ export default function ProductForm({ product, courses }: ProductFormProps) {
                                     </p>
                                     {errors.is_default && <p className="font-mono text-sm text-red-400">{errors.is_default}</p>}
                                 </div>
+                            </div>
+
+                            {/* Lead Magnet Product */}
+                            <div className="space-y-2">
+                                <Label className="font-mono text-sm tracking-wider text-gray-500 uppercase">Lead Magnet Product</Label>
+                                <div className="border-primary/20 bg-primary-foreground/70 flex items-center space-x-2 rounded-lg border p-4">
+                                    <Checkbox
+                                        id="is_lead_magnet"
+                                        checked={data.is_lead_magnet}
+                                        onCheckedChange={(checked) => setData('is_lead_magnet', checked as boolean)}
+                                    />
+                                    <label htmlFor="is_lead_magnet" className="text-sm text-gray-500">
+                                        Set as Lead Magnet product (Pay What You Want)
+                                    </label>
+                                </div>
+                                <p className="text-xs text-gray-400">
+                                    If checked, this product will be used for the Lead Magnet landing page where users can pay any amount they want.
+                                </p>
+                                {errors.is_lead_magnet && <p className="font-mono text-sm text-red-400">{errors.is_lead_magnet}</p>}
                             </div>
 
                             {/* Type-specific fields */}

@@ -43,11 +43,27 @@ class RegisteredUserController extends Controller
 
     public function create(): Response
     {
-        $coursePrice = \App\Models\Setting::get('course_price', env('VITE_COURSE_PRICE', 500000));
+        // Check if coming from lead magnet flow (via query parameter)
+        $registrationType = request()->query('type', 'standard');
+        $isLeadMagnet = $registrationType === 'lead-magnet';
+
+        if ($isLeadMagnet) {
+            // Get lead magnet product
+            $product = Product::getLeadMagnetProduct();
+            $coursePrice = $product ? $product->price : 0;
+        } else {
+            // Standard flow - use default product price from settings
+            $coursePrice = \App\Models\Setting::get('course_price', env('VITE_COURSE_PRICE', 500000));
+        }
+
         $duitkuScriptUrl = \App\Models\Setting::get('duitku_script_url', env('VITE_DUITKU_SCRIPT_URL', ''));
+        $minLeadMagnetPrice = \App\Models\Setting::get('min_lead_magnet_price', 10000);
+
         return Inertia::render('auth/register', [
             'coursePrice' => $coursePrice,
             'duitkuScriptUrl' => $duitkuScriptUrl,
+            'registrationType' => $isLeadMagnet ? 'lead_magnet' : 'standard',
+            'minLeadMagnetPrice' => (int) $minLeadMagnetPrice,
         ]);
     }
 
@@ -55,23 +71,46 @@ class RegisteredUserController extends Controller
     {
         // 1. Validasi form
         $validated = $request->validate([
-            'gateway' => 'required|string|in:duitku,midtrans', // <-- Front-end harus kirim ini
+            'gateway' => 'required|string|in:duitku,midtrans',
             'username' => 'required|string|max:255|alpha_dash|unique:users',
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:255|min_digits:8|unique:users',
             'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'registration_type' => 'nullable|string|in:standard,lead_magnet',
+            'payment_amount' => 'nullable|numeric',
         ]);
 
         $gatewayDriver = $request->input('gateway');
+        $registrationType = $request->input('registration_type', 'standard');
+        $isLeadMagnet = $registrationType === 'lead_magnet';
+
+        // 2. Determine product and price based on registration type
+        if ($isLeadMagnet) {
+            $product = Product::getLeadMagnetProduct();
+            $minPrice = \App\Models\Setting::get('min_lead_magnet_price', 10000);
+            $paymentAmount = $request->input('payment_amount', $minPrice);
+
+            // Validate minimum price for lead magnet
+            if ($paymentAmount < $minPrice) {
+                return response()->json([
+                    'message' => "Minimal pembayaran adalah Rp " . number_format($minPrice, 0, ',', '.')
+                ], 422);
+            }
+
+            $orderAmount = $paymentAmount;
+        } else {
+            $product = Product::getDefaultProduct();
+            $orderAmount = $request->final_price;
+        }
 
         $click = $affiliateService->getLastValidClickForSession($request);
 
-        // 2. Buat Order 'pending' (Logika ini tetap sama)
+        // 3. Buat Order 'pending'
         $order = Order::create([
             'order_id' => 'REG-' . Str::uuid(),
             'user_id' => null,
-            'amount' => $request->final_price,
+            'amount' => $orderAmount,
             'status' => 'pending',
             'type' => 'registration',
             'payment_method' => $gatewayDriver,
@@ -82,17 +121,19 @@ class RegisteredUserController extends Controller
                 'follow_up_sent' => false,
                 'payment_url' => null,
                 'affiliate_click_id' => $click ? $click->id : null,
+                'registration_type' => $registrationType,
+                'product_id' => $product ? $product->id : null,
             ],
         ]);
 
         try {
-            // 3. Pilih Gateway secara dinamis
+            // 4. Pilih Gateway secara dinamis
             $gateway = $paymentGateway->getGateway($gatewayDriver);
 
-            // 4. Buat permintaan pembayaran
+            // 5. Buat permintaan pembayaran
             $paymentDetails = $gateway->createPaymentRequest($order, $validated);
 
-            // 5. Simpan URL pembayaran ke Order 
+            // 6. Simpan URL pembayaran ke Order 
             if (isset($paymentDetails['paymentUrl'])) {
                 $meta = $order->meta;
                 $meta['payment_url'] = $paymentDetails['paymentUrl'];
@@ -106,6 +147,7 @@ class RegisteredUserController extends Controller
                     'event_type' => 'conversion',
                     'event_data' => [
                         'type' => 'registration',
+                        'registration_type' => $registrationType,
                         'order_id' => $order->order_id,
                         'name' => $validated['name'],
                         'email' => $validated['email'],
@@ -121,8 +163,7 @@ class RegisteredUserController extends Controller
                 Log::error('Analytics Conversion Tracking Failed: ' . $e->getMessage());
             }
 
-
-            // 6. Kirim data ke front-end
+            // 7. Kirim data ke front-end
             return response()->json($paymentDetails);
         } catch (\Exception $e) {
             logger()->error("Failed to create payment request: " . $e->getMessage());
@@ -130,10 +171,8 @@ class RegisteredUserController extends Controller
         }
     }
 
-
-
     /**
-     * Handle an incoming registration request.
+     * Handle an incoming registration request (free/voucher).
      *
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -146,7 +185,16 @@ class RegisteredUserController extends Controller
                 'phone' => 'required|string|max:255|min_digits:8|unique:users',
                 'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
                 'password' => ['required', 'confirmed', Rules\Password::defaults()],
+                'registration_type' => 'nullable|string|in:standard,lead_magnet',
             ]);
+
+            $registrationType = $request->input('registration_type', 'standard');
+            $isLeadMagnet = $registrationType === 'lead_magnet';
+
+            // Determine product based on registration type
+            $product = $isLeadMagnet 
+                ? Product::getLeadMagnetProduct() 
+                : Product::getDefaultProduct();
 
             $order = Order::create([
                 'order_id' => 'REGFREE-' . Str::uuid(),
@@ -161,6 +209,8 @@ class RegisteredUserController extends Controller
                     'discount_amount' => $request->discount_amount ?? 0,
                     'follow_up_sent' => false,
                     'payment_url' => null,
+                    'registration_type' => $registrationType,
+                    'product_id' => $product ? $product->id : null,
                 ],
             ]);
 

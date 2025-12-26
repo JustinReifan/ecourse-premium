@@ -48,6 +48,7 @@ class ProductController extends Controller
             'order' => 'nullable|integer',
             'status' => 'required|in:active,inactive',
             'is_default' => 'nullable|boolean',
+            'is_lead_magnet' => 'nullable|boolean',
             'course_ids' => 'nullable|array',
             'course_ids.*' => 'exists:courses,id',
         ]);
@@ -76,6 +77,11 @@ class ProductController extends Controller
         // Handle is_default constraint - only one product can be default
         if (!empty($validated['is_default']) && $validated['is_default']) {
             Product::where('is_default', true)->update(['is_default' => false]);
+        }
+
+        // Handle is_lead_magnet constraint - only one product can be lead magnet
+        if (!empty($validated['is_lead_magnet']) && $validated['is_lead_magnet']) {
+            Product::where('is_lead_magnet', true)->update(['is_lead_magnet' => false]);
         }
 
         $product = Product::create($validated);
@@ -118,6 +124,7 @@ class ProductController extends Controller
             'order' => 'nullable|integer',
             'status' => 'required|in:active,inactive',
             'is_default' => 'nullable|boolean',
+            'is_lead_magnet' => 'nullable|boolean',
             'course_ids' => 'nullable|array',
             'course_ids.*' => 'exists:courses,id',
         ]);
@@ -153,6 +160,11 @@ class ProductController extends Controller
         // Handle is_default constraint - only one product can be default
         if (!empty($validated['is_default']) && $validated['is_default']) {
             Product::where('is_default', true)->where('id', '!=', $product->id)->update(['is_default' => false]);
+        }
+
+        // Handle is_lead_magnet constraint - only one product can be lead magnet
+        if (!empty($validated['is_lead_magnet']) && $validated['is_lead_magnet']) {
+            Product::where('is_lead_magnet', true)->where('id', '!=', $product->id)->update(['is_lead_magnet' => false]);
         }
 
         $product->update($validated);
