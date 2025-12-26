@@ -14,7 +14,22 @@ use App\Http\Controllers\ModuleMaterialController;
 use App\Http\Controllers\ProductPurchaseController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 
+
+
 Route::get('/', function () {
+    $settings = \App\Models\Setting::getAllCached();
+
+    return Inertia::render('welcome', [
+        'landingHeadline' => $settings['landing_headline'] ?? 'Strategi Jadi Canva Creator Sukses: Dari Nol Sampai Cuan Pertama di Dunia Digital',
+        'landingSubheadline' => $settings['landing_subheadline'] ?? 'Dibimbing Langsung Dari Nol Sampai Bisa Ngasilin Cuan dari Canva',
+        'landingBadge' => $settings['landing_badge'] ?? 'Premium Canva Masterclass',
+        'landingVslThumbnail' => $settings['landing_vsl_thumbnail'] ?? null,
+        'landingVslUrl' => $settings['landing_vsl_url'] ?? null,
+        'coursePrice' => $settings['course_price'] ?? 0,
+    ]);
+})->name('home');
+
+Route::get('/v2', function () {
     $settings = \App\Models\Setting::getAllCached();
 
     return Inertia::render('welcome2', [
@@ -25,7 +40,7 @@ Route::get('/', function () {
         'landingVslUrl' => $settings['landing_vsl_url'] ?? null,
         'coursePrice' => $settings['course_price'] ?? 0,
     ]);
-})->name('home');
+})->name('home2');
 
 
 
