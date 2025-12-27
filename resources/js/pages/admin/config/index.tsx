@@ -365,7 +365,7 @@ export default function ConfigIndex({ settings }: ConfigPageProps) {
                                     </div>
 
                                     {/* Yearly Plan Toggle */}
-                                    <div className="border-border/50 space-y-4 rounded-lg border p-4">
+                                    <div className="border-border/50 space-y-4 rounded-lg border">
                                         <div className="flex items-center gap-3">
                                             <Checkbox
                                                 id="enable_yearly_plan"
