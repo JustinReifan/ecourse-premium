@@ -60,16 +60,35 @@ class RegisteredUserController extends Controller
             'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'subscription_plan' => 'nullable|string|in:yearly,lifetime',
+            'voucher_code' => 'nullable|string|max:50',
+            'discount_amount' => 'nullable|numeric|min:0',
         ]);
 
         $gatewayDriver = $request->input('gateway');
         $subscriptionPlan = $request->input('subscription_plan', 'lifetime');
         
-        // Validate price based on subscription plan
+        // Get base price based on subscription plan
         $enableYearlyPlan = filter_var(Setting::get('enable_yearly_plan', false), FILTER_VALIDATE_BOOLEAN);
-        $expectedPrice = $subscriptionPlan === 'yearly' && $enableYearlyPlan
+        $basePrice = $subscriptionPlan === 'yearly' && $enableYearlyPlan
             ? (int) Setting::get('course_price_yearly', 0)
             : (int) Setting::get('course_price', 0);
+
+        // Server-side voucher validation and discount calculation
+        $discountAmount = 0;
+        $voucherCode = $request->input('voucher_code');
+        
+        if ($voucherCode) {
+            $voucher = \App\Models\Voucher::where('code', $voucherCode)->first();
+            
+            if ($voucher && $voucher->isValid()) {
+                $discountAmount = $voucher->calculateDiscount($basePrice);
+            } else {
+                return response()->json(['message' => 'Voucher tidak valid atau sudah kadaluarsa.'], 400);
+            }
+        }
+
+        // Calculate final price server-side (prevents price manipulation)
+        $finalPrice = max(0, $basePrice - $discountAmount);
 
         $click = $affiliateService->getLastValidClickForSession($request);
         
@@ -80,14 +99,15 @@ class RegisteredUserController extends Controller
         $order = Order::create([
             'order_id' => 'REG-' . Str::uuid(),
             'user_id' => null,
-            'amount' => $request->final_price,
+            'amount' => $finalPrice,
             'status' => 'pending',
             'type' => 'registration',
             'payment_method' => $gatewayDriver,
             'meta' => [
                 'form_data' => $validated,
-                'voucher_code' => $request->voucher_code,
-                'discount_amount' => $request->discount_amount ?? 0,
+                'voucher_code' => $voucherCode,
+                'discount_amount' => $discountAmount,
+                'original_price' => $basePrice,
                 'follow_up_sent' => false,
                 'payment_url' => null,
                 'affiliate_click_id' => $click ? $click->id : null,

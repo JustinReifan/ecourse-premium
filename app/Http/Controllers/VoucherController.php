@@ -62,7 +62,10 @@ class VoucherController extends Controller
 
     public function validate(Request $request)
     {
-        $request->validate(['code' => 'required|string']);
+        $request->validate([
+            'code' => 'required|string',
+            'original_price' => 'nullable|numeric|min:0',
+        ]);
 
         $voucher = Voucher::where('code', $request->code)->first();
 
@@ -74,10 +77,10 @@ class VoucherController extends Controller
             return response()->json(['error' => 'Voucher is not valid or has expired'], 400);
         }
 
-
-        $originalPrice =  Setting::get('course_price', 100000); // Your course price
+        // Use provided original_price or fallback to course_price setting
+        $originalPrice = $request->original_price ?? (int) Setting::get('course_price', 100000);
         $discount = $voucher->calculateDiscount($originalPrice);
-        $finalPrice = $originalPrice - $discount;
+        $finalPrice = max(0, $originalPrice - $discount);
 
         return response()->json([
             'voucher' => $voucher,

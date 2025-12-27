@@ -27,6 +27,7 @@ export function VoucherInput({ onVoucherApplied, onVoucherRemoved, originalPrice
         try {
             const response = await axios.post('/api/vouchers/validate', {
                 code: voucherCode.trim().toUpperCase(),
+                original_price: originalPrice,
             });
 
             const voucherData = response.data;
