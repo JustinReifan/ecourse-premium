@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Setting;
+use App\Models\Voucher;
 use App\Models\UserPurchase;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
@@ -51,7 +52,7 @@ class OrderFinalizationService
         // 4. Berikan produk default
         $productId = $order->meta['product_id'] ?? null;
         $defaultProduct = $productId ? Product::find($productId) : Product::where('is_default', true)->first();
-        
+
         if ($defaultProduct) {
             // Calculate access_ends_at based on subscription_plan override
             $accessEndsAt = $this->calculateAccessExpiry($defaultProduct, $subscriptionPlan);
@@ -73,6 +74,19 @@ class OrderFinalizationService
             ['registration' => true, 'voucher_applied' => !empty($order->meta['voucher_code'])],
             $defaultProduct?->id
         );
+
+        // 6. Jika ada voucher, increment penggunaan
+        if (!empty($order->meta['voucher_code'])) {
+            $voucherCode = $order->meta['voucher_code'];
+
+            $voucher = Voucher::where('code', $voucherCode)->first();
+
+            if ($voucher) {
+                $voucher->increment('used_count');
+
+                Log::info("Voucher usage incremented: {$voucherCode} for Order: {$order->order_id}");
+            }
+        }
 
         // 6. Kirim Notifikasi Sukses
         try {

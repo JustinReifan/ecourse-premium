@@ -10,6 +10,7 @@ use App\Models\Order;
 use Inertia\Response;
 use App\Models\Product;
 use App\Models\Setting;
+use App\Models\Voucher;
 use Illuminate\Support\Str;
 use App\Models\UserPurchase;
 use Illuminate\Http\Request;
@@ -36,10 +37,10 @@ class RegisteredUserController extends Controller
         $coursePriceYearly = (int) Setting::get('course_price_yearly', 0);
         $enableYearlyPlan = filter_var(Setting::get('enable_yearly_plan', false), FILTER_VALIDATE_BOOLEAN);
         $duitkuScriptUrl = Setting::get('duitku_script_url', env('VITE_DUITKU_SCRIPT_URL', ''));
-        
+
         // Detect subscription plan from URL param
         $subscriptionPlan = $request->query('period') === 'yearly' && $enableYearlyPlan ? 'yearly' : 'lifetime';
-        
+
         return Inertia::render('auth/register', [
             'coursePrice' => $coursePrice,
             'coursePriceYearly' => $coursePriceYearly,
@@ -66,7 +67,7 @@ class RegisteredUserController extends Controller
 
         $gatewayDriver = $request->input('gateway');
         $subscriptionPlan = $request->input('subscription_plan', 'lifetime');
-        
+
         // Get base price based on subscription plan
         $enableYearlyPlan = filter_var(Setting::get('enable_yearly_plan', false), FILTER_VALIDATE_BOOLEAN);
         $basePrice = $subscriptionPlan === 'yearly' && $enableYearlyPlan
@@ -76,10 +77,10 @@ class RegisteredUserController extends Controller
         // Server-side voucher validation and discount calculation
         $discountAmount = 0;
         $voucherCode = $request->input('voucher_code');
-        
+
         if ($voucherCode) {
             $voucher = \App\Models\Voucher::where('code', $voucherCode)->first();
-            
+
             if ($voucher && $voucher->isValid()) {
                 $discountAmount = $voucher->calculateDiscount($basePrice);
             } else {
@@ -91,7 +92,7 @@ class RegisteredUserController extends Controller
         $finalPrice = max(0, $basePrice - $discountAmount);
 
         $click = $affiliateService->getLastValidClickForSession($request);
-        
+
         // Get default product
         $defaultProduct = Product::where('is_default', true)->first();
 
@@ -207,6 +208,18 @@ class RegisteredUserController extends Controller
                     'amount_paid' => $order->amount,
                     'access_ends_at' => $accessEndsAt,
                 ]);
+            }
+
+            if (!empty($order->meta['voucher_code'])) {
+                $voucherCode = $order->meta['voucher_code'];
+
+                $voucher = Voucher::where('code', $voucherCode)->first();
+
+                if ($voucher) {
+                    $voucher->increment('used_count');
+
+                    Log::info("Voucher usage incremented: {$voucherCode} for Order: {$order->order_id}");
+                }
             }
 
             session()->flash('trigger_survey', true);
