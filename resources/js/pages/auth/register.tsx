@@ -1,6 +1,7 @@
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,7 +10,7 @@ import { useAnalytics } from '@/hooks/use-analytics';
 import AuthLayout from '@/layouts/auth-layout';
 import { Head, useForm } from '@inertiajs/react';
 import axios from 'axios';
-import { CheckCircle, LoaderCircle } from 'lucide-react';
+import { Calendar, CheckCircle, Infinity, LoaderCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 // Declare global checkout variable for Duitku
@@ -31,6 +32,8 @@ declare global {
     }
 }
 
+type SubscriptionPlan = 'lifetime' | 'yearly';
+
 type RegisterForm = {
     username: string;
     name: string;
@@ -42,14 +45,28 @@ type RegisterForm = {
 
 interface RegisterProps {
     coursePrice: number;
+    coursePriceYearly: number;
+    enableYearlyPlan: boolean;
+    subscriptionPlan: SubscriptionPlan;
     duitkuScriptUrl: string;
 }
 
-export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps) {
+export default function Register({ 
+    coursePrice, 
+    coursePriceYearly = 0, 
+    enableYearlyPlan = false,
+    subscriptionPlan = 'lifetime',
+    duitkuScriptUrl 
+}: RegisterProps) {
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [appliedVoucher, setAppliedVoucher] = useState<any>(null);
-    const [finalPrice, setFinalPrice] = useState(coursePrice);
+    const [currentPlan, setCurrentPlan] = useState<SubscriptionPlan>(subscriptionPlan);
+    
+    // Calculate base price based on plan
+    const basePrice = currentPlan === 'yearly' ? coursePriceYearly : coursePrice;
+    const [finalPrice, setFinalPrice] = useState(basePrice);
+    
     const { trackEngagement, trackConversion, trackPayment } = useAnalytics();
     const [isSendingNotif, setIsSendingNotif] = useState(false);
     const [selectedGateway, setSelectedGateway] = useState('duitku'); // pilihan payment gateway
@@ -67,15 +84,22 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
         password_confirmation: '',
     });
 
+    // Update final price when plan changes or voucher changes
     useEffect(() => {
-        // Dynamically load Midtrans script
-        const script = document.createElement('script');
-        // script.src = 'https://app.midtrans.com/snap/snap.js';
-        // script.setAttribute('data-client-key', import.meta.env.VITE_MIDTRANS_CLIENT_KEY);
-        // script.type = 'text/javascript';
-        // script.async = true;
+        const newBasePrice = currentPlan === 'yearly' ? coursePriceYearly : coursePrice;
+        if (appliedVoucher) {
+            // Recalculate voucher discount with new base price
+            const discountPercent = appliedVoucher.voucher?.discount_percent || 0;
+            const discountAmount = Math.floor((newBasePrice * discountPercent) / 100);
+            setFinalPrice(Math.max(0, newBasePrice - discountAmount));
+        } else {
+            setFinalPrice(newBasePrice);
+        }
+    }, [currentPlan, coursePrice, coursePriceYearly, appliedVoucher]);
 
-        // Duitku - use the script URL from props (database)
+    useEffect(() => {
+        // Dynamically load Duitku script
+        const script = document.createElement('script');
         script.src = duitkuScriptUrl || import.meta.env.VITE_DUITKU_SCRIPT_URL || '';
 
         if (script.src) {
@@ -90,7 +114,7 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
 
     const handleVoucherRemoved = () => {
         setAppliedVoucher(null);
-        setFinalPrice(coursePrice);
+        setFinalPrice(basePrice);
     };
 
     const sendNotification = async (phone: string, message: string) => {
@@ -126,6 +150,7 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
                 final_price: finalPrice,
                 voucher_code: appliedVoucher?.voucher?.code || null,
                 discount_amount: appliedVoucher?.discount || 0,
+                subscription_plan: currentPlan,
             };
 
             // check if price = 0, bypass payment
@@ -157,9 +182,10 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
                         trackPayment('success', {
                             payment_method: 'duitku',
                             amount: finalPrice,
-                            original_amount: coursePrice,
+                            original_amount: basePrice,
                             discount_amount: appliedVoucher?.discount || 0,
                             voucher_code: appliedVoucher?.voucher?.code || null,
+                            subscription_plan: currentPlan,
                         });
 
                         try {
@@ -201,19 +227,16 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
                     },
                 });
             } else if (!checkout) {
-                // 3. TAMBAHKAN INI: Error jika script Duitku gagal di-load
                 console.error('Duitku checkout script not loaded.');
                 setToastMessage('Gagal memuat gateway pembayaran. Coba refresh halaman.');
                 setShowToast(true);
                 setTimeout(() => setShowToast(false), 4000);
             } else {
-                // 4. TAMBAHKAN INI: Error jika respon server tidak valid
                 console.error('Invalid response type from server:', res.data.type);
                 setToastMessage('Respon server tidak valid. Hubungi admin.');
                 setShowToast(true);
                 setTimeout(() => setShowToast(false), 4000);
             }
-            // --- SELESAI PERBAIKAN ---
         } catch (err: any) {
             if (err.response && err.response.data && err.response.data.errors) {
                 const validationErrors = err.response.data.errors;
@@ -224,12 +247,11 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
                     }
                 });
             } else {
-                // 5. PERBAIKI BLOK CATCH ANDA: Tampilkan error ke user
                 const message = err.response?.data?.message || 'Terjadi kesalahan. Coba lagi.';
                 setToastMessage(message);
                 setShowToast(true);
                 setTimeout(() => setShowToast(false), 4000);
-                console.error(err); // Tetap log di console
+                console.error(err);
             }
         }
     };
@@ -257,6 +279,53 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
 
             <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
                 <div className="grid gap-6">
+                    {/* Plan Selection - Only show if yearly plan is enabled */}
+                    {enableYearlyPlan && (
+                        <div className="grid gap-2">
+                            <Label>Pilih Paket Akses</Label>
+                            <div className="grid grid-cols-2 gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setCurrentPlan('yearly')}
+                                    className={`relative rounded-lg border-2 p-4 text-left transition-all ${
+                                        currentPlan === 'yearly'
+                                            ? 'border-primary bg-primary/10'
+                                            : 'border-border hover:border-primary/50'
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <Calendar className="text-primary h-4 w-4" />
+                                        <span className="font-medium">1 Tahun</span>
+                                    </div>
+                                    <div className="text-primary mt-1 text-lg font-bold">Rp {formatRupiah(coursePriceYearly)}</div>
+                                    <div className="text-muted-foreground text-xs">Akses 1 tahun penuh</div>
+                                    {currentPlan === 'yearly' && (
+                                        <Badge className="absolute -top-2 -right-2 bg-amber-500 text-white">Dipilih</Badge>
+                                    )}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setCurrentPlan('lifetime')}
+                                    className={`relative rounded-lg border-2 p-4 text-left transition-all ${
+                                        currentPlan === 'lifetime'
+                                            ? 'border-primary bg-primary/10'
+                                            : 'border-border hover:border-primary/50'
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <Infinity className="text-primary h-4 w-4" />
+                                        <span className="font-medium">Lifetime</span>
+                                    </div>
+                                    <div className="text-primary mt-1 text-lg font-bold">Rp {formatRupiah(coursePrice)}</div>
+                                    <div className="text-muted-foreground text-xs">Akses selamanya</div>
+                                    {currentPlan === 'lifetime' && (
+                                        <Badge className="absolute -top-2 -right-2">Dipilih</Badge>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="grid gap-4 md:grid-cols-2">
                         <div className="grid gap-4">
                             <Label htmlFor="username">Username</Label>
@@ -374,7 +443,7 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
                         <VoucherInput
                             onVoucherApplied={handleVoucherApplied}
                             onVoucherRemoved={handleVoucherRemoved}
-                            originalPrice={coursePrice}
+                            originalPrice={basePrice}
                             disabled={processing}
                         />
                     </div>
@@ -384,9 +453,26 @@ export default function Register({ coursePrice, duitkuScriptUrl }: RegisterProps
                         <div className="relative">
                             <div className="border-primary/50 from-primary/5 to-primary/10 rounded-lg border bg-gradient-to-r p-4">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm font-medium text-gray-300">Harga:</span>
+                                    <div>
+                                        <span className="text-sm font-medium text-gray-300">Total Pembayaran:</span>
+                                        {enableYearlyPlan && (
+                                            <div className="text-muted-foreground mt-1 flex items-center gap-2 text-xs">
+                                                {currentPlan === 'yearly' ? (
+                                                    <>
+                                                        <Calendar className="h-3 w-3" />
+                                                        <span>Akses 1 Tahun</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Infinity className="h-3 w-3" />
+                                                        <span>Lifetime Access</span>
+                                                    </>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
                                     <div className="text-right">
-                                        {appliedVoucher && <div className="text-xs text-gray-500 line-through">Rp {formatRupiah(coursePrice)}</div>}
+                                        {appliedVoucher && <div className="text-xs text-gray-500 line-through">Rp {formatRupiah(basePrice)}</div>}
                                         <div className="text-primary text-lg font-bold">Rp {formatRupiah(finalPrice)}</div>
                                         {appliedVoucher && (
                                             <div className="text-xs text-green-400">Hemat Rp {formatRupiah(appliedVoucher.discount)}!</div>

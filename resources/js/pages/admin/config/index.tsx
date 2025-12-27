@@ -23,6 +23,8 @@ interface ConfigFormData {
     landing_vsl_thumbnail: string;
     vsl_thumbnail?: File;
     course_price: string;
+    enable_yearly_plan: boolean;
+    course_price_yearly: string;
     owner_whatsapp: string;
     duitku_api_key: string;
     duitku_merchant_code: string;
@@ -53,6 +55,8 @@ export default function ConfigIndex({ settings }: ConfigPageProps) {
         landing_vsl_url: settings.landing_vsl_url || '',
         landing_vsl_thumbnail: settings.landing_vsl_thumbnail || '',
         course_price: settings.course_price || '0',
+        enable_yearly_plan: settings.enable_yearly_plan || false,
+        course_price_yearly: settings.course_price_yearly || '0',
         owner_whatsapp: settings.owner_whatsapp || '',
         duitku_api_key: settings.duitku_api_key || '',
         duitku_merchant_code: settings.duitku_merchant_code || '',
@@ -348,7 +352,7 @@ export default function ConfigIndex({ settings }: ConfigPageProps) {
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div>
-                                        <Label htmlFor="course_price">Main Course Price (IDR)</Label>
+                                        <Label htmlFor="course_price">Lifetime Price (IDR)</Label>
                                         <Input
                                             id="course_price"
                                             type="number"
@@ -358,6 +362,41 @@ export default function ConfigIndex({ settings }: ConfigPageProps) {
                                             required
                                         />
                                         {errors.course_price && <p className="text-destructive mt-1 text-sm">{errors.course_price}</p>}
+                                    </div>
+
+                                    {/* Yearly Plan Toggle */}
+                                    <div className="border-border/50 space-y-4 rounded-lg border p-4">
+                                        <div className="flex items-center gap-3">
+                                            <Checkbox
+                                                id="enable_yearly_plan"
+                                                checked={Number(data.enable_yearly_plan) === 1 || data.enable_yearly_plan === true}
+                                                onCheckedChange={(checked) => setData('enable_yearly_plan', checked)}
+                                                className="h-4 w-4 rounded border-zinc-700"
+                                            />
+                                            <Label htmlFor="enable_yearly_plan" className="cursor-pointer font-medium">
+                                                Enable Yearly Plan Option
+                                            </Label>
+                                        </div>
+                                        <p className="text-muted-foreground text-sm">
+                                            When enabled, users can choose between Yearly and Lifetime access on the landing page.
+                                        </p>
+
+                                        {(Number(data.enable_yearly_plan) === 1 || data.enable_yearly_plan === true) && (
+                                            <div>
+                                                <Label htmlFor="course_price_yearly">Yearly Price (IDR)</Label>
+                                                <Input
+                                                    id="course_price_yearly"
+                                                    type="number"
+                                                    value={data.course_price_yearly}
+                                                    onChange={(e) => setData('course_price_yearly', e.target.value)}
+                                                    placeholder="150000"
+                                                />
+                                                <p className="text-muted-foreground mt-1 text-sm">Price for 1-year access subscription</p>
+                                                {errors.course_price_yearly && (
+                                                    <p className="text-destructive mt-1 text-sm">{errors.course_price_yearly}</p>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div>

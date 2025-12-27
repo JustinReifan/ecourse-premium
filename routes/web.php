@@ -23,7 +23,9 @@ Route::get('/', function () {
         'landingBadge' => $settings['landing_badge'] ?? 'Premium Canva Masterclass',
         'landingVslThumbnail' => $settings['landing_vsl_thumbnail'] ?? null,
         'landingVslUrl' => $settings['landing_vsl_url'] ?? null,
-        'coursePrice' => $settings['course_price'] ?? 0,
+        'coursePrice' => (int) ($settings['course_price'] ?? 0),
+        'enableYearlyPlan' => filter_var($settings['enable_yearly_plan'] ?? false, FILTER_VALIDATE_BOOLEAN),
+        'coursePriceYearly' => (int) ($settings['course_price_yearly'] ?? 0),
     ]);
 })->name('home');
 

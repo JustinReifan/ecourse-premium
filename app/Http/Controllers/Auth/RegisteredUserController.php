@@ -9,6 +9,7 @@ use Midtrans\Config;
 use App\Models\Order;
 use Inertia\Response;
 use App\Models\Product;
+use App\Models\Setting;
 use Illuminate\Support\Str;
 use App\Models\UserPurchase;
 use Illuminate\Http\Request;
@@ -29,12 +30,21 @@ class RegisteredUserController extends Controller
     /**
      * Show the registration page.
      */
-    public function create(): Response
+    public function create(Request $request): Response
     {
-        $coursePrice = \App\Models\Setting::get('course_price', env('VITE_COURSE_PRICE', 500000));
-        $duitkuScriptUrl = \App\Models\Setting::get('duitku_script_url', env('VITE_DUITKU_SCRIPT_URL', ''));
+        $coursePrice = (int) Setting::get('course_price', env('VITE_COURSE_PRICE', 500000));
+        $coursePriceYearly = (int) Setting::get('course_price_yearly', 0);
+        $enableYearlyPlan = filter_var(Setting::get('enable_yearly_plan', false), FILTER_VALIDATE_BOOLEAN);
+        $duitkuScriptUrl = Setting::get('duitku_script_url', env('VITE_DUITKU_SCRIPT_URL', ''));
+        
+        // Detect subscription plan from URL param
+        $subscriptionPlan = $request->query('period') === 'yearly' && $enableYearlyPlan ? 'yearly' : 'lifetime';
+        
         return Inertia::render('auth/register', [
             'coursePrice' => $coursePrice,
+            'coursePriceYearly' => $coursePriceYearly,
+            'enableYearlyPlan' => $enableYearlyPlan,
+            'subscriptionPlan' => $subscriptionPlan,
             'duitkuScriptUrl' => $duitkuScriptUrl,
         ]);
     }
@@ -43,19 +53,30 @@ class RegisteredUserController extends Controller
     {
         // 1. Validasi form
         $validated = $request->validate([
-            'gateway' => 'required|string|in:duitku,midtrans', // <-- Front-end harus kirim ini
+            'gateway' => 'required|string|in:duitku,midtrans',
             'username' => 'required|string|max:255|alpha_dash|unique:users',
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:255|min_digits:8|unique:users',
             'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'subscription_plan' => 'nullable|string|in:yearly,lifetime',
         ]);
 
         $gatewayDriver = $request->input('gateway');
+        $subscriptionPlan = $request->input('subscription_plan', 'lifetime');
+        
+        // Validate price based on subscription plan
+        $enableYearlyPlan = filter_var(Setting::get('enable_yearly_plan', false), FILTER_VALIDATE_BOOLEAN);
+        $expectedPrice = $subscriptionPlan === 'yearly' && $enableYearlyPlan
+            ? (int) Setting::get('course_price_yearly', 0)
+            : (int) Setting::get('course_price', 0);
 
         $click = $affiliateService->getLastValidClickForSession($request);
+        
+        // Get default product
+        $defaultProduct = Product::where('is_default', true)->first();
 
-        // 2. Buat Order 'pending' (Logika ini tetap sama)
+        // 2. Buat Order 'pending'
         $order = Order::create([
             'order_id' => 'REG-' . Str::uuid(),
             'user_id' => null,
@@ -70,6 +91,8 @@ class RegisteredUserController extends Controller
                 'follow_up_sent' => false,
                 'payment_url' => null,
                 'affiliate_click_id' => $click ? $click->id : null,
+                'product_id' => $defaultProduct?->id,
+                'subscription_plan' => $subscriptionPlan,
             ],
         ]);
 
@@ -88,7 +111,6 @@ class RegisteredUserController extends Controller
                 $order->save();
             }
 
-
             // 6. Kirim data ke front-end
             return response()->json($paymentDetails);
         } catch (\Exception $e) {
@@ -97,12 +119,8 @@ class RegisteredUserController extends Controller
         }
     }
 
-
-
     /**
-     * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
+     * Handle free/voucher registration
      */
     public function forceRegister(Request $request)
     {
@@ -113,8 +131,10 @@ class RegisteredUserController extends Controller
                 'phone' => 'required|string|max:255|min_digits:8|unique:users',
                 'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
                 'password' => ['required', 'confirmed', Rules\Password::defaults()],
+                'subscription_plan' => 'nullable|string|in:yearly,lifetime',
             ]);
 
+            $subscriptionPlan = $request->input('subscription_plan', 'lifetime');
             $defaultProduct = Product::where('is_default', true)->first();
 
             if (!$defaultProduct) {
@@ -143,10 +163,12 @@ class RegisteredUserController extends Controller
                     'discount_amount' => $request->discount_amount ?? 0,
                     'follow_up_sent' => false,
                     'payment_url' => null,
+                    'product_id' => $defaultProduct->id,
+                    'subscription_plan' => $subscriptionPlan,
                 ],
             ]);
 
-            // 3. Cek Idempotency (jika sudah dibeli, jangan proses lagi)
+            // 3. Cek Idempotency
             if ($defaultProduct->isOwnedBy($user->id)) {
                 Log::info('User sudah memiliki produk.', [
                     'order_id' => $order->order_id,
@@ -156,7 +178,7 @@ class RegisteredUserController extends Controller
             }
 
             if ($defaultProduct) {
-                $accessEndsAt = $this->calculateAccessExpiry($defaultProduct);
+                $accessEndsAt = $this->calculateAccessExpiry($defaultProduct, $subscriptionPlan);
                 logger()->info('Access ends at: ' . $accessEndsAt);
                 UserPurchase::create([
                     'user_id' => $user->id,
@@ -167,6 +189,7 @@ class RegisteredUserController extends Controller
                 ]);
             }
 
+            session()->flash('trigger_survey', true);
             event(new Registered($user));
             Auth::login($user);
 
@@ -181,8 +204,16 @@ class RegisteredUserController extends Controller
         }
     }
 
-    protected function calculateAccessExpiry(Product $product, ?UserPurchase $existingPurchase = null): ?\Carbon\Carbon
+    protected function calculateAccessExpiry(Product $product, string $subscriptionPlan = 'lifetime', ?UserPurchase $existingPurchase = null): ?\Carbon\Carbon
     {
+        // Override: If yearly plan, always set 1 year access
+        if ($subscriptionPlan === 'yearly') {
+            if ($existingPurchase && $existingPurchase->access_ends_at?->isFuture()) {
+                return $existingPurchase->access_ends_at->copy()->addYear();
+            }
+            return now()->addYear();
+        }
+
         // Lifetime access (null or 0)
         if ($product->hasLifetimeAccess()) {
             return null;
@@ -193,16 +224,11 @@ class RegisteredUserController extends Controller
         // Handle renewal
         if ($existingPurchase) {
             $currentExpiry = $existingPurchase->access_ends_at;
-
-            // Scenario A: Still active - extend from current expiry
             if ($currentExpiry && $currentExpiry->isFuture()) {
                 return $currentExpiry->copy()->addDays($accessDays);
             }
-
-            // Scenario B: Already expired or was lifetime - restart from now
         }
 
-        // New purchase or expired renewal - start from now
         return now()->addDays($accessDays);
     }
 }
