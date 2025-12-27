@@ -84,18 +84,41 @@ export default function Register({
         password_confirmation: '',
     });
 
-    // Update final price when plan changes or voucher changes
+    // Update final price when plan changes
     useEffect(() => {
         const newBasePrice = currentPlan === 'yearly' ? coursePriceYearly : coursePrice;
         if (appliedVoucher) {
             // Recalculate voucher discount with new base price
-            const discountPercent = appliedVoucher.voucher?.discount_percent || 0;
-            const discountAmount = Math.floor((newBasePrice * discountPercent) / 100);
+            const discountPercent = appliedVoucher.voucher?.type === 'percentage' 
+                ? appliedVoucher.voucher?.value || 0 
+                : 0;
+            const fixedDiscount = appliedVoucher.voucher?.type === 'fixed' 
+                ? appliedVoucher.voucher?.value || 0 
+                : 0;
+            
+            let discountAmount = 0;
+            if (appliedVoucher.voucher?.type === 'percentage') {
+                discountAmount = Math.floor((newBasePrice * discountPercent) / 100);
+                // Apply max discount cap if set
+                if (appliedVoucher.voucher?.max_discount_amount && discountAmount > appliedVoucher.voucher.max_discount_amount) {
+                    discountAmount = appliedVoucher.voucher.max_discount_amount;
+                }
+            } else {
+                discountAmount = fixedDiscount;
+            }
+            
+            // Update appliedVoucher with recalculated values
+            setAppliedVoucher({
+                ...appliedVoucher,
+                discount: discountAmount,
+                final_price: Math.max(0, newBasePrice - discountAmount),
+                original_price: newBasePrice,
+            });
             setFinalPrice(Math.max(0, newBasePrice - discountAmount));
         } else {
             setFinalPrice(newBasePrice);
         }
-    }, [currentPlan, coursePrice, coursePriceYearly, appliedVoucher]);
+    }, [currentPlan, coursePrice, coursePriceYearly]);
 
     useEffect(() => {
         // Dynamically load Duitku script
