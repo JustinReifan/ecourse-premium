@@ -210,13 +210,23 @@ export function VideoPlayer({ src, title, thumbnailUrl, onProgress, onComplete, 
             {/* YouTube Player */}
             {isYouTube && !isLoaded && (
                 <button
-                    className="absolute inset-0 z-10 cursor-pointer"
+                    className="group absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-black/10"
                     onClick={() => {
-                        console.log('Clicked!');
                         setIsLoaded(true);
                     }}
                 >
-                    {thumbnail && <img src={thumbnail} alt={title} className="h-full w-full object-cover" />}
+                    {thumbnail && (
+                        <div className="absolute inset-0">
+                            <img src={thumbnail} alt={title} className="h-full w-full object-cover" />
+                            <div className="absolute inset-0 bg-black/30 transition-all duration-300 group-hover:bg-black/40" />
+                        </div>
+                    )}
+
+                    {/* Tombol Play Besar */}
+                    <div className="bg-primary/90 group-hover:bg-primary relative flex h-20 w-20 items-center justify-center rounded-full text-white shadow-2xl backdrop-blur-sm transition-all duration-300 group-hover:scale-110">
+                        <div className="absolute inset-0 -z-10 rounded-full bg-white/20" />
+                        <Play className="relative ml-1 h-10 w-10 fill-current" />
+                    </div>
                 </button>
             )}
 
@@ -242,31 +252,37 @@ export function VideoPlayer({ src, title, thumbnailUrl, onProgress, onComplete, 
                         onContextMenu={(e) => e.preventDefault()}
                         onClick={togglePlayPause}
                     />
+
+                    {/* Thumbnail & Play Button Overlay */}
+                    {!isPlaying && (
+                        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40">
+                            {/* Tampilkan Thumbnail HANYA jika video belum diputar (waktu masih 0) */}
+                            {thumbnailUrl && currentTime === 0 && (
+                                <div className="absolute inset-0">
+                                    <img src={thumbnailUrl} alt={title} className="h-full w-full object-cover" />
+                                    {/* Overlay gelap transparan agar icon terlihat jelas */}
+                                    <div className="absolute inset-0 bg-black/20" />
+                                </div>
+                            )}
+
+                            {/* Tombol Play Besar di Tengah */}
+                            <button
+                                onClick={togglePlayPause}
+                                className="group bg-primary/90 hover:bg-primary relative flex h-20 w-20 items-center justify-center rounded-full text-white shadow-2xl backdrop-blur-sm transition-all duration-300 hover:scale-110"
+                            >
+                                {/* Efek Pulse di belakang tombol */}
+                                <div className="absolute inset-0 -z-10 animate-pulse rounded-full bg-white/20" />
+                                <Play className="relative ml-1 h-10 w-10 fill-current" />
+                            </button>
+                        </div>
+                    )}
+
                     {/* Loading Spinner */}
                     {isBuffering && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
                             <div className="border-primary h-12 w-12 animate-spin rounded-full border-2 border-t-transparent" />
                         </div>
                     )}
-                    {/* Play/Pause Overlay */}
-                    {/* <div
-                        className={cn(
-                            'absolute inset-0 flex items-center justify-center bg-black/20 transition-opacity duration-300',
-                            showControls ? 'opacity-0' : 'opacity-100',
-                        )}
-                    >
-                        <button
-                            onClick={togglePlayPause}
-                            className="bg-primary/20 border-primary/50 text-primary hover:bg-primary flex h-20 w-20 items-center justify-center rounded-full border transition-all duration-300 hover:scale-110 hover:text-black"
-                        >
-                            {isPlaying ? (
-                                <Pause className="ml-0.5 h-8 w-8" fill="currentColor" />
-                            ) : (
-                                <Play className="ml-1 h-8 w-8" fill="currentColor" />
-                            )}
-                        </button>
-                    </div> */}
-                    {/* Controls Overlay */}
                     <div
                         className={cn(
                             'absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent p-6 transition-all duration-300',
