@@ -52,7 +52,7 @@ class OrderFinalizationService
         if ($defaultProduct) {
             // Calculate access_ends_at based on product access_period
             $accessEndsAt = $this->calculateAccessExpiry($defaultProduct);
-            
+            logger()->info('Access ends at: ' . $accessEndsAt);
             UserPurchase::create([
                 'user_id' => $user->id,
                 'product_id' => $defaultProduct->id,
@@ -327,12 +327,12 @@ class OrderFinalizationService
         // Handle renewal
         if ($existingPurchase) {
             $currentExpiry = $existingPurchase->access_ends_at;
-            
+
             // Scenario A: Still active - extend from current expiry
             if ($currentExpiry && $currentExpiry->isFuture()) {
                 return $currentExpiry->copy()->addDays($accessDays);
             }
-            
+
             // Scenario B: Already expired or was lifetime - restart from now
         }
 

@@ -156,11 +156,14 @@ class RegisteredUserController extends Controller
             }
 
             if ($defaultProduct) {
+                $accessEndsAt = $this->calculateAccessExpiry($defaultProduct);
+                logger()->info('Access ends at: ' . $accessEndsAt);
                 UserPurchase::create([
                     'user_id' => $user->id,
                     'product_id' => $defaultProduct->id,
                     'order_id' => $order->id,
                     'amount_paid' => $order->amount,
+                    'access_ends_at' => $accessEndsAt,
                 ]);
             }
 
@@ -176,5 +179,30 @@ class RegisteredUserController extends Controller
                 'message' => 'Gagal memproses order: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    protected function calculateAccessExpiry(Product $product, ?UserPurchase $existingPurchase = null): ?\Carbon\Carbon
+    {
+        // Lifetime access (null or 0)
+        if ($product->hasLifetimeAccess()) {
+            return null;
+        }
+
+        $accessDays = $product->access_period;
+
+        // Handle renewal
+        if ($existingPurchase) {
+            $currentExpiry = $existingPurchase->access_ends_at;
+
+            // Scenario A: Still active - extend from current expiry
+            if ($currentExpiry && $currentExpiry->isFuture()) {
+                return $currentExpiry->copy()->addDays($accessDays);
+            }
+
+            // Scenario B: Already expired or was lifetime - restart from now
+        }
+
+        // New purchase or expired renewal - start from now
+        return now()->addDays($accessDays);
     }
 }

@@ -195,7 +195,7 @@ export default function MemberProducts({ ownedProducts, availableProducts, selec
                                         const isExpired = product.is_expired;
                                         const isLifetime = product.is_lifetime;
                                         const expiryDate = product.access_ends_at ? new Date(product.access_ends_at) : null;
-                                        
+
                                         return (
                                             <Card
                                                 key={product.id}
@@ -204,7 +204,7 @@ export default function MemberProducts({ ownedProducts, availableProducts, selec
                                                         ? 'border-destructive/50 bg-card/30 opacity-75 grayscale'
                                                         : 'border-primary/50 bg-card/50'
                                                 }`}
-                                                onClick={() => isExpired ? handleLockedProductClick(product) : handleProductClick(product)}
+                                                onClick={() => (isExpired ? handleLockedProductClick(product) : handleProductClick(product))}
                                             >
                                                 {/* Expired overlay */}
                                                 {isExpired && (
@@ -233,8 +233,8 @@ export default function MemberProducts({ ownedProducts, availableProducts, selec
 
                                                 <CardContent className="p-6">
                                                     <div className="mb-3 flex flex-wrap items-center gap-2">
-                                                        <Badge variant="outline">{product.type.replace('_', ' ')}</Badge>
-                                                        
+                                                        <Badge>{product.type.replace('_', ' ')}</Badge>
+
                                                         {/* Subscription Status Badge */}
                                                         {isExpired ? (
                                                             <Badge variant="destructive" className="gap-1">
@@ -247,33 +247,37 @@ export default function MemberProducts({ ownedProducts, availableProducts, selec
                                                                 Lifetime
                                                             </Badge>
                                                         ) : (
-                                                            <Badge className="gap-1 bg-primary">
+                                                            <Badge className="bg-primary gap-1">
                                                                 <CheckCircle className="h-3 w-3" />
                                                                 Active
                                                             </Badge>
                                                         )}
-                                                        
+
                                                         {(product.type === 'ebook' || product.type === 'template') && !isExpired && (
                                                             <Download className="text-primary h-4 w-4" />
                                                         )}
                                                     </div>
-                                                    
+
                                                     <h3 className="text-foreground mb-2 line-clamp-2 text-lg font-semibold">{product.title}</h3>
-                                                    
+
                                                     {/* Expiry Info */}
                                                     {!isLifetime && expiryDate && (
                                                         <p className={`mb-2 text-xs ${isExpired ? 'text-red-400' : 'text-muted-foreground'}`}>
                                                             {isExpired ? 'Expired on: ' : 'Expires on: '}
-                                                            {expiryDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                            {expiryDate.toLocaleDateString('id-ID', {
+                                                                day: '2-digit',
+                                                                month: 'short',
+                                                                year: 'numeric',
+                                                            })}
                                                         </p>
                                                     )}
-                                                    
+
                                                     {product.type === 'ecourse' && product.courses && (
                                                         <p className="text-muted-foreground text-sm">
                                                             {product.courses.length} Course{product.courses.length !== 1 ? 's' : ''}
                                                         </p>
                                                     )}
-                                                    
+
                                                     {/* Action Button for Expired */}
                                                     {isExpired && (
                                                         <Button
