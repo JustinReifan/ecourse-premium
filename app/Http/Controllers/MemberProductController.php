@@ -16,7 +16,7 @@ class MemberProductController extends Controller
     {
         $userId = auth()->id();
 
-        // Get user's owned products
+        // Get user's owned products with subscription data
         $ownedProducts = Product::whereHas('purchases', function ($query) use ($userId) {
             $query->where('user_id', $userId);
         })
@@ -27,6 +27,31 @@ class MemberProductController extends Controller
             ->orderBy('order', 'asc')
             ->get()
             ->map(function ($product) use ($userId) {
+                // Get user's purchase for subscription data
+                $purchase = UserPurchase::where('user_id', $userId)
+                    ->where('product_id', $product->id)
+                    ->first();
+                
+                // Add subscription status
+                $product->subscription_status = 'active';
+                $product->access_ends_at = null;
+                $product->is_lifetime = true;
+                $product->is_expired = false;
+                
+                if ($purchase) {
+                    $product->access_ends_at = $purchase->access_ends_at?->toISOString();
+                    $product->is_lifetime = $purchase->isLifetime();
+                    $product->is_expired = $purchase->isExpired();
+                    
+                    if ($purchase->isExpired()) {
+                        $product->subscription_status = 'expired';
+                    } elseif ($purchase->isLifetime()) {
+                        $product->subscription_status = 'lifetime';
+                    } else {
+                        $product->subscription_status = 'active';
+                    }
+                }
+
                 // Add user completion data for ecourses
                 if ($product->type === 'ecourse') {
                     $product->courses->each(function ($course) use ($userId) {

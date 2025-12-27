@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import MemberLayout from '@/layouts/member-layout';
 import type { PageProps } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import { AlertTriangle, BookOpen, CheckCircle, Download, Lock, Package } from 'lucide-react';
+import { AlertTriangle, BookOpen, CheckCircle, Clock, Download, Infinity, Lock, Package, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface Course {
@@ -28,6 +28,11 @@ interface Product {
     file_path: string | null;
     external_url: string | null;
     courses?: Course[];
+    // Subscription fields
+    subscription_status?: 'active' | 'expired' | 'lifetime';
+    access_ends_at?: string | null;
+    is_lifetime?: boolean;
+    is_expired?: boolean;
 }
 
 interface ProductsPageProps extends PageProps {
@@ -186,42 +191,107 @@ export default function MemberProducts({ ownedProducts, availableProducts, selec
                                 </Card>
                             ) : (
                                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                                    {ownedProducts.map((product) => (
-                                        <Card
-                                            key={product.id}
-                                            className="group border-primary/50 bg-card/50 cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-lg"
-                                            onClick={() => handleProductClick(product)}
-                                        >
-                                            <div className="from-secondary to-muted relative aspect-video overflow-hidden bg-gradient-to-br">
-                                                {product.thumbnail ? (
-                                                    <img
-                                                        src={'/storage/' + product.thumbnail}
-                                                        alt={product.title}
-                                                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                                    />
-                                                ) : (
-                                                    <div className="flex h-full items-center justify-center">
-                                                        <BookOpen className="text-muted-foreground h-16 w-16" />
+                                    {ownedProducts.map((product) => {
+                                        const isExpired = product.is_expired;
+                                        const isLifetime = product.is_lifetime;
+                                        const expiryDate = product.access_ends_at ? new Date(product.access_ends_at) : null;
+                                        
+                                        return (
+                                            <Card
+                                                key={product.id}
+                                                className={`group relative cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-lg ${
+                                                    isExpired
+                                                        ? 'border-destructive/50 bg-card/30 opacity-75 grayscale'
+                                                        : 'border-primary/50 bg-card/50'
+                                                }`}
+                                                onClick={() => isExpired ? handleLockedProductClick(product) : handleProductClick(product)}
+                                            >
+                                                {/* Expired overlay */}
+                                                {isExpired && (
+                                                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                                                        <div className="text-center">
+                                                            <Clock className="mx-auto mb-2 h-12 w-12 text-red-400" />
+                                                            <p className="text-sm font-medium text-white">Subscription Expired</p>
+                                                            <p className="mt-1 text-xs text-gray-300">Click to Renew</p>
+                                                        </div>
                                                     </div>
                                                 )}
-                                            </div>
 
-                                            <CardContent className="p-6">
-                                                <div className="mb-3 flex items-center justify-between">
-                                                    <Badge>{product.type.replace('_', ' ')}</Badge>
-                                                    {(product.type === 'ebook' || product.type === 'template') && (
-                                                        <Download className="text-primary h-4 w-4" />
+                                                <div className="from-secondary to-muted relative aspect-video overflow-hidden bg-gradient-to-br">
+                                                    {product.thumbnail ? (
+                                                        <img
+                                                            src={'/storage/' + product.thumbnail}
+                                                            alt={product.title}
+                                                            className={`h-full w-full object-cover transition-transform duration-300 ${isExpired ? '' : 'group-hover:scale-105'}`}
+                                                        />
+                                                    ) : (
+                                                        <div className="flex h-full items-center justify-center">
+                                                            <BookOpen className="text-muted-foreground h-16 w-16" />
+                                                        </div>
                                                     )}
                                                 </div>
-                                                <h3 className="text-foreground mb-2 line-clamp-2 text-lg font-semibold">{product.title}</h3>
-                                                {product.type === 'ecourse' && product.courses && (
-                                                    <p className="text-muted-foreground text-sm">
-                                                        {product.courses.length} Course{product.courses.length !== 1 ? 's' : ''}
-                                                    </p>
-                                                )}
-                                            </CardContent>
-                                        </Card>
-                                    ))}
+
+                                                <CardContent className="p-6">
+                                                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                                                        <Badge variant="outline">{product.type.replace('_', ' ')}</Badge>
+                                                        
+                                                        {/* Subscription Status Badge */}
+                                                        {isExpired ? (
+                                                            <Badge variant="destructive" className="gap-1">
+                                                                <Clock className="h-3 w-3" />
+                                                                Expired
+                                                            </Badge>
+                                                        ) : isLifetime ? (
+                                                            <Badge className="gap-1 bg-emerald-600 hover:bg-emerald-700">
+                                                                <Infinity className="h-3 w-3" />
+                                                                Lifetime
+                                                            </Badge>
+                                                        ) : (
+                                                            <Badge className="gap-1 bg-primary">
+                                                                <CheckCircle className="h-3 w-3" />
+                                                                Active
+                                                            </Badge>
+                                                        )}
+                                                        
+                                                        {(product.type === 'ebook' || product.type === 'template') && !isExpired && (
+                                                            <Download className="text-primary h-4 w-4" />
+                                                        )}
+                                                    </div>
+                                                    
+                                                    <h3 className="text-foreground mb-2 line-clamp-2 text-lg font-semibold">{product.title}</h3>
+                                                    
+                                                    {/* Expiry Info */}
+                                                    {!isLifetime && expiryDate && (
+                                                        <p className={`mb-2 text-xs ${isExpired ? 'text-red-400' : 'text-muted-foreground'}`}>
+                                                            {isExpired ? 'Expired on: ' : 'Expires on: '}
+                                                            {expiryDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                        </p>
+                                                    )}
+                                                    
+                                                    {product.type === 'ecourse' && product.courses && (
+                                                        <p className="text-muted-foreground text-sm">
+                                                            {product.courses.length} Course{product.courses.length !== 1 ? 's' : ''}
+                                                        </p>
+                                                    )}
+                                                    
+                                                    {/* Action Button for Expired */}
+                                                    {isExpired && (
+                                                        <Button
+                                                            size="sm"
+                                                            className="mt-3 w-full gap-2"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleLockedProductClick(product);
+                                                            }}
+                                                        >
+                                                            <RefreshCw className="h-4 w-4" />
+                                                            Renew Access
+                                                        </Button>
+                                                    )}
+                                                </CardContent>
+                                            </Card>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>

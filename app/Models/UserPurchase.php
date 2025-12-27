@@ -23,11 +23,37 @@ class UserPurchase extends Model
         'product_id',
         'order_id',
         'amount_paid',
+        'access_ends_at',
     ];
 
     protected $casts = [
         'amount_paid' => 'decimal:2',
+        'access_ends_at' => 'datetime',
     ];
+
+    /**
+     * Check if subscription is active (null = lifetime, future date = active)
+     */
+    public function isActive(): bool
+    {
+        return $this->access_ends_at === null || $this->access_ends_at->isFuture();
+    }
+
+    /**
+     * Check if subscription has expired
+     */
+    public function isExpired(): bool
+    {
+        return $this->access_ends_at !== null && $this->access_ends_at->isPast();
+    }
+
+    /**
+     * Check if subscription is lifetime
+     */
+    public function isLifetime(): bool
+    {
+        return $this->access_ends_at === null;
+    }
 
     public function user(): BelongsTo
     {
