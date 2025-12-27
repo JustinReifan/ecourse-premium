@@ -50,11 +50,15 @@ class OrderFinalizationService
         // 4. Berikan produk default
         $defaultProduct = Product::where('is_default', true)->first();
         if ($defaultProduct) {
+            // Calculate access_ends_at based on product access_period
+            $accessEndsAt = $this->calculateAccessExpiry($defaultProduct);
+            
             UserPurchase::create([
                 'user_id' => $user->id,
                 'product_id' => $defaultProduct->id,
                 'order_id' => $order->id,
                 'amount_paid' => $order->amount,
+                'access_ends_at' => $accessEndsAt,
             ]);
         }
 
@@ -209,20 +213,34 @@ class OrderFinalizationService
         }
 
         // 3. Cek Idempotency (jika sudah dibeli, jangan proses lagi)
-        if ($product->isOwnedBy($user->id)) {
-            Log::info('Finalisasi produk dilewati: User sudah memiliki produk.', [
-                'order_id' => $order->order_id,
-                'user_id' => $user->id
+        // Note: We allow renewal even if product is owned
+        $existingPurchase = UserPurchase::where('user_id', $user->id)
+            ->where('product_id', $product->id)
+            ->first();
+
+        if ($existingPurchase) {
+            // Handle renewal - extend access period
+            $accessEndsAt = $this->calculateAccessExpiry($product, $existingPurchase);
+            $existingPurchase->update([
+                'access_ends_at' => $accessEndsAt,
+                'amount_paid' => $order->amount,
             ]);
-            return null; // Berhenti di sini
+            Log::info('Renewed product access.', [
+                'order_id' => $order->order_id,
+                'user_id' => $user->id,
+                'new_expiry' => $accessEndsAt,
+            ]);
+            return $existingPurchase;
         }
 
-        // 4. Buat UserPurchase (catat kepemilikan)
+        // 4. Buat UserPurchase baru (catat kepemilikan)
+        $accessEndsAt = $this->calculateAccessExpiry($product);
         $purchase = UserPurchase::create([
             'user_id' => $user->id,
             'product_id' => $product->id,
             'order_id' => $order->id,
             'amount_paid' => $order->amount,
+            'access_ends_at' => $accessEndsAt,
         ]);
 
         // 5. Berikan Komisi Affiliate (Upsell)
@@ -288,5 +306,37 @@ class OrderFinalizationService
                 SendWhatsappNotificationJob::dispatch($this->adminNumber, $messageToAdmin);
             }
         }
+    }
+
+    /**
+     * Calculate access expiry date based on product access_period
+     * 
+     * @param Product $product The product being purchased
+     * @param UserPurchase|null $existingPurchase For renewals - extend from current expiry if still active
+     * @return \Carbon\Carbon|null null = Lifetime access
+     */
+    protected function calculateAccessExpiry(Product $product, ?UserPurchase $existingPurchase = null): ?\Carbon\Carbon
+    {
+        // Lifetime access (null or 0)
+        if ($product->hasLifetimeAccess()) {
+            return null;
+        }
+
+        $accessDays = $product->access_period;
+
+        // Handle renewal
+        if ($existingPurchase) {
+            $currentExpiry = $existingPurchase->access_ends_at;
+            
+            // Scenario A: Still active - extend from current expiry
+            if ($currentExpiry && $currentExpiry->isFuture()) {
+                return $currentExpiry->copy()->addDays($accessDays);
+            }
+            
+            // Scenario B: Already expired or was lifetime - restart from now
+        }
+
+        // New purchase or expired renewal - start from now
+        return now()->addDays($accessDays);
     }
 }

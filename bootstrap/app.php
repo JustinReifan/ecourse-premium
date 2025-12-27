@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'subscription.active' => \App\Http\Middleware\EnsureProductSubscriptionIsActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

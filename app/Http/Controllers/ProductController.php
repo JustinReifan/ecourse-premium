@@ -48,6 +48,8 @@ class ProductController extends Controller
             'order' => 'nullable|integer',
             'status' => 'required|in:active,inactive',
             'is_default' => 'nullable|boolean',
+            'is_lead_magnet' => 'nullable|boolean',
+            'access_period' => 'nullable|integer|min:0',
             'course_ids' => 'nullable|array',
             'course_ids.*' => 'exists:courses,id',
         ]);
@@ -118,6 +120,8 @@ class ProductController extends Controller
             'order' => 'nullable|integer',
             'status' => 'required|in:active,inactive',
             'is_default' => 'nullable|boolean',
+            'is_lead_magnet' => 'nullable|boolean',
+            'access_period' => 'nullable|integer|min:0',
             'course_ids' => 'nullable|array',
             'course_ids.*' => 'exists:courses,id',
         ]);

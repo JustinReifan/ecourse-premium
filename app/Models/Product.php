@@ -36,11 +36,22 @@ class Product extends Model
         'order',
         'status',
         'is_default',
+        'is_lead_magnet',
+        'access_period',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
+        'access_period' => 'integer',
     ];
+
+    /**
+     * Check if product has lifetime access
+     */
+    public function hasLifetimeAccess(): bool
+    {
+        return empty($this->access_period) || $this->access_period <= 0;
+    }
 
     public function courses(): HasMany
     {

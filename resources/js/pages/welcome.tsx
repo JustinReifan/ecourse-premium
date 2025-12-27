@@ -170,7 +170,7 @@ export default function Welcome() {
                             <div data-aos="fade-up">
                                 {/* Video utama di atas background */}
                                 <VideoPlayer
-                                    src={landingVslUrl}
+                                    src={landingVslUrl ?? ''}
                                     title="VSL - Belajar Canva"
                                     className="aspect-video w-full lg:h-[600px]"
                                     thumbnailUrl={landingVslThumbnail}

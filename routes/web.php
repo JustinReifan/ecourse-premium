@@ -52,9 +52,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [MemberProductController::class, 'index'])->name('index');
         Route::get('/products', [MemberProductController::class, 'index'])->name('products');
         Route::get('/products/{product:slug}', [MemberProductController::class, 'showProduct'])->name('product.show');
-        Route::get('course/{course:slug}', [MemberController::class, 'course'])->name('course');
-        Route::get('module/{module:slug}', [MemberController::class, 'module'])->name('module');
-        Route::post('module/complete/{module}', [MemberController::class, 'markComplete'])->name('module.complete');
+        Route::get('course/{course:slug}', [MemberController::class, 'course'])->name('course')->middleware('subscription.active');
+        Route::get('module/{module:slug}', [MemberController::class, 'module'])->name('module')->middleware('subscription.active');
+        Route::post('module/complete/{module}', [MemberController::class, 'markComplete'])->name('module.complete')->middleware('subscription.active');
+        Route::post('/survey', [UserController::class, 'updateSurvey'])->name('survey');
     });
 
     // Admin routes

@@ -27,6 +27,8 @@ interface Product {
     order: number;
     status: 'active' | 'inactive';
     is_default: boolean;
+    is_lead_magnet: boolean;
+    access_period: number | null;
     courses?: Course[];
 }
 
@@ -53,6 +55,8 @@ export default function ProductForm({ product, courses }: ProductFormProps) {
         order: product?.order || 0,
         status: product?.status || ('active' as const),
         is_default: product?.is_default || false,
+        is_lead_magnet: product?.is_lead_magnet || false,
+        access_period: product?.access_period || null,
         course_ids: selectedCourseIds,
     });
 
@@ -260,6 +264,28 @@ export default function ProductForm({ product, courses }: ProductFormProps) {
                                     </p>
                                     {errors.is_default && <p className="font-mono text-sm text-red-400">{errors.is_default}</p>}
                                 </div>
+                            </div>
+
+                            {/* Access Period Field */}
+                            <div className="space-y-2">
+                                <Label htmlFor="access_period" className="font-mono text-sm tracking-wider text-gray-300 uppercase">
+                                    Access Period (Days)
+                                </Label>
+                                <Input
+                                    id="access_period"
+                                    type="number"
+                                    min="0"
+                                    value={data.access_period ?? ''}
+                                    onChange={(e) =>
+                                        setData('access_period', e.target.value ? parseInt(e.target.value) : null)
+                                    }
+                                    className="border-zinc-700/50 bg-zinc-800/50 text-white backdrop-blur-sm focus:border-cyan-400"
+                                    placeholder="Leave empty or 0 for Lifetime Access"
+                                />
+                                <p className="text-xs text-gray-400">
+                                    How long users have access to this product after purchase. Leave empty or set to 0 for lifetime access.
+                                </p>
+                                {errors.access_period && <p className="font-mono text-sm text-red-400">{errors.access_period}</p>}
                             </div>
 
                             {/* Type-specific fields */}
