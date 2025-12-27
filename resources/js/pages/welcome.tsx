@@ -25,10 +25,12 @@ interface WelcomeProps {
     landingVslThumbnail?: string;
     landingVslUrl?: string;
     coursePrice: number;
+    enableYearlyPlan?: boolean;
+    coursePriceYearly?: number;
 }
 
 export default function Welcome() {
-    const { auth, landingHeadline, landingSubheadline, landingBadge, landingVslThumbnail, landingVslUrl } = usePage<SharedData & WelcomeProps>()
+    const { auth, landingHeadline, landingSubheadline, landingBadge, landingVslThumbnail, landingVslUrl, coursePrice, enableYearlyPlan, coursePriceYearly } = usePage<SharedData & WelcomeProps>()
         .props;
     const { trackVisit } = useAnalytics();
     const [isHovered, setIsHovered] = useState(false);
@@ -256,7 +258,11 @@ export default function Welcome() {
 
                 {/* Pricing Section */}
                 <div data-aos="fade-up" data-aos-delay="200">
-                    <PricingSection />
+                    <PricingSection 
+                        enableYearlyPlan={enableYearlyPlan || false}
+                        coursePrice={coursePrice}
+                        coursePriceYearly={coursePriceYearly || 0}
+                    />
                 </div>
 
                 {/* FAQ Section */}

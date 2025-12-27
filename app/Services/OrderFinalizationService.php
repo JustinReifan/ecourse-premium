@@ -32,6 +32,7 @@ class OrderFinalizationService
     {
         // 1. Ambil data form dari meta
         $formData = $order->meta['form_data'];
+        $subscriptionPlan = $order->meta['subscription_plan'] ?? 'lifetime';
 
         // 2. Buat User baru
         $user = User::create([
@@ -48,11 +49,13 @@ class OrderFinalizationService
         event(new Registered($user));
 
         // 4. Berikan produk default
-        $defaultProduct = Product::where('is_default', true)->first();
+        $productId = $order->meta['product_id'] ?? null;
+        $defaultProduct = $productId ? Product::find($productId) : Product::where('is_default', true)->first();
+        
         if ($defaultProduct) {
-            // Calculate access_ends_at based on product access_period
-            $accessEndsAt = $this->calculateAccessExpiry($defaultProduct);
-            logger()->info('Access ends at: ' . $accessEndsAt);
+            // Calculate access_ends_at based on subscription_plan override
+            $accessEndsAt = $this->calculateAccessExpiry($defaultProduct, $subscriptionPlan);
+            logger()->info('Access ends at: ' . $accessEndsAt . ' (plan: ' . $subscriptionPlan . ')');
             UserPurchase::create([
                 'user_id' => $user->id,
                 'product_id' => $defaultProduct->id,
@@ -315,8 +318,16 @@ class OrderFinalizationService
      * @param UserPurchase|null $existingPurchase For renewals - extend from current expiry if still active
      * @return \Carbon\Carbon|null null = Lifetime access
      */
-    protected function calculateAccessExpiry(Product $product, ?UserPurchase $existingPurchase = null): ?\Carbon\Carbon
+    protected function calculateAccessExpiry(Product $product, string $subscriptionPlan = 'lifetime', ?UserPurchase $existingPurchase = null): ?\Carbon\Carbon
     {
+        // Override: If yearly plan, always set 1 year access regardless of product settings
+        if ($subscriptionPlan === 'yearly') {
+            if ($existingPurchase && $existingPurchase->access_ends_at?->isFuture()) {
+                return $existingPurchase->access_ends_at->copy()->addYear();
+            }
+            return now()->addYear();
+        }
+
         // Lifetime access (null or 0)
         if ($product->hasLifetimeAccess()) {
             return null;
@@ -332,8 +343,6 @@ class OrderFinalizationService
             if ($currentExpiry && $currentExpiry->isFuture()) {
                 return $currentExpiry->copy()->addDays($accessDays);
             }
-
-            // Scenario B: Already expired or was lifetime - restart from now
         }
 
         // New purchase or expired renewal - start from now

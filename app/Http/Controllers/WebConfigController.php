@@ -44,6 +44,8 @@ class WebConfigController extends Controller
             'landing_badge' => 'nullable|string|max:255',
             'vsl_thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'course_price' => 'required|numeric|min:0',
+            'enable_yearly_plan' => 'nullable|boolean',
+            'course_price_yearly' => 'nullable|numeric|min:0',
             'owner_whatsapp' => 'nullable|string|max:20',
             'duitku_api_key' => 'nullable|string|max:500',
             'duitku_merchant_code' => 'nullable|string|max:255',

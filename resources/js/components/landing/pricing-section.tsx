@@ -1,11 +1,13 @@
 import { CtaButton } from '@/components/ui/cta-button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { router } from '@inertiajs/react';
-import { Check, Rocket, Star, TicketPercent, Zap } from 'lucide-react';
+import { usePage, router } from '@inertiajs/react';
+import { Check, Rocket, Star, TicketPercent, Zap, Calendar, Infinity } from 'lucide-react';
 import { useState } from 'react';
 
-const benefits = [
+type SubscriptionPlan = 'lifetime' | 'yearly';
+
+const lifetimeBenefits = [
     {
         title: '50+ Modul Pembelajaran',
         description: 'Tutorial step-by-step dari basic hingga advanced editing techniques',
@@ -32,8 +34,35 @@ const benefits = [
     },
 ];
 
+const yearlyBenefits = [
+    {
+        title: '50+ Modul Pembelajaran',
+        description: 'Tutorial step-by-step dari basic hingga advanced editing techniques',
+    },
+    {
+        title: 'Template Desain Premium',
+        description: 'Akses Ke Ratusan Aset Desain Premium Siap Pakai',
+    },
+    {
+        title: 'Exclusive Community Access',
+        description: 'Bergabung dengan ratusan designer lainnya di grup eksklusif',
+    },
+    {
+        title: '1 Tahun Akses Penuh',
+        description: 'Akses semua materi selama 1 tahun, perpanjang kapan saja',
+    },
+    {
+        title: 'Live Sharing Session',
+        description: 'Dapatkan feedback langsung dari mentor dalam sesi bedah desain ',
+    },
+    {
+        title: 'Materi Setiap Hari',
+        description: 'Akses Ke Puluhan Materi Setiap Hari via Telegram',
+    },
+];
+
 interface BenefitItemProps {
-    benefit: (typeof benefits)[0];
+    benefit: (typeof lifetimeBenefits)[0];
     index: number;
 }
 
@@ -78,11 +107,26 @@ function BenefitItem({ benefit, index }: BenefitItemProps) {
     );
 }
 
-export function PricingSection() {
+interface PricingSectionProps {
+    enableYearlyPlan?: boolean;
+    coursePrice?: number;
+    coursePriceYearly?: number;
+}
+
+export function PricingSection({ enableYearlyPlan = false, coursePrice = 199000, coursePriceYearly = 99000 }: PricingSectionProps) {
     const [isCardHovered, setIsCardHovered] = useState(false);
+    const [plan, setPlan] = useState<SubscriptionPlan>('lifetime');
+
+    const currentPrice = plan === 'yearly' ? coursePriceYearly : coursePrice;
+    const currentBenefits = plan === 'yearly' ? yearlyBenefits : lifetimeBenefits;
+
+    const formatPrice = (price: number) => {
+        return new Intl.NumberFormat('id-ID').format(price);
+    };
 
     const handleButton = () => {
-        router.visit(route('register'), {
+        const params = plan === 'yearly' ? { period: 'yearly' } : {};
+        router.visit(route('register', params), {
             method: 'get',
             preserveState: true,
             preserveScroll: true,
@@ -111,13 +155,49 @@ export function PricingSection() {
                         <div className="animate-fade-in space-y-4" style={{ animationDelay: '200ms', animationFillMode: 'both' }}>
                             <h2 className="text-foreground text-4xl font-bold md:text-5xl lg:text-6xl">
                                 <span className="text-foreground block bg-clip-text">Investasi Sekali,</span>
-                                <span className="text-primary/80 bg-clip-text">Manfaat Selamanya</span>
+                                <span className="text-primary/80 bg-clip-text">
+                                    {plan === 'yearly' ? 'Akses Setahun Penuh' : 'Manfaat Selamanya'}
+                                </span>
                             </h2>
                             <p className="text-muted-foreground mx-auto max-w-3xl text-xl leading-relaxed">
-                                Kamu akan dapat lifetime access ke semua materi premium & update-nya. Cukup bayar sekali, ilmunya bisa kamu akses
-                                seumur hidup.
+                                {plan === 'yearly'
+                                    ? 'Dapatkan akses penuh ke semua materi premium selama 1 tahun. Harga lebih terjangkau untuk memulai!'
+                                    : 'Kamu akan dapat lifetime access ke semua materi premium & update-nya. Cukup bayar sekali, ilmunya bisa kamu akses seumur hidup.'}
                             </p>
                         </div>
+
+                        {/* Plan Toggle - Only show if yearly plan is enabled */}
+                        {enableYearlyPlan && (
+                            <div className="animate-fade-in flex justify-center" style={{ animationDelay: '300ms', animationFillMode: 'both' }}>
+                                <div className="bg-card/50 border-border/50 inline-flex items-center gap-1 rounded-full border p-1 backdrop-blur-sm">
+                                    <button
+                                        onClick={() => setPlan('yearly')}
+                                        className={cn(
+                                            'flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300',
+                                            plan === 'yearly'
+                                                ? 'bg-primary text-primary-foreground shadow-lg'
+                                                : 'text-muted-foreground hover:text-foreground',
+                                        )}
+                                    >
+                                        <Calendar className="h-4 w-4" />
+                                        <span className="hidden sm:inline">1 Tahun</span>
+                                        <span className="sm:hidden">1 Thn</span>
+                                    </button>
+                                    <button
+                                        onClick={() => setPlan('lifetime')}
+                                        className={cn(
+                                            'flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300',
+                                            plan === 'lifetime'
+                                                ? 'bg-primary text-primary-foreground shadow-lg'
+                                                : 'text-muted-foreground hover:text-foreground',
+                                        )}
+                                    >
+                                        <Infinity className="h-4 w-4" />
+                                        <span>Lifetime</span>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Pricing Card */}
@@ -143,12 +223,19 @@ export function PricingSection() {
                                 )}
                             />
 
-                            {/* Lifetime Badge */}
+                            {/* Plan Badge */}
                             <div className="absolute -top-4 left-1/2 z-10 -translate-x-1/2">
-                                <div className="bg-primary text-primary-foreground shadow-primary/40 rounded-full px-2 py-2 text-sm font-bold shadow-lg sm:px-4 lg:px-6">
+                                <div
+                                    className={cn(
+                                        'shadow-primary/40 rounded-full px-2 py-2 text-sm font-bold shadow-lg transition-all duration-300 sm:px-4 lg:px-6',
+                                        plan === 'yearly'
+                                            ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
+                                            : 'bg-primary text-primary-foreground',
+                                    )}
+                                >
                                     <div className="flex items-center gap-2">
-                                        <Zap className="h-4 w-4" />
-                                        LIFETIME ACCESS
+                                        {plan === 'yearly' ? <Calendar className="h-4 w-4" /> : <Zap className="h-4 w-4" />}
+                                        {plan === 'yearly' ? '1 TAHUN AKSES' : 'LIFETIME ACCESS'}
                                     </div>
                                 </div>
                             </div>
@@ -157,28 +244,47 @@ export function PricingSection() {
                                 {/* Price Display */}
                                 <div className="space-y-4 text-center">
                                     <div className="space-y-2">
-                                        <div className="flex items-center justify-center gap-2">
-                                            <span className="text-muted-foreground text-2xl line-through">Rp 499.000</span>
-                                            <span className="bg-destructive/20 text-destructive rounded-md px-2 py-1 text-sm font-medium">-60%</span>
-                                        </div>
-                                        <div className="flex items-center justify-center gap-2">
-                                            <span className="text-primary/80 text-2xl line-through">Rp 249.000</span>
-                                            <span className="bg-primary/80 text-foreground rounded-md px-2 py-1 text-xs font-semibold">
-                                                100 Orang Pertama
-                                            </span>
-                                        </div>
+                                        {plan === 'lifetime' && (
+                                            <>
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <span className="text-muted-foreground text-2xl line-through">Rp 499.000</span>
+                                                    <span className="bg-destructive/20 text-destructive rounded-md px-2 py-1 text-sm font-medium">
+                                                        -60%
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <span className="text-primary/80 text-2xl line-through">Rp 249.000</span>
+                                                    <span className="bg-primary/80 text-foreground rounded-md px-2 py-1 text-xs font-semibold">
+                                                        100 Orang Pertama
+                                                    </span>
+                                                </div>
+                                            </>
+                                        )}
+                                        {plan === 'yearly' && (
+                                            <div className="flex items-center justify-center gap-2">
+                                                <span className="text-muted-foreground text-2xl line-through">
+                                                    Rp {formatPrice(coursePrice)}
+                                                </span>
+                                                <span className="rounded-md bg-amber-500/20 px-2 py-1 text-sm font-medium text-amber-400">
+                                                    Hemat {Math.round(((coursePrice - coursePriceYearly) / coursePrice) * 100)}%
+                                                </span>
+                                            </div>
+                                        )}
                                         <div className="flex items-baseline justify-center gap-1">
                                             <span className="text-primary text-2xl font-medium">Rp</span>
-                                            {/* harusnya text-foreground */}
-                                            <span className="text-foreground text-6xl font-bold tracking-tight lg:text-7xl">199.000</span>
+                                            <span className="text-foreground text-6xl font-bold tracking-tight lg:text-7xl">
+                                                {formatPrice(currentPrice)}
+                                            </span>
                                         </div>
-                                        <p className="text-muted-foreground text-lg">Akses selamanya • Tanpa biaya bulanan</p>
+                                        <p className="text-muted-foreground text-lg">
+                                            {plan === 'yearly' ? 'Akses 1 tahun penuh • Bisa diperpanjang' : 'Akses selamanya • Tanpa biaya bulanan'}
+                                        </p>
                                     </div>
                                 </div>
 
                                 {/* Benefits Grid */}
                                 <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
-                                    {benefits.map((benefit, index) => (
+                                    {currentBenefits.map((benefit, index) => (
                                         <BenefitItem key={benefit.title} benefit={benefit} index={index} />
                                     ))}
                                 </div>
@@ -202,10 +308,6 @@ export function PricingSection() {
                                     </button>
 
                                     <div className="flex items-center justify-center gap-6 text-sm text-white">
-                                        {/* <div className="flex items-center gap-2">
-                                            <Check className="text-primary h-4 w-4" />
-                                            
-                                        </div> */}
                                         <button onClick={handleButton}>
                                             <div className="hover:text-primary flex cursor-pointer items-center gap-2 transition-colors duration-300">
                                                 <TicketPercent className="h-4 w-4" />
