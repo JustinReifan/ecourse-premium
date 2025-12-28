@@ -173,7 +173,12 @@ class OrderFinalizationService
     {
         try {
             // Kita coba ambil session ID dari request saat ini (karena triggered by axios dari frontend)
-            $sessionId = request()->session()->getId();
+            $sessionId = $order->meta['session_id'] 
+            ?? (request()->hasSession() ? request()->session()->getId() : null);
+
+            if (!$sessionId) {
+                $sessionId = 'webhook_' . $order->order_id; 
+            }
 
             // Siapkan data event
             $eventData = [
@@ -186,13 +191,16 @@ class OrderFinalizationService
                 'product_title' => $order->meta['product']['title'] ?? 'Product',
             ];
 
+            $ipAddress = request()->ip() ?? '127.0.0.1';
+            $userAgent = request()->userAgent() ?? 'System/Webhook';
+
             UserAnalytic::create([
                 'session_id' => $sessionId,
                 'user_id' => $user->id,
                 'event_type' => 'payment',
                 'event_data' => $eventData,
-                'ip_hash' => hash('sha256', request()->ip() . config('app.key')),
-                'user_agent' => request()->userAgent(),
+                'ip_hash' => hash('sha256', $ipAddress . config('app.key')),
+                'user_agent' => $userAgent,
                 'created_at' => now(),
             ]);
 

@@ -115,7 +115,7 @@ export function RichTextEditor({ value, onChange, error, placeholder, className 
         <div className={cn('space-y-1', className)}>
             <div
                 className={cn(
-                    'rounded-lg border bg-zinc-800/50 backdrop-blur-sm transition-colors',
+                    'rounded-lg border bg-primary/10 backdrop-blur-sm transition-colors',
                     error ? 'border-red-500/50' : 'border-zinc-700/50 focus-within:border-cyan-400'
                 )}
             >
@@ -181,7 +181,7 @@ export function RichTextEditor({ value, onChange, error, placeholder, className 
                 {/* Editor Content */}
                 <EditorContent 
                     editor={editor} 
-                    className="text-white [&_.ProseMirror]:min-h-[200px] [&_.ProseMirror_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-editor-empty:first-child]:before:text-muted-foreground [&_.ProseMirror_p.is-editor-empty:first-child]:before:pointer-events-none [&_.ProseMirror_p.is-editor-empty:first-child]:before:float-left [&_.ProseMirror_p.is-editor-empty:first-child]:before:h-0"
+                    className="text-foreground [&_.ProseMirror]:min-h-[200px] [&_.ProseMirror_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-editor-empty:first-child]:before:text-muted-foreground [&_.ProseMirror_p.is-editor-empty:first-child]:before:pointer-events-none [&_.ProseMirror_p.is-editor-empty:first-child]:before:float-left [&_.ProseMirror_p.is-editor-empty:first-child]:before:h-0"
                 />
             </div>
 

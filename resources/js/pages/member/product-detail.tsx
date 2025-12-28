@@ -51,7 +51,12 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                                 <h1 className="animate-gradient-x from-foreground via-primary to-foreground bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent md:text-6xl">
                                     {product.title}
                                 </h1>
-                                {product.description && <p className="text-muted-foreground max-w-2xl text-xl">{product.description}</p>}
+                                {product.description && (
+                                    <div
+                                        className="prose prose-invert text-muted-foreground prose-p:text-lg prose-p:leading-relaxed prose-li:text-base mb-4 max-w-3xl"
+                                        dangerouslySetInnerHTML={{ __html: product.description }}
+                                    />
+                                )}
                                 <Badge className="rounded-full px-3 text-base">
                                     {product.courses.length} Course{product.courses.length !== 1 ? 's' : ''}
                                 </Badge>

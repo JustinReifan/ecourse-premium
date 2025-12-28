@@ -124,6 +124,7 @@ class RegisteredUserController extends Controller
                 'affiliate_click_id' => $click ? $click->id : null,
                 'registration_type' => $registrationType,
                 'product_id' => $product ? $product->id : null,
+                'session_id' => request()->session()->getId(),
             ],
         ]);
 
@@ -212,6 +213,7 @@ class RegisteredUserController extends Controller
                     'payment_url' => null,
                     'registration_type' => $registrationType,
                     'product_id' => $product ? $product->id : null,
+                    'session_id' => request()->session()->getId(),
                 ],
             ]);
 

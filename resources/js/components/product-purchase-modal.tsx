@@ -162,7 +162,7 @@ export function ProductPurchaseModal({ open, onOpenChange, product, triggerToast
 
                     <div>
                         <h3 className="text-foreground mb-2 text-xl font-semibold">{product.title}</h3>
-                        {product.description && <p className="text-muted-foreground text-sm leading-relaxed">{product.description}</p>}
+                        {/* {product.description && <p className="text-muted-foreground text-sm leading-relaxed">{product.description}</p>} */}
                     </div>
 
                     <div className="space-y-2">

@@ -154,9 +154,9 @@ export default function MemberProducts({ ownedProducts, availableProducts, selec
     const handleProductClick = (product: Product) => {
         if (product.type === 'ecourse') {
             router.get(route('member.product.show', { product: product.slug }));
-        } else if (product.type === 'template') {
-            window.location.href = `/api/products/${product.id}/download`;
-        } else if (product.type === 'affiliate_link' || (product.type === 'ebook' && product.external_url)) {
+            // } else if (product.type === 'template') {
+            //     window.location.href = `/api/products/${product.id}/download`;
+        } else if (product.type === 'affiliate_link' || product.type === 'template' || (product.type === 'ebook' && product.external_url)) {
             if (product.external_url) {
                 window.open(product.external_url, '_blank');
             }
@@ -294,8 +294,13 @@ export default function MemberProducts({ ownedProducts, availableProducts, selec
                             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                                 <div>
                                     <h1 className="text-foreground mb-2 text-3xl font-bold">{selectedCatalogProduct.title}</h1>
-                                    <p className="text-muted-foreground mb-4">{selectedCatalogProduct.description}</p>
-                                    <Badge variant="outline" className="text-base">
+                                    {selectedCatalogProduct.description && (
+                                        <div
+                                            className="prose prose-invert text-muted-foreground prose-p:text-lg prose-p:leading-relaxed prose-li:text-base mb-4 max-w-3xl"
+                                            dangerouslySetInnerHTML={{ __html: selectedCatalogProduct.description }}
+                                        />
+                                    )}
+                                    <Badge variant="default" className="text-base">
                                         Rp {selectedCatalogProduct.price.toLocaleString('id-ID')}
                                     </Badge>
                                 </div>
@@ -336,7 +341,12 @@ export default function MemberProducts({ ownedProducts, availableProducts, selec
 
                                 <CardContent className="p-8">
                                     <h3 className="text-foreground mb-2 text-2xl font-bold opacity-50">{selectedCatalogProduct.title}</h3>
-                                    <p className="text-muted-foreground opacity-50">{selectedCatalogProduct.description}</p>
+                                    {selectedCatalogProduct.description && (
+                                        <div
+                                            className="prose prose-invert text-muted-foreground prose-p:text-lg prose-p:leading-relaxed prose-li:text-base mb-4 max-w-3xl"
+                                            dangerouslySetInnerHTML={{ __html: selectedCatalogProduct.description }}
+                                        />
+                                    )}
                                 </CardContent>
                             </Card>
                         </div>

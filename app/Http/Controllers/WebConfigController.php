@@ -44,6 +44,7 @@ class WebConfigController extends Controller
             'landing_badge' => 'nullable|string|max:255',
             'vsl_thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'course_price' => 'required|numeric|min:0',
+            'min_lead_magnet_price' => 'nullable|numeric|min:0',
             'owner_whatsapp' => 'nullable|string|max:20',
             'owner_email' => 'nullable|string|lowercase|email',
             'duitku_api_key' => 'nullable|string|max:500',
