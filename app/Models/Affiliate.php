@@ -140,6 +140,6 @@ class Affiliate extends Model
 
     public function getShareLink2(): string
     {
-        return url('/v2/?aff=' . $this->aff_key);
+        return url('/mbd/?aff=' . $this->aff_key);
     }
 }

@@ -5,6 +5,7 @@ import { Star } from 'lucide-react';
 import * as React from 'react';
 // --- Ganti path import ini ---
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'; // <-- Sesuaikan path ke file yg Anda buat
+import { CtaButton } from '@/components/ui/cta-button';
 import Autoplay from 'embla-carousel-autoplay'; // Plugin untuk autoplay
 
 // --- 1. Data Dummy untuk Testimoni ---
@@ -16,11 +17,12 @@ interface Testimonial {
 
 // Ganti path ini dengan path ke gambar testimoni 9:16 Anda
 const testimonials: Testimonial[] = [
-    { id: '1', imageUrl: '/storage/landing/testimonials/testimoni1.png', alt: 'Testimonial 1' },
-    { id: '2', imageUrl: '/storage/landing/testimonials/testimoni2.png', alt: 'Testimonial 2' },
-    { id: '3', imageUrl: '/storage/landing/testimonials/testimoni3.png', alt: 'Testimonial 3' },
-    { id: '4', imageUrl: '/storage/landing/testimonials/testimoni4.png', alt: 'Testimonial 4' },
-    { id: '5', imageUrl: '/storage/landing/testimonials/testimoni5.png', alt: 'Testimonial 5' },
+    { id: '1', imageUrl: '/storage/landing/testimonials2/1.jpeg', alt: 'Testimonial 1' },
+    { id: '2', imageUrl: '/storage/landing/testimonials2/2.jpeg', alt: 'Testimonial 2' },
+    { id: '3', imageUrl: '/storage/landing/testimonials2/3.jpeg', alt: 'Testimonial 3' },
+    { id: '4', imageUrl: '/storage/landing/testimonials2/4.jpeg', alt: 'Testimonial 4' },
+    { id: '5', imageUrl: '/storage/landing/testimonials2/5.jpeg', alt: 'Testimonial 5' },
+    { id: '6', imageUrl: '/storage/landing/testimonials2/6.jpeg', alt: 'Testimonial 6' },
 ];
 
 // --- 2. Komponen Card untuk Carousel Item ---
@@ -65,6 +67,14 @@ function TestimonialCard({ testimonial }: TestimonialCardProps) {
 // --- 3. Komponen Section Utama ---
 
 export function TestimonialsSection() {
+    const handleCtaClick = () => {
+        // scroll to pricing section
+        const pricingSection = document.getElementById('pricing-section');
+        if (pricingSection) {
+            pricingSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
     return (
         <section className="relative py-20 lg:py-32">
             {/* Background */}
@@ -138,6 +148,18 @@ export function TestimonialsSection() {
                             <CarouselPrevious className="hidden sm:inline-flex" />
                             <CarouselNext className="hidden sm:inline-flex" />
                         </Carousel>
+                    </div>
+
+                    <div className="pt-6 text-center">
+                        <button onClick={handleCtaClick}>
+                            <CtaButton
+                                variant="primary"
+                                size="lg"
+                                className="group transform text-center transition-all duration-300 hover:scale-105"
+                            >
+                                <span className="relative z-10">Gabung Sekarang</span>
+                            </CtaButton>
+                        </button>
                     </div>
                 </div>
             </div>

@@ -29,7 +29,7 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-Route::get('/v2', function () {
+Route::get('/mbd', function () {
     $settings = \App\Models\Setting::getAllCached();
 
     return Inertia::render('welcome2', [

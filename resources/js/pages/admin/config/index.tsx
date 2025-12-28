@@ -23,6 +23,7 @@ interface ConfigFormData {
     landing_vsl_thumbnail: string;
     vsl_thumbnail?: File;
     course_price: string;
+    min_lead_magnet_price: string;
     owner_whatsapp: string;
     owner_email: string;
     duitku_api_key: string;
@@ -54,6 +55,7 @@ export default function ConfigIndex({ settings }: ConfigPageProps) {
         landing_vsl_url: settings.landing_vsl_url || '',
         landing_vsl_thumbnail: settings.landing_vsl_thumbnail || '',
         course_price: settings.course_price || '0',
+        min_lead_magnet_price: settings.min_lead_magnet_price || '0',
         owner_whatsapp: settings.owner_whatsapp || '',
         owner_email: settings.owner_email || '',
         duitku_api_key: settings.duitku_api_key || '',
@@ -360,6 +362,21 @@ export default function ConfigIndex({ settings }: ConfigPageProps) {
                                             required
                                         />
                                         {errors.course_price && <p className="text-destructive mt-1 text-sm">{errors.course_price}</p>}
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="min_lead_magnet_price">Lead Magnet Minimum Price (IDR)</Label>
+                                        <Input
+                                            id="min_lead_magnet_price"
+                                            type="number"
+                                            value={data.min_lead_magnet_price}
+                                            onChange={(e) => setData('min_lead_magnet_price', e.target.value)}
+                                            placeholder="Minimum 1"
+                                            required
+                                        />
+                                        {errors.min_lead_magnet_price && (
+                                            <p className="text-destructive mt-1 text-sm">{errors.min_lead_magnet_price}</p>
+                                        )}
                                     </div>
 
                                     <div>

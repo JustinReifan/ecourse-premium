@@ -64,8 +64,7 @@ export function ReasonJoinSection() {
         {
             icon: <Users className="h-7 w-7" />,
             title: 'Step by step bikin produk digital pertama',
-            description:
-                'Nggak perlu jago IT atau coding. Kamu bakal dipandu pelan-pelan dari nol sampai punya produk digital karyamu sendiri yang siap ditawarkan.',
+            description: 'Step by step kamu faham bisnis produk digital secara sederhana',
             gradient: 'from-blue-500/10 via-purple-500/10 to-pink-500/10',
         },
         {
@@ -128,7 +127,7 @@ export function ReasonJoinSection() {
                             {/* Main image */}
                             <div className="border-border/20 shadow-primary/5 relative overflow-hidden rounded-3xl border shadow-2xl">
                                 <img
-                                    src="/storage/landing/whyjoin.png"
+                                    src="/storage/landing/whyjoin2.webp"
                                     alt="Professional designer working with Canva interface creating stunning designs"
                                     className="h-[400px] w-full object-cover transition-transform duration-1000 hover:scale-110"
                                     loading="lazy"

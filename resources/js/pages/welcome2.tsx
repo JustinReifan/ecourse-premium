@@ -14,7 +14,6 @@ import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import DOMPurify from 'dompurify';
 import { useEffect, useState } from 'react';
 interface WelcomeProps {
     landingHeadline: string;
@@ -114,7 +113,7 @@ export default function Welcome() {
                     <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="space-y-8 text-center">
                             <div data-aos="fade-up">
-                                <HeroBadge text={landingBadge} />
+                                <HeroBadge text={'Kelas Hemat Bayar Suka Suka'} />
                             </div>
 
                             {/* Glow effect */}
@@ -143,11 +142,15 @@ export default function Welcome() {
                             </div> */}
 
                             <div className="space-y-6" data-aos="fade-up">
-                                <h1
-                                    className="text-foreground mx-auto max-w-6xl text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl"
-                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(landingHeadline) }}
-                                ></h1>
-                                <p className="text-muted-foreground mx-auto max-w-4xl text-base leading-relaxed md:text-xl">{landingSubheadline}</p>
+                                <h1 className="text-foreground mx-auto max-w-6xl text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl">
+                                    Jangan Bully Dirimu Sendiri Dengan Meragukan{' '}
+                                    <span className="from-primary via-primary/80 to-primary animate-gradient-x bg-gradient-to-r bg-clip-text text-transparent">
+                                        Potensimu Di Dunia Digital
+                                    </span>
+                                </h1>
+                                <p className="text-muted-foreground mx-auto max-w-4xl text-base leading-relaxed md:text-xl">
+                                    Temukan potensi hobi dan skillmu menjadi cuan digital di kelas ini
+                                </p>
                             </div>
 
                             {/* <div className="animate-fade-in" style={{ animationDelay: '400ms', animationFillMode: 'both' }}>
@@ -175,8 +178,8 @@ export default function Welcome() {
                                 /> */}
 
                                 {/* kalau gak ada vsl, thumbnail doang */}
-                                <div className="overflow-hidden rounded-2xl border border-neutral-800/60 bg-black shadow-2xl">
-                                    <img src="/storage/landing/hero/herosection.png" alt="" className="h-full w-full object-cover" />
+                                <div className="mx-auto overflow-hidden rounded-2xl shadow-2xl">
+                                    <img src="/storage/landing/hero/thumb2.webp" alt="" className="h-full w-full object-cover" />
                                 </div>
                             </div>
 
@@ -273,7 +276,7 @@ export default function Welcome() {
                                 </div>
                                 {/* <span className="text-foreground text-xl font-bold">Editor Amplifier</span> */}
                             </div>
-                            <p className="text-muted-foreground text-sm">© 2026 Affiliate Jago Jualan. All rights reserved.</p>
+                            <p className="text-muted-foreground text-sm">© 2026 Manisnya Bisnis Digital. All rights reserved.</p>
                         </div>
                     </div>
                 </footer>
