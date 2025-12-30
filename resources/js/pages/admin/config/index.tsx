@@ -365,21 +365,13 @@ export default function ConfigIndex({ settings }: ConfigPageProps) {
                                     </div>
 
                                     <div>
-<<<<<<< HEAD
                                         <Label htmlFor="min_lead_magnet_price">Lead Magnet Minimum Price (IDR)</Label>
-=======
-                                        <Label htmlFor="min_lead_magnet_price">Min Lead Magnet Price (IDR)</Label>
->>>>>>> 4d75177830fc5d6d4d7c14ae6cf0e1a4aee58390
                                         <Input
                                             id="min_lead_magnet_price"
                                             type="number"
                                             value={data.min_lead_magnet_price}
                                             onChange={(e) => setData('min_lead_magnet_price', e.target.value)}
-<<<<<<< HEAD
                                             placeholder="Minimum 1"
-=======
-                                            placeholder="10000"
->>>>>>> 4d75177830fc5d6d4d7c14ae6cf0e1a4aee58390
                                             required
                                         />
                                         {errors.min_lead_magnet_price && (

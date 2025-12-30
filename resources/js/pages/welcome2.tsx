@@ -178,8 +178,8 @@ export default function Welcome() {
                                 /> */}
 
                                 {/* kalau gak ada vsl, thumbnail doang */}
-                                <div className="mx-auto overflow-hidden rounded-2xl shadow-2xl">
-                                    <img src="/storage/landing/hero/thumb2.webp" alt="" className="h-full w-full object-cover" />
+                                <div className="mx-auto overflow-hidden rounded-2xl">
+                                    <img src="/storage/landing/hero/thumb2.png" alt="" className="h-full w-full object-cover" />
                                 </div>
                             </div>
 
