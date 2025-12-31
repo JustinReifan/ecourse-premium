@@ -67,25 +67,25 @@ class AffiliateService
         ]);
 
         // Track via analytics
-        UserAnalytic::create([
-            'session_id' => session()->getId(),
-            'event_type' => 'engagement',
-            'event_data' => [
-                'action' => 'affiliate_click',
-                'affiliate_id' => $affiliate->id,
-                'aff_key' => $affKey,
-                'click_id' => $click->id,
-            ],
-            'referral_source' => $request->header('referer'),
-            'utm_source' => $utm['source'],
-            'utm_medium' => $utm['medium'],
-            'utm_campaign' => $utm['campaign'],
-            'utm_content' => $utm['content'],
-            'utm_term' => $utm['term'],
-            'ip_hash' => hash('sha256', $request->ip()),
-            'user_agent' => $request->userAgent(),
-            'created_at' => now(),
-        ]);
+        // UserAnalytic::create([
+        //     'session_id' => session()->getId(),
+        //     'event_type' => 'engagement',
+        //     'event_data' => [
+        //         'action' => 'affiliate_click',
+        //         'affiliate_id' => $affiliate->id,
+        //         'aff_key' => $affKey,
+        //         'click_id' => $click->id,
+        //     ],
+        //     'referral_source' => $request->header('referer'),
+        //     'utm_source' => $utm['source'],
+        //     'utm_medium' => $utm['medium'],
+        //     'utm_campaign' => $utm['campaign'],
+        //     'utm_content' => $utm['content'],
+        //     'utm_term' => $utm['term'],
+        //     'ip_hash' => hash('sha256', $request->ip()),
+        //     'user_agent' => $request->userAgent(),
+        //     'created_at' => now(),
+        // ]);
 
         // Set signed cookie
         Cookie::queue(

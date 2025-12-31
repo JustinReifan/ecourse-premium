@@ -77,6 +77,7 @@ class AnalyticsController extends Controller
         $registrations = UserAnalytic::where('event_type', 'conversion')
             ->where('created_at', '>=', $startDate)
             ->where('event_data->type', 'registration')
+            ->distinct('session_id')
             ->count();
 
         $paymentAnalytics = UserAnalytic::where('event_type', 'payment')
@@ -97,7 +98,8 @@ class AnalyticsController extends Controller
             'unique_visitors' => $uniqueVisitors,
             'engagement_rate' => $totalVisits > 0 ? round(($engagementRate / $totalVisits) * 100, 2) : 0,
             'conversion_rate' => $totalVisits > 0 ? round(($registrations / $totalVisits) * 100, 2) : 0,
-            'payment_rate' => $registrations > 0 ? round(($payments / $registrations) * 100, 2) : 0,
+            'conversion_to_payment_rate' => $registrations > 0 ? round(($payments / $registrations) * 100, 2) : 0,
+            'payment_rate' => $registrations > 0 ? round(($payments / $totalVisits) * 100, 2) : 0,
             'total_revenue' => $revenue,
             'registrations' => $registrations,
             'payments' => $payments,

@@ -18,6 +18,7 @@ interface AnalyticsProps {
         unique_visitors: number;
         engagement_rate: number;
         conversion_rate: number;
+        conversion_to_payment_rate: number;
         payment_rate: number;
         total_revenue: number;
         registrations: number;
@@ -116,24 +117,28 @@ export default function Analytics({ stats, chartData, referralData, conversionFu
                                 description={`${stats.registrations} registrations`}
                             />
                             <MetricCard
-                                title="Payment Rate"
+                                title="Conversion to Payment Rate"
+                                value={`${stats.conversion_to_payment_rate}%`}
+                                icon={CreditCard}
+                                description={`${stats.payments} successful payments`}
+                            />
+                            <MetricCard
+                                title="Visit to Payment Rate"
                                 value={`${stats.payment_rate}%`}
                                 icon={CreditCard}
                                 description={`${stats.payments} successful payments`}
+                            />
+                            <MetricCard
+                                title="Total Revenue"
+                                value={formatCurrency(stats.total_revenue)}
+                                icon={DollarSign}
+                                description={`${stats.payments}x payments`}
                             />
                         </div>
                     </div>
 
                     {/* Revenue Card */}
-                    <div>
-                        <MetricCard
-                            title="Total Revenue"
-                            value={formatCurrency(stats.total_revenue)}
-                            icon={DollarSign}
-                            description={`${stats.payments}x payments`}
-                            className="lg:w-1/2"
-                        />
-                    </div>
+                    {/* <div></div> */}
 
                     {/* Charts Section */}
                     <div className="grid gap-8 lg:grid-cols-2">
