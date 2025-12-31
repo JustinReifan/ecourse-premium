@@ -106,7 +106,6 @@ export default function Welcome() {
                     </div>
                 </header>
 
-                {/* Headline Section */}
                 <section
                     className="relative overflow-hidden pt-20 lg:pt-12"
                     onMouseEnter={() => setIsHovered(true)}
