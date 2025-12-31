@@ -79,6 +79,7 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'registration_type' => 'nullable|string|in:standard,lead_magnet',
             'payment_amount' => 'nullable|numeric',
+            'landing_source' => 'nullable|string|max:255',
         ]);
 
         $gatewayDriver = $request->input('gateway');
@@ -125,6 +126,7 @@ class RegisteredUserController extends Controller
                 'registration_type' => $registrationType,
                 'product_id' => $product ? $product->id : null,
                 'session_id' => request()->session()->getId(),
+                'landing_source' => $request->landing_source,
             ],
         ]);
 
@@ -188,6 +190,7 @@ class RegisteredUserController extends Controller
                 'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
                 'password' => ['required', 'confirmed', Rules\Password::defaults()],
                 'registration_type' => 'nullable|string|in:standard,lead_magnet',
+                'landing_source' => 'nullable|string|max:255',
             ]);
 
             $registrationType = $request->input('registration_type', 'standard');
@@ -214,6 +217,7 @@ class RegisteredUserController extends Controller
                     'registration_type' => $registrationType,
                     'product_id' => $product ? $product->id : null,
                     'session_id' => request()->session()->getId(),
+                    'landing_source' => $request->landing_source,
                 ],
             ]);
 

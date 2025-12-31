@@ -1,4 +1,6 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
+
+const LANDING_SOURCE_KEY = 'landing_source';
 
 interface AnalyticsEvent {
     event_type: 'visit' | 'scroll' | 'engagement' | 'conversion' | 'payment';
@@ -11,14 +13,45 @@ interface AnalyticsEvent {
     utm_term?: string;
 }
 
+/**
+ * Get landing source from sessionStorage
+ */
+export function getLandingSource(): string {
+    if (typeof window === 'undefined') return 'unknown';
+    return sessionStorage.getItem(LANDING_SOURCE_KEY) || window.location.pathname;
+}
+
 export function useAnalytics() {
     const coursePrice = import.meta.env.VITE_COURSE_PRICE;
+
+    // Initialize landing source on mount
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        
+        // Only set if not already present (preserve original entry point)
+        if (!sessionStorage.getItem(LANDING_SOURCE_KEY)) {
+            const cleanPath = window.location.pathname;
+            sessionStorage.setItem(LANDING_SOURCE_KEY, cleanPath);
+        }
+    }, []);
+
     const track = useCallback(async (event: AnalyticsEvent) => {
         try {
+            // Get landing source from session storage
+            const landingSource = getLandingSource();
+
             // Get URL parameters for UTM tracking
             const urlParams = new URLSearchParams(window.location.search);
+            
+            // Inject landing_source into event_data
+            const enrichedEventData = {
+                ...event.event_data,
+                landing_source: landingSource,
+            };
+
             const eventData = {
                 ...event,
+                event_data: enrichedEventData,
                 referral_source: event.referral_source || urlParams.get('ref') || document.referrer || 'direct',
                 utm_source: event.utm_source || urlParams.get('utm_source'),
                 utm_medium: event.utm_medium || urlParams.get('utm_medium'),

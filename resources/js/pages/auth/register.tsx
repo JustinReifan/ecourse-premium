@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { VoucherInput } from '@/components/voucher-input';
-import { useAnalytics } from '@/hooks/use-analytics';
+import { getLandingSource, useAnalytics } from '@/hooks/use-analytics';
 import AuthLayout from '@/layouts/auth-layout';
 import { Head, useForm } from '@inertiajs/react';
 import axios from 'axios';
@@ -146,6 +146,7 @@ export default function Register({ coursePrice, duitkuScriptUrl, registrationTyp
                 discount_amount: appliedVoucher?.discount || 0,
                 registration_type: registrationType,
                 payment_amount: isLeadMagnet ? customAmount : null,
+                landing_source: getLandingSource(),
             };
 
             // check if price = 0, bypass payment

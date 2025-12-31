@@ -180,6 +180,9 @@ class OrderFinalizationService
                 $sessionId = 'webhook_' . $order->order_id; 
             }
 
+            // Extract landing_source from order meta for attribution
+            $landingSource = $order->meta['landing_source'] ?? 'unknown';
+
             // Siapkan data event
             $eventData = [
                 'status' => 'success',
@@ -189,6 +192,7 @@ class OrderFinalizationService
                 'voucher_code' => $order->meta['voucher_code'] ?? null,
                 'discount_amount' => $order->meta['discount_amount'] ?? 0,
                 'product_title' => $order->meta['product']['title'] ?? 'Product',
+                'landing_source' => $landingSource,
             ];
 
             $ipAddress = request()->ip() ?? '127.0.0.1';
