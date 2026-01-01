@@ -9,10 +9,12 @@ import AdminLayout from '@/layouts/admin-layout';
 import { CtaData, DeviceData, HeatmapData, ReaderData } from '@/types/analytics';
 import axios from 'axios';
 
+import { DateRangePicker } from '@/components/date-range-picker';
 import { AudienceSegmentation } from '@/components/labs/audience-segmentation';
 import { CtaAnalysis } from '@/components/labs/cta-analysis';
 import { DeviceComparison } from '@/components/labs/device-comparison';
 import { Head, router } from '@inertiajs/react';
+import { format, parse } from 'date-fns';
 import {
     Activity,
     AlertTriangle,
@@ -34,6 +36,7 @@ import {
     X,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import type { DateRange } from 'react-day-picker';
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 // ==================== INTERFACES ====================
@@ -148,6 +151,17 @@ export default function LabsIndex({ matrix, funnel, quality, devices, cta, reade
     const [toastMessage, setToastMessage] = useState('');
     const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
+    // Date range state for custom filter
+    const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
+        if (filters.start_date && filters.end_date) {
+            return {
+                from: parse(filters.start_date, 'yyyy-MM-dd', new Date()),
+                to: parse(filters.end_date, 'yyyy-MM-dd', new Date()),
+            };
+        }
+        return undefined;
+    });
+
     const triggerToast = (message: string, type: 'success' | 'error') => {
         setToastMessage(message);
         setToastType(type);
@@ -199,49 +213,93 @@ export default function LabsIndex({ matrix, funnel, quality, devices, cta, reade
 
     // Handlers
     const handleRangeChange = (value: string) => {
-        router.get(
-            route('admin.labs'),
-            {
-                range: value,
-                source: filters.source || undefined, // Preserve source filter
-            },
-            {
-                preserveState: true,
-                preserveScroll: true,
-                replace: true,
-            },
-        );
+        if (value === 'custom') {
+            // Just show the date picker, don't trigger router yet
+            router.get(
+                route('admin.labs'),
+                {
+                    range: 'custom',
+                    start_date: filters.start_date,
+                    end_date: filters.end_date,
+                    source: filters.source || undefined,
+                },
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                    replace: true,
+                },
+            );
+        } else {
+            // Preset range - trigger immediately
+            router.get(
+                route('admin.labs'),
+                {
+                    range: value,
+                    source: filters.source || undefined,
+                },
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                    replace: true,
+                },
+            );
+        }
+    };
+
+    const handleDateUpdate = (date: DateRange | undefined) => {
+        setDateRange(date);
+        // Only trigger router if both dates are selected
+        if (date?.from && date?.to) {
+            router.get(
+                route('admin.labs'),
+                {
+                    range: 'custom',
+                    start_date: format(date.from, 'yyyy-MM-dd'),
+                    end_date: format(date.to, 'yyyy-MM-dd'),
+                    source: filters.source || undefined,
+                },
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                    replace: true,
+                },
+            );
+        }
     };
 
     const handleSourceChange = (value: string) => {
         const sourceValue = value === 'all' ? undefined : value;
-        router.get(
-            route('admin.labs'),
-            {
-                range: filters.range,
-                source: sourceValue,
-            },
-            {
-                preserveState: true,
-                preserveScroll: true,
-                replace: true,
-            },
-        );
+        const params: Record<string, string | undefined> = {
+            range: filters.range,
+            source: sourceValue,
+        };
+        // Preserve custom date range parameters
+        if (filters.range === 'custom') {
+            params.start_date = filters.start_date;
+            params.end_date = filters.end_date;
+        }
+        router.get(route('admin.labs'), params, {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        });
     };
 
     const handleClearSource = () => {
-        router.get(
-            route('admin.labs'),
-            {
-                range: filters.range,
-                source: undefined,
-            },
-            {
-                preserveState: true,
-                preserveScroll: true,
-                replace: true,
-            },
-        );
+        const params: Record<string, string | undefined> = {
+            range: filters.range,
+            source: undefined,
+        };
+        // Preserve custom date range parameters
+        if (filters.range === 'custom') {
+            params.start_date = filters.start_date;
+            params.end_date = filters.end_date;
+        }
+        router.get(route('admin.labs'), params, {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        });
     };
 
     const handleRefreshCache = async () => {
@@ -250,6 +308,8 @@ export default function LabsIndex({ matrix, funnel, quality, devices, cta, reade
             const response = await axios.post(route('admin.labs.clear-cache'), {
                 range: filters.range,
                 source: filters.source,
+                start_date: filters.start_date,
+                end_date: filters.end_date,
             });
 
             if (response.data.success) {
@@ -341,9 +401,9 @@ export default function LabsIndex({ matrix, funnel, quality, devices, cta, reade
                             )}
                         </div>
 
-                        {/* Date Range */}
+                        {/* Date Range Dropdown */}
                         <Select value={filters.range} onValueChange={handleRangeChange}>
-                            <SelectTrigger className="w-[140px]">
+                            <SelectTrigger className="w-[160px]">
                                 <SelectValue placeholder="Select range" />
                             </SelectTrigger>
                             <SelectContent>
@@ -352,8 +412,14 @@ export default function LabsIndex({ matrix, funnel, quality, devices, cta, reade
                                 <SelectItem value="7">Last 7 Days</SelectItem>
                                 <SelectItem value="14">Last 14 Days</SelectItem>
                                 <SelectItem value="30">Last 30 Days</SelectItem>
+                                <SelectItem value="custom">Custom Range</SelectItem>
                             </SelectContent>
                         </Select>
+
+                        {/* Custom Date Range Picker - Conditional */}
+                        {filters.range === 'custom' && (
+                            <DateRangePicker date={dateRange} onUpdate={handleDateUpdate} />
+                        )}
 
                         <Button variant="outline" type="button" onClick={handleRefreshCache} disabled={isRefreshing} className="gap-2">
                             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
