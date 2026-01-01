@@ -45,7 +45,7 @@ export default function Welcome() {
 
     // Initialize tracking hooks
     useScrollTracking();
-    const hasEngaged = useDwellTime(15000);
+    const { isEngaged } = useDwellTime();
 
     // Track page visit on mount
     useEffect(() => {

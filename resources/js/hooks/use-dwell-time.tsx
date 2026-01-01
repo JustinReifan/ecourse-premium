@@ -1,45 +1,76 @@
-
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useAnalytics } from './use-analytics';
 
-export function useDwellTime(threshold = 15000) { // 15 seconds
+const INITIAL_THRESHOLD = 15000; // 15 seconds for "engaged" status
+const HEARTBEAT_INTERVAL = 30000; // 30 seconds between heartbeats
+const TICK_INTERVAL = 1000; // 1 second ticker
+
+export function useDwellTime() {
     const { trackEngagement } = useAnalytics();
-    const startTime = useRef(Date.now());
-    const hasTracked = useRef(false);
-    const isVisible = useRef(true);
+    
+    // Tracking state refs
+    const timeActive = useRef(0);
+    const lastPingTime = useRef(0);
+    const hasInitialTracked = useRef(false);
+    const isVisible = useRef(!document.hidden);
+    const tickerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    // Memoized tracking function to prevent stale closures
+    const sendPing = useCallback((duration: number, isInitial: boolean) => {
+        trackEngagement('dwell_ping', {
+            duration,
+            type: 'dwell_ping',
+            is_initial: isInitial,
+        });
+    }, [trackEngagement]);
 
     useEffect(() => {
         const handleVisibilityChange = () => {
-            if (document.hidden) {
-                isVisible.current = false;
-            } else {
-                isVisible.current = true;
-                startTime.current = Date.now();
-            }
+            isVisible.current = !document.hidden;
         };
 
-        const checkDwellTime = () => {
-            if (!hasTracked.current && isVisible.current) {
-                const dwellTime = Date.now() - startTime.current;
-                if (dwellTime >= threshold) {
-                    hasTracked.current = true;
-                    trackEngagement('dwell_time', { 
-                        duration: dwellTime,
-                        threshold 
-                    });
+        const tick = () => {
+            // Only increment if page is visible
+            if (!isVisible.current) return;
+
+            timeActive.current += TICK_INTERVAL;
+
+            // Check 1: Initial engagement trigger (15s threshold)
+            if (!hasInitialTracked.current && timeActive.current >= INITIAL_THRESHOLD) {
+                hasInitialTracked.current = true;
+                lastPingTime.current = timeActive.current;
+                sendPing(INITIAL_THRESHOLD, true);
+                return; // Don't check heartbeat on same tick
+            }
+
+            // Check 2: Heartbeat (every 30s after initial)
+            if (hasInitialTracked.current) {
+                const timeSinceLastPing = timeActive.current - lastPingTime.current;
+                if (timeSinceLastPing >= HEARTBEAT_INTERVAL) {
+                    lastPingTime.current = timeActive.current;
+                    sendPing(HEARTBEAT_INTERVAL, false);
                 }
             }
         };
 
+        // Set up visibility listener
         document.addEventListener('visibilitychange', handleVisibilityChange);
         
-        const interval = setInterval(checkDwellTime, 1000);
+        // Start the ticker
+        tickerRef.current = setInterval(tick, TICK_INTERVAL);
 
+        // Cleanup
         return () => {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
-            clearInterval(interval);
+            if (tickerRef.current) {
+                clearInterval(tickerRef.current);
+                tickerRef.current = null;
+            }
         };
-    }, [threshold, trackEngagement]);
+    }, [sendPing]);
 
-    return hasTracked.current;
+    return {
+        isEngaged: hasInitialTracked.current,
+        timeActive: timeActive.current,
+    };
 }
