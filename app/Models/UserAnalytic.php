@@ -10,6 +10,7 @@ class UserAnalytic extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'id',
         'session_id',
         'event_type',
         'event_data',

@@ -97,6 +97,11 @@ class LabsController extends Controller
 
         Cache::forget($cacheKey);
 
-        return response()->json(['message' => 'Cache cleared successfully']);
+        return response()->json(
+            [
+                'success' => 'true',
+                'message' => 'Cache cleared successfully'
+            ]
+        );
     }
 }

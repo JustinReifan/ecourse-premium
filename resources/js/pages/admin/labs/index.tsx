@@ -1,16 +1,20 @@
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
 import AdminLayout from '@/layouts/admin-layout';
+import axios from 'axios';
+
 import { Head, router } from '@inertiajs/react';
 import {
     Activity,
+    AlertTriangle,
     ArrowUpDown,
     BarChart3,
+    CheckCircle,
     ChevronLeft,
     ChevronRight,
     Clock,
@@ -24,7 +28,7 @@ import {
     Users,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { Bar, BarChart, CartesianGrid, Cell, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 // ==================== INTERFACES ====================
 
@@ -118,24 +122,31 @@ const transformFunnelData = (funnel: FunnelItem[], selectedSources: string[]) =>
     });
 };
 
-const CHART_COLORS = [
-    'hsl(var(--chart-1))',
-    'hsl(var(--chart-2))',
-    'hsl(var(--chart-3))',
-    'hsl(var(--chart-4))',
-    'hsl(var(--chart-5))',
-];
+const CHART_COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
 // ==================== MAIN COMPONENT ====================
 
 export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
-    const { success, error } = useToast();
-
     // State
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [sortColumn, setSortColumn] = useState<keyof MatrixItem>('rpv');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
     const [currentPage, setCurrentPage] = useState(1);
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
+    const [toastType, setToastType] = useState<'success' | 'error'>('success');
+
+    const triggerToast = (message: string, type: 'success' | 'error') => {
+        setToastMessage(message);
+        setToastType(type);
+        setShowToast(true);
+
+        setTimeout(() => {
+            setShowToast(false);
+            setToastMessage('');
+        }, 4000);
+    };
+
     const [selectedFunnelSources, setSelectedFunnelSources] = useState<string[]>(() => {
         // Default: Top 2 by RPV
         return matrix.slice(0, 2).map((m) => m.landing_source);
@@ -177,7 +188,7 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
     // Handlers
     const handleRangeChange = (value: string) => {
         router.get(
-            route('labs'),
+            route('admin.labs'),
             { range: value },
             {
                 preserveState: true,
@@ -189,18 +200,17 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
     const handleRefreshCache = async () => {
         setIsRefreshing(true);
         try {
-            await fetch(route('labs.clear-cache'), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
-                body: JSON.stringify({ range: filters.range }),
+            const response = await axios.post(route('admin.labs.clear-cache'), {
+                range: filters.range,
             });
-            success('Cache cleared. Refreshing data...');
+
+            if (response.data.success) {
+                triggerToast('Data cached successfully', 'success');
+            }
+
             router.reload();
-        } catch (e) {
-            error('Failed to clear cache');
+        } catch (error: any) {
+            triggerToast('Failed to cache data: ' + error || '', 'error');
         } finally {
             setIsRefreshing(false);
         }
@@ -226,6 +236,27 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
             <Head title="A/B Testing Labs" />
 
             <div className="container mx-auto space-y-8 p-6">
+                {showToast && (
+                    <div className="animate-fade-in fixed top-20 right-4 z-50 w-auto max-w-sm">
+                        <Alert
+                            className={
+                                toastType === 'success'
+                                    ? 'border-primary/50 bg-primary/10 backdrop-blur-sm'
+                                    : 'border-red-500/50 bg-red-900/50 backdrop-blur-sm'
+                            }
+                        >
+                            {toastType === 'success' ? (
+                                <CheckCircle className="text-primary h-4 w-4" />
+                            ) : (
+                                <AlertTriangle className="h-4 w-4 text-red-400" />
+                            )}
+                            <AlertDescription className={toastType === 'success' ? 'text-primary font-medium' : 'font-medium text-red-300'}>
+                                {toastMessage}
+                            </AlertDescription>
+                        </Alert>
+                    </div>
+                )}
+
                 {/* ==================== CONTROL BAR ==================== */}
                 <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex items-center gap-4">
@@ -251,7 +282,7 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                             </SelectContent>
                         </Select>
 
-                        <Button variant="outline" onClick={handleRefreshCache} disabled={isRefreshing} className="gap-2">
+                        <Button variant="outline" type="button" onClick={handleRefreshCache} disabled={isRefreshing} className="gap-2">
                             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
                             Refresh Data
                         </Button>
@@ -297,7 +328,7 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                                 <th className="text-muted-foreground p-4 text-left text-sm font-medium">
                                                     <button
                                                         onClick={() => handleSort('visits')}
-                                                        className="flex items-center gap-1 hover:text-foreground"
+                                                        className="hover:text-foreground flex items-center gap-1"
                                                     >
                                                         <Eye className="h-4 w-4" /> Visits
                                                         <ArrowUpDown className="h-3 w-3" />
@@ -306,7 +337,7 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                                 <th className="text-muted-foreground p-4 text-left text-sm font-medium">
                                                     <button
                                                         onClick={() => handleSort('bounce_rate')}
-                                                        className="flex items-center gap-1 hover:text-foreground"
+                                                        className="hover:text-foreground flex items-center gap-1"
                                                     >
                                                         Bounce
                                                         <ArrowUpDown className="h-3 w-3" />
@@ -315,7 +346,7 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                                 <th className="text-muted-foreground p-4 text-left text-sm font-medium">
                                                     <button
                                                         onClick={() => handleSort('conversions')}
-                                                        className="flex items-center gap-1 hover:text-foreground"
+                                                        className="hover:text-foreground flex items-center gap-1"
                                                     >
                                                         <MousePointerClick className="h-4 w-4" /> Intent
                                                         <ArrowUpDown className="h-3 w-3" />
@@ -324,7 +355,7 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                                 <th className="text-muted-foreground p-4 text-left text-sm font-medium">
                                                     <button
                                                         onClick={() => handleSort('lead_cr')}
-                                                        className="flex items-center gap-1 hover:text-foreground"
+                                                        className="hover:text-foreground flex items-center gap-1"
                                                     >
                                                         Lead CR
                                                         <ArrowUpDown className="h-3 w-3" />
@@ -333,7 +364,7 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                                 <th className="text-muted-foreground p-4 text-left text-sm font-medium">
                                                     <button
                                                         onClick={() => handleSort('strict_cr')}
-                                                        className="flex items-center gap-1 hover:text-foreground"
+                                                        className="hover:text-foreground flex items-center gap-1"
                                                     >
                                                         <Target className="h-4 w-4" /> Sales CR
                                                         <ArrowUpDown className="h-3 w-3" />
@@ -342,7 +373,7 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                                 <th className="text-muted-foreground p-4 text-left text-sm font-medium">
                                                     <button
                                                         onClick={() => handleSort('rpv')}
-                                                        className="flex items-center gap-1 hover:text-foreground"
+                                                        className="hover:text-foreground flex items-center gap-1"
                                                     >
                                                         <TrendingUp className="h-4 w-4" /> RPV
                                                         <ArrowUpDown className="h-3 w-3" />
@@ -372,7 +403,7 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                                         </td>
                                                         <td className="text-foreground p-4 font-medium">{formatNumber(item.visits)}</td>
                                                         <td className="p-4">
-                                                            <span className={isHighBounce ? 'font-medium text-destructive' : 'text-foreground'}>
+                                                            <span className={isHighBounce ? 'text-destructive font-medium' : 'text-foreground'}>
                                                                 {item.bounce_rate.toFixed(1)}%
                                                             </span>
                                                         </td>
@@ -499,10 +530,7 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                                 checked={selectedFunnelSources.includes(f.landing_source)}
                                                 onCheckedChange={() => toggleFunnelSource(f.landing_source)}
                                             />
-                                            <Label
-                                                htmlFor={`funnel-${f.landing_source}`}
-                                                className="flex cursor-pointer items-center gap-2 text-sm"
-                                            >
+                                            <Label htmlFor={`funnel-${f.landing_source}`} className="flex cursor-pointer items-center gap-2 text-sm">
                                                 <div
                                                     className="h-3 w-3 rounded-full"
                                                     style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
@@ -535,7 +563,9 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                                     <Bar
                                                         key={source}
                                                         dataKey={source}
-                                                        fill={CHART_COLORS[funnel.findIndex((f) => f.landing_source === source) % CHART_COLORS.length]}
+                                                        fill={
+                                                            CHART_COLORS[funnel.findIndex((f) => f.landing_source === source) % CHART_COLORS.length]
+                                                        }
                                                         radius={[4, 4, 0, 0]}
                                                     />
                                                 ))}

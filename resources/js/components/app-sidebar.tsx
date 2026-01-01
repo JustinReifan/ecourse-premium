@@ -22,6 +22,7 @@ import {
     BookOpenCheck,
     ChartSpline,
     DollarSign,
+    FlaskConical,
     Folder,
     Handshake,
     LayoutGrid,
@@ -78,6 +79,11 @@ const mainNavItems: NavItem[] = [
         title: 'Analytics',
         href: '/admin/analytics',
         icon: ChartSpline,
+    },
+    {
+        title: 'A/B Labs',
+        href: '/admin/labs',
+        icon: FlaskConical,
     },
     {
         title: 'Vouchers',

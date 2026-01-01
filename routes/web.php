@@ -8,7 +8,7 @@ use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AnalyticsController;
-use App\Http\Controllers\Admin\LabsController;
+use App\Http\Controllers\LabsController;
 use App\Http\Controllers\MemberProductController;
 use App\Http\Controllers\WhatsappNotifController;
 use App\Http\Controllers\ModuleMaterialController;

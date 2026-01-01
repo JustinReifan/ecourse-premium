@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Log;
 use Carbon\Carbon;
 use Inertia\Inertia;
 use App\Models\Setting;
@@ -33,7 +34,7 @@ class AnalyticsController extends Controller
     public function track(Request $request)
     {
         // Debug request
-        \Log::info('Analytics Request:', $request->all());
+        Log::info('Analytics Request:', $request->all());
 
         $sessionId = $request->session()->getId();
         $ipHash = hash('sha256', $request->ip() . config('app.key'));
