@@ -27,6 +27,7 @@ class LabsController extends Controller
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'range' => 'nullable|in:3,5,7,14,30,custom',
+            'source' => 'nullable|string',
         ]);
 
         // Determine date range
@@ -41,18 +42,29 @@ class LabsController extends Controller
             $endDate = Carbon::now()->endOfDay();
         }
 
-        // Generate cache key based on date range
-        $cacheKey = "ab_testing_{$startDate->format('Y-m-d')}_{$endDate->format('Y-m-d')}";
+        // Get source filter
+        $sourceFilter = $request->get('source');
+
+        // Generate cache key including source filter
+        $sourceKey = $sourceFilter ?? 'all';
+        $cacheKey = "ab_testing_{$startDate->format('Y-m-d')}_{$endDate->format('Y-m-d')}_{$sourceKey}";
         $cacheDuration = 15 * 60; // 15 minutes in seconds
 
         // Fetch data with caching
-        $data = Cache::remember($cacheKey, $cacheDuration, function () use ($startDate, $endDate) {
+        $data = Cache::remember($cacheKey, $cacheDuration, function () use ($startDate, $endDate, $sourceFilter) {
             return [
-                'matrix' => $this->abTestingService->getPerformanceMatrix($startDate, $endDate),
-                'funnel' => $this->abTestingService->getSplitFunnel($startDate, $endDate),
-                'quality' => $this->abTestingService->getQualityAnalysis($startDate, $endDate),
+                'matrix' => $this->abTestingService->getPerformanceMatrix($startDate, $endDate, $sourceFilter),
+                'funnel' => $this->abTestingService->getSplitFunnel($startDate, $endDate, $sourceFilter),
+                'quality' => $this->abTestingService->getQualityAnalysis($startDate, $endDate, $sourceFilter),
+                'devices' => $this->abTestingService->getDevicePerformance($startDate, $endDate, $sourceFilter),
+                'cta' => $this->abTestingService->getCtaPerformance($startDate, $endDate, $sourceFilter),
+                'readers' => $this->abTestingService->getReaderSegmentation($startDate, $endDate, $sourceFilter),
+                'heatmap' => $this->abTestingService->getScrollHeatmap($startDate, $endDate, $sourceFilter),
             ];
         });
+
+        // Get available sources (not cached, lightweight query)
+        $availableSources = $this->abTestingService->getAvailableSources($startDate, $endDate);
 
         // Return JSON for API calls
         if ($request->wantsJson()) {
@@ -60,10 +72,16 @@ class LabsController extends Controller
                 'matrix' => $data['matrix'],
                 'funnel' => $data['funnel'],
                 'quality' => $data['quality'],
+                'devices' => $data['devices'],
+                'cta' => $data['cta'],
+                'readers' => $data['readers'],
+                'heatmap' => $data['heatmap'],
+                'available_sources' => $availableSources,
                 'meta' => [
                     'start_date' => $startDate->toIso8601String(),
                     'end_date' => $endDate->toIso8601String(),
                     'range' => $range,
+                    'source' => $sourceFilter,
                     'cached_at' => now()->toIso8601String(),
                 ],
             ]);
@@ -74,10 +92,16 @@ class LabsController extends Controller
             'matrix' => $data['matrix'],
             'funnel' => $data['funnel'],
             'quality' => $data['quality'],
+            'devices' => $data['devices'],
+            'cta' => $data['cta'],
+            'readers' => $data['readers'],
+            'heatmap' => $data['heatmap'],
+            'availableSources' => $availableSources,
             'filters' => [
                 'start_date' => $startDate->format('Y-m-d'),
                 'end_date' => $endDate->format('Y-m-d'),
                 'range' => $range,
+                'source' => $sourceFilter,
             ],
         ]);
     }
@@ -88,20 +112,25 @@ class LabsController extends Controller
     public function clearCache(Request $request)
     {
         $range = $request->get('range', '7');
-        $days = (int) $range;
+        $sourceFilter = $request->get('source');
 
-        $startDate = Carbon::now()->subDays($days)->startOfDay();
-        $endDate = Carbon::now()->endOfDay();
+        if ($range === 'custom') {
+            $startDate = Carbon::parse($request->get('start_date', now()->subDays(7)));
+            $endDate = Carbon::parse($request->get('end_date', now()))->endOfDay();
+        } else {
+            $days = (int) $range;
+            $startDate = Carbon::now()->subDays($days)->startOfDay();
+            $endDate = Carbon::now()->endOfDay();
+        }
 
-        $cacheKey = "ab_testing_{$startDate->format('Y-m-d')}_{$endDate->format('Y-m-d')}";
+        $sourceKey = $sourceFilter ?? 'all';
+        $cacheKey = "ab_testing_{$startDate->format('Y-m-d')}_{$endDate->format('Y-m-d')}_{$sourceKey}";
 
         Cache::forget($cacheKey);
 
-        return response()->json(
-            [
-                'success' => 'true',
-                'message' => 'Cache cleared successfully'
-            ]
-        );
+        return response()->json([
+            'success' => true,
+            'message' => 'Cache cleared successfully',
+        ]);
     }
 }
