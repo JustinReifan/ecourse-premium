@@ -6,8 +6,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AdminLayout from '@/layouts/admin-layout';
+import { CtaData, DeviceData, HeatmapData, ReaderData } from '@/types/analytics';
 import axios from 'axios';
 
+import { AudienceSegmentation } from '@/components/labs/audience-segmentation';
+import { CtaAnalysis } from '@/components/labs/cta-analysis';
+import { DeviceComparison } from '@/components/labs/device-comparison';
 import { Head, router } from '@inertiajs/react';
 import {
     Activity,
@@ -19,6 +23,7 @@ import {
     ChevronRight,
     Clock,
     Eye,
+    Filter,
     FlaskConical,
     MousePointerClick,
     RefreshCw,
@@ -26,6 +31,7 @@ import {
     TrendingUp,
     Trophy,
     Users,
+    X,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -71,12 +77,18 @@ interface Filters {
     start_date: string;
     end_date: string;
     range: string;
+    source?: string | null;
 }
 
 interface Props {
     matrix: MatrixItem[];
     funnel: FunnelItem[];
     quality: QualityItem[];
+    devices: DeviceData[];
+    cta: CtaData[];
+    readers: ReaderData[];
+    heatmap: HeatmapData[];
+    availableSources: string[];
     filters: Filters;
 }
 
@@ -126,7 +138,7 @@ const CHART_COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--c
 
 // ==================== MAIN COMPONENT ====================
 
-export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
+export default function LabsIndex({ matrix, funnel, quality, devices, cta, readers, heatmap, availableSources, filters }: Props) {
     // State
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [sortColumn, setSortColumn] = useState<keyof MatrixItem>('rpv');
@@ -189,10 +201,45 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
     const handleRangeChange = (value: string) => {
         router.get(
             route('admin.labs'),
-            { range: value },
+            { 
+                range: value,
+                source: filters.source || undefined, // Preserve source filter
+            },
             {
                 preserveState: true,
                 preserveScroll: true,
+                replace: true,
+            },
+        );
+    };
+
+    const handleSourceChange = (value: string) => {
+        const sourceValue = value === 'all' ? undefined : value;
+        router.get(
+            route('admin.labs'),
+            {
+                range: filters.range,
+                source: sourceValue,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
+        );
+    };
+
+    const handleClearSource = () => {
+        router.get(
+            route('admin.labs'),
+            {
+                range: filters.range,
+                source: undefined,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
             },
         );
     };
@@ -202,6 +249,7 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
         try {
             const response = await axios.post(route('admin.labs.clear-cache'), {
                 range: filters.range,
+                source: filters.source,
             });
 
             if (response.data.success) {
@@ -235,9 +283,9 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
         <AdminLayout>
             <Head title="A/B Testing Labs" />
 
-            <div className="container mx-auto space-y-8 p-6">
+            <div className="container mx-auto space-y-8 p-4 md:p-6">
                 {showToast && (
-                    <div className="animate-fade-in fixed top-20 right-4 z-50 w-auto max-w-sm">
+                    <div className="animate-fade-in fixed right-4 top-20 z-50 w-auto max-w-sm">
                         <Alert
                             className={
                                 toastType === 'success'
@@ -246,11 +294,11 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                             }
                         >
                             {toastType === 'success' ? (
-                                <CheckCircle className="text-primary h-4 w-4" />
+                                <CheckCircle className="h-4 w-4 text-primary" />
                             ) : (
                                 <AlertTriangle className="h-4 w-4 text-red-400" />
                             )}
-                            <AlertDescription className={toastType === 'success' ? 'text-primary font-medium' : 'font-medium text-red-300'}>
+                            <AlertDescription className={toastType === 'success' ? 'font-medium text-primary' : 'font-medium text-red-300'}>
                                 {toastMessage}
                             </AlertDescription>
                         </Alert>
@@ -260,16 +308,48 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                 {/* ==================== CONTROL BAR ==================== */}
                 <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex items-center gap-4">
-                        <div className="bg-primary/20 flex h-12 w-12 items-center justify-center rounded-xl">
-                            <FlaskConical className="text-primary h-6 w-6" />
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20">
+                            <FlaskConical className="h-6 w-6 text-primary" />
                         </div>
                         <div>
-                            <h1 className="text-foreground text-2xl font-bold md:text-3xl">A/B Testing Labs</h1>
-                            <p className="text-muted-foreground text-sm">Optimize your landing page performance</p>
+                            <h1 className="text-2xl font-bold text-foreground md:text-3xl">A/B Testing Labs</h1>
+                            <p className="text-sm text-muted-foreground">Optimize your landing page performance</p>
                         </div>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
+                        {/* Source Filter */}
+                        <div className="flex items-center gap-2">
+                            <Filter className="h-4 w-4 text-muted-foreground" />
+                            <Select 
+                                value={filters.source || 'all'} 
+                                onValueChange={handleSourceChange}
+                            >
+                                <SelectTrigger className="w-[160px]">
+                                    <SelectValue placeholder="All Sources" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Sources</SelectItem>
+                                    {availableSources.map((source) => (
+                                        <SelectItem key={source} value={source}>
+                                            {source === 'direct' ? 'Direct Traffic' : source}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {filters.source && (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={handleClearSource}
+                                    className="h-8 w-8"
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            )}
+                        </div>
+
+                        {/* Date Range */}
                         <Select value={filters.range} onValueChange={handleRangeChange}>
                             <SelectTrigger className="w-[140px]">
                                 <SelectValue placeholder="Select range" />
@@ -284,24 +364,32 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
 
                         <Button variant="outline" type="button" onClick={handleRefreshCache} disabled={isRefreshing} className="gap-2">
                             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                            Refresh Data
+                            <span className="hidden sm:inline">Refresh Data</span>
                         </Button>
                     </div>
                 </div>
 
-                {/* Date Range Info */}
-                <div className="text-muted-foreground text-sm">
-                    Showing data from <span className="text-foreground font-medium">{filters.start_date}</span> to{' '}
-                    <span className="text-foreground font-medium">{filters.end_date}</span>
+                {/* Date Range Info & Active Filters */}
+                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                    <span>
+                        Showing data from <span className="font-medium text-foreground">{filters.start_date}</span> to{' '}
+                        <span className="font-medium text-foreground">{filters.end_date}</span>
+                    </span>
+                    {filters.source && (
+                        <Badge variant="secondary" className="gap-1">
+                            <Filter className="h-3 w-3" />
+                            {filters.source === 'direct' ? 'Direct Traffic' : filters.source}
+                        </Badge>
+                    )}
                 </div>
 
                 {!hasData ? (
                     <Card className="py-16 text-center">
                         <CardContent>
-                            <BarChart3 className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
-                            <h3 className="text-foreground text-lg font-semibold">No Analytics Data</h3>
-                            <p className="text-muted-foreground mt-2">
-                                There's no data available for the selected date range. Try extending the range or check back later.
+                            <BarChart3 className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                            <h3 className="text-lg font-semibold text-foreground">No Analytics Data</h3>
+                            <p className="mt-2 text-muted-foreground">
+                                There's no data available for the selected filters. Try adjusting the date range or source filter.
                             </p>
                         </CardContent>
                     </Card>
@@ -311,7 +399,7 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                         <Card>
                             <CardHeader>
                                 <div className="flex items-center gap-3">
-                                    <Trophy className="text-primary h-5 w-5" />
+                                    <Trophy className="h-5 w-5 text-primary" />
                                     <div>
                                         <CardTitle>Performance Matrix</CardTitle>
                                         <CardDescription>Landing page comparison sorted by Revenue Per Visit</CardDescription>
@@ -323,63 +411,63 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                 <div className="hidden overflow-x-auto lg:block">
                                     <table className="w-full">
                                         <thead>
-                                            <tr className="border-border border-b">
-                                                <th className="text-muted-foreground p-4 text-left text-sm font-medium">Source</th>
-                                                <th className="text-muted-foreground p-4 text-left text-sm font-medium">
+                                            <tr className="border-b border-border">
+                                                <th className="p-4 text-left text-sm font-medium text-muted-foreground">Source</th>
+                                                <th className="p-4 text-left text-sm font-medium text-muted-foreground">
                                                     <button
                                                         onClick={() => handleSort('visits')}
-                                                        className="hover:text-foreground flex items-center gap-1"
+                                                        className="flex items-center gap-1 hover:text-foreground"
                                                     >
                                                         <Eye className="h-4 w-4" /> Visits
                                                         <ArrowUpDown className="h-3 w-3" />
                                                     </button>
                                                 </th>
-                                                <th className="text-muted-foreground p-4 text-left text-sm font-medium">
+                                                <th className="p-4 text-left text-sm font-medium text-muted-foreground">
                                                     <button
                                                         onClick={() => handleSort('bounce_rate')}
-                                                        className="hover:text-foreground flex items-center gap-1"
+                                                        className="flex items-center gap-1 hover:text-foreground"
                                                     >
                                                         Bounce
                                                         <ArrowUpDown className="h-3 w-3" />
                                                     </button>
                                                 </th>
-                                                <th className="text-muted-foreground p-4 text-left text-sm font-medium">
+                                                <th className="p-4 text-left text-sm font-medium text-muted-foreground">
                                                     <button
                                                         onClick={() => handleSort('conversions')}
-                                                        className="hover:text-foreground flex items-center gap-1"
+                                                        className="flex items-center gap-1 hover:text-foreground"
                                                     >
                                                         <MousePointerClick className="h-4 w-4" /> Intent
                                                         <ArrowUpDown className="h-3 w-3" />
                                                     </button>
                                                 </th>
-                                                <th className="text-muted-foreground p-4 text-left text-sm font-medium">
+                                                <th className="p-4 text-left text-sm font-medium text-muted-foreground">
                                                     <button
                                                         onClick={() => handleSort('lead_cr')}
-                                                        className="hover:text-foreground flex items-center gap-1"
+                                                        className="flex items-center gap-1 hover:text-foreground"
                                                     >
                                                         Lead CR
                                                         <ArrowUpDown className="h-3 w-3" />
                                                     </button>
                                                 </th>
-                                                <th className="text-muted-foreground p-4 text-left text-sm font-medium">
+                                                <th className="p-4 text-left text-sm font-medium text-muted-foreground">
                                                     <button
                                                         onClick={() => handleSort('strict_cr')}
-                                                        className="hover:text-foreground flex items-center gap-1"
+                                                        className="flex items-center gap-1 hover:text-foreground"
                                                     >
                                                         <Target className="h-4 w-4" /> Sales CR
                                                         <ArrowUpDown className="h-3 w-3" />
                                                     </button>
                                                 </th>
-                                                <th className="text-muted-foreground p-4 text-left text-sm font-medium">
+                                                <th className="p-4 text-left text-sm font-medium text-muted-foreground">
                                                     <button
                                                         onClick={() => handleSort('rpv')}
-                                                        className="hover:text-foreground flex items-center gap-1"
+                                                        className="flex items-center gap-1 hover:text-foreground"
                                                     >
                                                         <TrendingUp className="h-4 w-4" /> RPV
                                                         <ArrowUpDown className="h-3 w-3" />
                                                     </button>
                                                 </th>
-                                                <th className="text-muted-foreground p-4 text-left text-sm font-medium">Revenue</th>
+                                                <th className="p-4 text-left text-sm font-medium text-muted-foreground">Revenue</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -388,26 +476,26 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                                 const isHighBounce = item.bounce_rate > 80;
 
                                                 return (
-                                                    <tr key={item.landing_source} className="border-border hover:bg-muted/50 border-b transition">
+                                                    <tr key={item.landing_source} className="border-b border-border transition hover:bg-muted/50">
                                                         <td className="p-4">
                                                             <div className="flex items-center gap-2">
-                                                                <span className="text-foreground font-mono text-sm font-medium">
+                                                                <span className="font-mono text-sm font-medium text-foreground">
                                                                     {item.landing_source}
                                                                 </span>
                                                                 {isWinner && (
-                                                                    <Badge variant="default" className="bg-chart-4 text-foreground gap-1">
+                                                                    <Badge variant="default" className="gap-1 bg-chart-4 text-foreground">
                                                                         <Trophy className="h-3 w-3" /> Winner
                                                                     </Badge>
                                                                 )}
                                                             </div>
                                                         </td>
-                                                        <td className="text-foreground p-4 font-medium">{formatNumber(item.visits)}</td>
+                                                        <td className="p-4 font-medium text-foreground">{formatNumber(item.visits)}</td>
                                                         <td className="p-4">
-                                                            <span className={isHighBounce ? 'text-destructive font-medium' : 'text-foreground'}>
+                                                            <span className={isHighBounce ? 'font-medium text-destructive' : 'text-foreground'}>
                                                                 {item.bounce_rate.toFixed(1)}%
                                                             </span>
                                                         </td>
-                                                        <td className="text-foreground p-4">{formatNumber(item.conversions)}</td>
+                                                        <td className="p-4 text-foreground">{formatNumber(item.conversions)}</td>
                                                         <td className="p-4">
                                                             <Badge variant="secondary">{item.lead_cr.toFixed(2)}%</Badge>
                                                         </td>
@@ -419,7 +507,7 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                                                 {formatCurrency(item.rpv)}
                                                             </span>
                                                         </td>
-                                                        <td className="text-foreground p-4">{formatCurrency(item.revenue)}</td>
+                                                        <td className="p-4 text-foreground">{formatCurrency(item.revenue)}</td>
                                                     </tr>
                                                 );
                                             })}
@@ -434,12 +522,12 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                         const isHighBounce = item.bounce_rate > 80;
 
                                         return (
-                                            <Card key={item.landing_source} className={`${isWinner ? 'border-chart-4 border-2' : ''}`}>
+                                            <Card key={item.landing_source} className={`${isWinner ? 'border-2 border-chart-4' : ''}`}>
                                                 <CardContent className="space-y-3 pt-4">
                                                     <div className="flex items-center justify-between">
-                                                        <span className="text-foreground font-mono font-medium">{item.landing_source}</span>
+                                                        <span className="font-mono font-medium text-foreground">{item.landing_source}</span>
                                                         {isWinner && (
-                                                            <Badge variant="default" className="bg-chart-4 text-foreground gap-1">
+                                                            <Badge variant="default" className="gap-1 bg-chart-4 text-foreground">
                                                                 <Trophy className="h-3 w-3" /> Winner
                                                             </Badge>
                                                         )}
@@ -447,7 +535,7 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                                     <div className="grid grid-cols-2 gap-3 text-sm">
                                                         <div>
                                                             <span className="text-muted-foreground">Visits:</span>{' '}
-                                                            <span className="text-foreground font-medium">{formatNumber(item.visits)}</span>
+                                                            <span className="font-medium text-foreground">{formatNumber(item.visits)}</span>
                                                         </div>
                                                         <div>
                                                             <span className="text-muted-foreground">Bounce:</span>{' '}
@@ -491,7 +579,7 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                         >
                                             <ChevronLeft className="h-4 w-4" />
                                         </Button>
-                                        <span className="text-muted-foreground text-sm">
+                                        <span className="text-sm text-muted-foreground">
                                             Page {currentPage} of {totalPages}
                                         </span>
                                         <Button
@@ -512,7 +600,7 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                             <CardHeader>
                                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                                     <div className="flex items-center gap-3">
-                                        <Activity className="text-primary h-5 w-5" />
+                                        <Activity className="h-5 w-5 text-primary" />
                                         <div>
                                             <CardTitle>Split Funnel</CardTitle>
                                             <CardDescription>Compare conversion journey across landing pages</CardDescription>
@@ -573,7 +661,7 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                         </ResponsiveContainer>
                                     </div>
                                 ) : (
-                                    <div className="text-muted-foreground py-12 text-center">
+                                    <div className="py-12 text-center text-muted-foreground">
                                         Select at least one landing page to view the funnel chart
                                     </div>
                                 )}
@@ -583,10 +671,10 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                     <div className="overflow-x-auto">
                                         <table className="w-full text-sm">
                                             <thead>
-                                                <tr className="border-border border-b">
-                                                    <th className="text-muted-foreground p-3 text-left font-medium">Stage</th>
+                                                <tr className="border-b border-border">
+                                                    <th className="p-3 text-left font-medium text-muted-foreground">Stage</th>
                                                     {selectedFunnelSources.map((source) => (
-                                                        <th key={source} className="text-muted-foreground p-3 text-left font-medium">
+                                                        <th key={source} className="p-3 text-left font-medium text-muted-foreground">
                                                             {source}
                                                         </th>
                                                     ))}
@@ -594,8 +682,8 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                             </thead>
                                             <tbody>
                                                 {['Visits', 'Engaged', 'Intent', 'Leads', 'Sales'].map((stage) => (
-                                                    <tr key={stage} className="border-border border-b">
-                                                        <td className="text-foreground p-3 font-medium">{stage}</td>
+                                                    <tr key={stage} className="border-b border-border">
+                                                        <td className="p-3 font-medium text-foreground">{stage}</td>
                                                         {selectedFunnelSources.map((source) => {
                                                             const funnelItem = funnel.find((f) => f.landing_source === source);
                                                             const step = funnelItem?.steps.find((s) => s.stage === stage);
@@ -603,7 +691,7 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                                                 <td key={source} className="p-3">
                                                                     <div className="flex items-center gap-2">
                                                                         <span className="text-foreground">{formatNumber(step?.count ?? 0)}</span>
-                                                                        <span className="text-muted-foreground text-xs">
+                                                                        <span className="text-xs text-muted-foreground">
                                                                             ({step?.percentage.toFixed(1) ?? 0}%)
                                                                         </span>
                                                                     </div>
@@ -619,13 +707,24 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                             </CardContent>
                         </Card>
 
-                        {/* ==================== SECTION C: QUALITY ANALYSIS ==================== */}
+                        {/* ==================== SECTION C: DEVICE PERFORMANCE ==================== */}
+                        {devices && devices.length > 0 && <DeviceComparison data={devices} />}
+
+                        {/* ==================== SECTION D: CTA ANALYSIS ==================== */}
+                        {cta && cta.length > 0 && <CtaAnalysis data={cta} />}
+
+                        {/* ==================== SECTION E: AUDIENCE SEGMENTATION ==================== */}
+                        {((readers && readers.length > 0) || (heatmap && heatmap.length > 0)) && (
+                            <AudienceSegmentation readers={readers || []} heatmap={heatmap || []} />
+                        )}
+
+                        {/* ==================== SECTION F: QUALITY ANALYSIS ==================== */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-3">
-                                <Users className="text-primary h-5 w-5" />
+                                <Users className="h-5 w-5 text-primary" />
                                 <div>
-                                    <h2 className="text-foreground text-xl font-semibold">Behavior Analysis</h2>
-                                    <p className="text-muted-foreground text-sm">Buyers vs Non-Buyers engagement comparison</p>
+                                    <h2 className="text-xl font-semibold text-foreground">Behavior Analysis</h2>
+                                    <p className="text-sm text-muted-foreground">Buyers vs Non-Buyers engagement comparison</p>
                                 </div>
                             </div>
 
@@ -641,7 +740,7 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                                 <div className="flex items-center justify-between">
                                                     <CardTitle className="font-mono text-sm">{item.landing_source}</CardTitle>
                                                     {hasSignificantGap && (
-                                                        <Badge variant="outline" className="border-chart-4 text-chart-4 text-xs">
+                                                        <Badge variant="outline" className="border-chart-4 text-xs text-chart-4">
                                                             High Gap
                                                         </Badge>
                                                     )}
@@ -651,20 +750,20 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                                 {/* Scroll Depth Comparison */}
                                                 <div className="space-y-2">
                                                     <div className="flex items-center justify-between text-sm">
-                                                        <span className="text-muted-foreground flex items-center gap-1">
+                                                        <span className="flex items-center gap-1 text-muted-foreground">
                                                             <TrendingUp className="h-3 w-3" /> Scroll Depth
                                                         </span>
                                                     </div>
                                                     <div className="space-y-1">
                                                         <div className="flex items-center justify-between text-xs">
                                                             <span className="text-primary">Buyers ({item.buyers.count})</span>
-                                                            <span className="text-foreground font-medium">
+                                                            <span className="font-medium text-foreground">
                                                                 {item.buyers.avg_scroll_depth.toFixed(1)}%
                                                             </span>
                                                         </div>
-                                                        <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
+                                                        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                                                             <div
-                                                                className="bg-primary h-full rounded-full transition-all"
+                                                                className="h-full rounded-full bg-primary transition-all"
                                                                 style={{ width: `${Math.min(item.buyers.avg_scroll_depth, 100)}%` }}
                                                             />
                                                         </div>
@@ -672,9 +771,9 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                                             <span className="text-muted-foreground">Others ({item.non_buyers.count})</span>
                                                             <span className="text-foreground">{item.non_buyers.avg_scroll_depth.toFixed(1)}%</span>
                                                         </div>
-                                                        <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
+                                                        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                                                             <div
-                                                                className="bg-muted-foreground h-full rounded-full transition-all"
+                                                                className="h-full rounded-full bg-muted-foreground transition-all"
                                                                 style={{ width: `${Math.min(item.non_buyers.avg_scroll_depth, 100)}%` }}
                                                             />
                                                         </div>
@@ -684,23 +783,23 @@ export default function LabsIndex({ matrix, funnel, quality, filters }: Props) {
                                                 {/* Dwell Time Comparison */}
                                                 <div className="space-y-2">
                                                     <div className="flex items-center justify-between text-sm">
-                                                        <span className="text-muted-foreground flex items-center gap-1">
+                                                        <span className="flex items-center gap-1 text-muted-foreground">
                                                             <Clock className="h-3 w-3" /> Dwell Time
                                                         </span>
                                                     </div>
                                                     <div className="flex items-center justify-between gap-4">
                                                         <div className="text-center">
-                                                            <div className="text-primary text-lg font-bold">
+                                                            <div className="text-lg font-bold text-primary">
                                                                 {formatDuration(item.buyers.avg_dwell_time)}
                                                             </div>
-                                                            <div className="text-muted-foreground text-xs">Buyers</div>
+                                                            <div className="text-xs text-muted-foreground">Buyers</div>
                                                         </div>
-                                                        <div className="text-muted-foreground text-xl">vs</div>
+                                                        <div className="text-xl text-muted-foreground">vs</div>
                                                         <div className="text-center">
-                                                            <div className="text-foreground text-lg font-bold">
+                                                            <div className="text-lg font-bold text-foreground">
                                                                 {formatDuration(item.non_buyers.avg_dwell_time)}
                                                             </div>
-                                                            <div className="text-muted-foreground text-xs">Others</div>
+                                                            <div className="text-xs text-muted-foreground">Others</div>
                                                         </div>
                                                     </div>
                                                 </div>
