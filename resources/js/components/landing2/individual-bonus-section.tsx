@@ -1,4 +1,5 @@
 import { CtaButton } from '@/components/ui/cta-button';
+import { useAnalytics } from '@/hooks/use-analytics';
 import { Tag } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -21,9 +22,10 @@ export function IndividualBonusSection({ bonus, index }: IndividualBonusSectionP
     const [isVisible, setIsVisible] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const sectionRef = useRef<HTMLElement>(null);
+    const { trackCTA } = useAnalytics();
 
     const handleCtaClick = () => {
-        // scroll to pricing section
+        trackCTA(`individual_bonus_${bonus.id}`, 'Gabung Sekarang', '#pricing-section');
         const pricingSection = document.getElementById('pricing-section');
         if (pricingSection) {
             pricingSection.scrollIntoView({ behavior: 'smooth' });

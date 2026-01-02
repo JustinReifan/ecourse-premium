@@ -2,7 +2,6 @@ import AppLogo from '@/components/app-logo';
 import { BonusSection } from '@/components/landing/bonus-section';
 import { CurriculumSection } from '@/components/landing/curriculum-section';
 import { FaqSection } from '@/components/landing/faq-section';
-import { HeroBadge } from '@/components/landing/hero-badge';
 import { MentorProfile } from '@/components/landing/mentor-profile';
 import { PricingSection } from '@/components/landing/pricing-section';
 import { ReasonJoinSection } from '@/components/landing/reason-join-section';
@@ -11,12 +10,13 @@ import { CtaButton } from '@/components/ui/cta-button';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { useDwellTime } from '@/hooks/use-dwell-time';
 import { useScrollTracking } from '@/hooks/use-scroll-tracking';
+import { cn } from '@/lib/utils';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import DOMPurify from 'dompurify';
 import { useEffect, useState } from 'react';
+
 interface WelcomeProps {
     landingHeadline: string;
     landingSubheadline: string;
@@ -26,7 +26,7 @@ interface WelcomeProps {
     coursePrice: number;
 }
 
-export default function Welcome() {
+export default function Test1Hero() {
     const { auth, landingHeadline, landingSubheadline, landingBadge, landingVslThumbnail, landingVslUrl } = usePage<SharedData & WelcomeProps>()
         .props;
     const { trackVisit, trackCTA } = useAnalytics();
@@ -50,7 +50,7 @@ export default function Welcome() {
 
     // Track CTA button click
     const handleCtaClick = () => {
-        trackCTA('hero_section', 'Gabung Sekarang', '#pricing-section');
+        trackCTA('hero_section', 'PELAJARI STRATEGINYA', '#pricing-section');
         // scroll to pricing section
         const pricingSection = document.getElementById('pricing-section');
         if (pricingSection) {
@@ -103,89 +103,68 @@ export default function Welcome() {
                     </div>
                 </header>
 
+                {/* Hero Section */}
                 <section
-                    className="relative overflow-hidden pt-20 lg:pt-12"
+                    className="relative overflow-hidden pt-6 lg:pt-8"
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
                 >
                     <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="space-y-8 text-center">
-                            <div data-aos="fade-up">
-                                <HeroBadge text={landingBadge} />
+                            <div className="flex justify-center">
+                                <div
+                                    className={cn(
+                                        'border-primary/30 from-primary/20 to-accent/20 text-primary inline-flex items-center gap-2 rounded-full border bg-gradient-to-r px-4 py-2 text-sm font-medium',
+                                        'animate-glow-pulse hover:border-primary/40 transition-all duration-500',
+                                        'shadow-primary/30 shadow-lg backdrop-blur-sm',
+                                    )}
+                                >
+                                    {/* Teks Copywriting */}
+                                    <span className="text-foreground text-xs md:text-sm">
+                                        <p>⭐⭐⭐⭐⭐</p>
+                                        <span className="font-bold">4.9/5.0</span> dari <span className="font-bold">500+ murid</span> yang sudah
+                                        berhasil hasilkan jutaan dengan metode ini.
+                                    </span>
+                                </div>
                             </div>
 
-                            {/* Glow effect */}
-                            {/* <div className="absolute inset-0 overflow-visible">
-                                <div
-                                    className={`animate-float absolute h-96 w-96 rounded-full blur-3xl transition-all duration-1000 ${
-                                        isHovered ? 'bg-primary/30' : 'bg-primary/15'
-                                    }`}
-                                    style={{
-                                        top: '-20%',
-                                        left: '35%',
-                                        animationDelay: '1s',
-                                    }}
-                                />
-                                <div
-                                    className={`animate-float absolute h-80 w-80 rounded-full blur-3xl transition-all duration-1000 ${
-                                        isHovered ? 'bg-accent/30' : 'bg-accent/15'
-                                    }`}
-                                    style={{
-                                        top: '-20%',
-                                        right: '35%',
-                                        animationDelay: '1s',
-                                        animationDirection: 'reverse',
-                                    }}
-                                />
-                            </div> */}
-
-                            <div className="space-y-6" data-aos="fade-up">
-                                <h1
-                                    className="text-foreground mx-auto max-w-6xl text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl"
-                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(landingHeadline) }}
-                                ></h1>
-                                <p className="text-muted-foreground mx-auto max-w-4xl text-base leading-relaxed md:text-xl">{landingSubheadline}</p>
+                            <div className="space-y-6">
+                                <h1 className="text-foreground mx-auto max-w-6xl text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl">
+                                    Dibimbing Mendapatkan{' '}
+                                    <span className="from-primary via-primary/80 to-primary animate-gradient-x bg-gradient-to-r bg-clip-text text-transparent">
+                                        5 Juta Pertama Dari Sosmed
+                                    </span>
+                                </h1>
+                                <p className="text-muted-foreground mx-auto max-w-4xl text-base leading-relaxed md:text-2xl">
+                                    Contek Strategi Aku <span className="font-bold">Hasilkan Rp 150+ JUTA</span> Dari Konten & Produk Digital -
+                                    Meskipun <span className="font-bold">Kamu Pemula dan Gaptek</span>
+                                </p>
                             </div>
-
-                            {/* <div className="animate-fade-in" style={{ animationDelay: '400ms', animationFillMode: 'both' }}>
-                                <CtaButton variant="secondary" size="lg" className="group border-primary/50">
-                                    Gabung sekarang
-                                    <ArrowRight className="ms-2 inline h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                                </CtaButton>
-                            </div> */}
                         </div>
                     </div>
                 </section>
 
-                {/* Hero Video Section */}
+                {/* image/video hero section */}
                 <section className="relative overflow-hidden py-8 lg:pt-12 lg:pb-24">
                     {/* Konten Utama */}
                     <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="space-y-12">
-                            <div data-aos="fade-up">
-                                {/* Video utama di atas background */}
-                                {/* <VideoPlayer
-                                    src={landingVslUrl}
-                                    title="VSL - Belajar Canva"
-                                    className="aspect-video w-full lg:h-[600px]"
-                                    thumbnailUrl={landingVslThumbnail}
-                                /> */}
-
+                            <div>
                                 {/* kalau gak ada vsl, thumbnail doang */}
-                                <div className="overflow-hidden rounded-2xl border border-neutral-800/60 bg-black shadow-2xl">
-                                    <img src="/storage/landing/hero/herosection.png" alt="" className="h-full w-full object-cover" />
+                                <div className="mx-auto overflow-hidden rounded-2xl bg-black shadow-2xl lg:max-w-3xl">
+                                    <img src="/storage/landing/hero/thumb3.png" alt="" className="h-full w-full object-cover" />
                                 </div>
                             </div>
 
                             {/* CTA Button */}
-                            <div className="pt-6 text-center">
+                            <div className="text-center">
                                 <button onClick={() => handleCtaClick()}>
                                     <CtaButton
                                         variant="primary"
                                         size="lg"
                                         className="group transform text-center transition-all duration-300 hover:scale-105"
                                     >
-                                        <span className="relative z-10">Gabung Sekarang</span>
+                                        <span className="relative z-10">PELAJARI STRATEGINYA</span>
                                     </CtaButton>
                                 </button>
                             </div>
@@ -194,12 +173,10 @@ export default function Welcome() {
                 </section>
 
                 {/* Canva Masterclass Benefits Section */}
-                <div data-aos="fade-up" data-aos-delay="200">
-                    <ReasonJoinSection />
-                </div>
+                <ReasonJoinSection />
 
                 {/* Learning Benefits Section */}
-                {/* <section className="border-border/50 relative border-t py-16 lg:py-32" data-aos="fade-up">
+                {/* <section className="border-border/50 relative border-t py-16 lg:py-32" >
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-5 lg:gap-16">
                             <div className="animate-fade-in lg:col-span-2" style={{ animationDelay: '1000ms', animationFillMode: 'both' }}>
@@ -221,43 +198,24 @@ export default function Welcome() {
                                 </div>
                             </div>
 
-                            <div className="lg:col-span-3" data-aos="fade-up">
+                            <div className="lg:col-span-3" >
                                 <LearningBenefits />
                             </div>
                         </div>
                     </div>
                 </section> */}
 
-                {/* Video Results Section */}
-                <div data-aos="fade-up" data-aos-delay="200">
-                    <TestimonialsSection />
-                    {/* <VideoResults /> */}
-                </div>
+                <TestimonialsSection />
 
-                {/* Curriculum Section */}
-                <div data-aos="fade-up" data-aos-delay="200">
-                    <CurriculumSection />
-                </div>
+                <CurriculumSection />
 
-                {/* Bonus Section */}
-                <div data-aos="fade-up" data-aos-delay="200">
-                    <BonusSection />
-                </div>
+                <BonusSection />
 
-                {/* Mentor Profile Section */}
-                <div data-aos="fade-up" data-aos-delay="200">
-                    <MentorProfile />
-                </div>
+                <MentorProfile />
 
-                {/* Pricing Section */}
-                <div data-aos="fade-up" data-aos-delay="200">
-                    <PricingSection />
-                </div>
+                <PricingSection />
 
-                {/* FAQ Section */}
-                <div data-aos="fade-up" data-aos-delay="200">
-                    <FaqSection />
-                </div>
+                <FaqSection />
 
                 {/* Footer */}
                 <footer className="relative backdrop-blur-sm">

@@ -10,7 +10,6 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\LabsController;
 use App\Http\Controllers\MemberProductController;
-use App\Http\Controllers\WhatsappNotifController;
 use App\Http\Controllers\ModuleMaterialController;
 use App\Http\Controllers\ProductPurchaseController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -31,17 +30,12 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/mbd', function () {
-    $settings = \App\Models\Setting::getAllCached();
+    return Inertia::render('mbd');
+})->name('mbd');
 
-    return Inertia::render('welcome2', [
-        'landingHeadline' => $settings['landing_headline'] ?? 'Strategi Jadi Canva Creator Sukses: Dari Nol Sampai Cuan Pertama di Dunia Digital',
-        'landingSubheadline' => $settings['landing_subheadline'] ?? 'Dibimbing Langsung Dari Nol Sampai Bisa Ngasilin Cuan dari Canva',
-        'landingBadge' => $settings['landing_badge'] ?? 'Premium Canva Masterclass',
-        'landingVslThumbnail' => $settings['landing_vsl_thumbnail'] ?? null,
-        'landingVslUrl' => $settings['landing_vsl_url'] ?? null,
-        'coursePrice' => $settings['course_price'] ?? 0,
-    ]);
-})->name('home2');
+Route::get('/test1', function () {
+    return Inertia::render('test1-hero');
+})->name('test1');
 
 
 

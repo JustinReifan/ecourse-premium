@@ -105,7 +105,7 @@ export function IndividualBonusSection({ bonus, index }: IndividualBonusSectionP
                     {/* Content Section */}
                     <div className={`space-y-8 lg:col-span-3 ${!isEven ? 'lg:order-2' : ''}`}>
                         {/* Floating Bonus Badge */}
-                        <div className="animate-fade-in">
+                        <div>
                             <div className="border-primary/20 bg-primary/10 inline-flex items-center gap-2 rounded-full border px-4 py-2 backdrop-blur-sm">
                                 <div className="bg-primary h-2 w-2 animate-pulse rounded-full" />
                                 <span className="text-primary text-sm font-medium">{bonus.badge}</span>

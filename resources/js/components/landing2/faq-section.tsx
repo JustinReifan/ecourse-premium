@@ -1,4 +1,5 @@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useAnalytics } from '@/hooks/use-analytics';
 import { cn } from '@/lib/utils';
 import { ChevronDown, HelpCircle, MapPin, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
@@ -88,7 +89,11 @@ function FaqItem({ faq, index }: FaqItemProps) {
 }
 
 export function FaqSection() {
+    const { trackCTA } = useAnalytics();
+
     const handleCtaClick = () => {
+        trackCTA('faq_section', 'Join Sekarang', '#pricing-section');
+
         // scroll to pricing section
         const pricingSection = document.getElementById('pricing-section');
         if (pricingSection) {

@@ -1,5 +1,6 @@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { CtaButton } from '@/components/ui/cta-button';
+import { useAnalytics } from '@/hooks/use-analytics';
 import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronRight, CirclePlay } from 'lucide-react';
 import { useState } from 'react';
@@ -291,8 +292,10 @@ function CurriculumCard({ module, delay }: CurriculumCardProps) {
 }
 
 export function CurriculumSection() {
+    const { trackCTA } = useAnalytics();
+
     const handleCtaClick = () => {
-        // scroll to pricing section
+        trackCTA('curriculum_section', 'Gabung Sekarang', '#pricing-section');
         const pricingSection = document.getElementById('pricing-section');
         if (pricingSection) {
             pricingSection.scrollIntoView({ behavior: 'smooth' });

@@ -1,5 +1,6 @@
 import { CtaButton } from '@/components/ui/cta-button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useAnalytics } from '@/hooks/use-analytics';
 import { cn } from '@/lib/utils';
 import { router } from '@inertiajs/react';
 import { Check, Rocket, Star, TicketPercent, Zap } from 'lucide-react';
@@ -80,9 +81,20 @@ function BenefitItem({ benefit, index }: BenefitItemProps) {
 
 export function PricingSection() {
     const [isCardHovered, setIsCardHovered] = useState(false);
+    const { trackCTA } = useAnalytics();
 
     const handleButton = () => {
-        router.visit(route('register', { type: 'lead-magnet' }), {
+        trackCTA('pricing_card', 'Gabung Sekarang', route('register'));
+        router.visit(route('register'), {
+            method: 'get',
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
+    const handlePromoClick = () => {
+        trackCTA('pricing_promo_link', 'Punya Kode Promo?', route('register'));
+        router.visit(route('register'), {
             method: 'get',
             preserveState: true,
             preserveScroll: true,
@@ -208,7 +220,7 @@ export function PricingSection() {
                                             <Check className="text-primary h-4 w-4" />
                                             
                                         </div> */}
-                                        <button onClick={handleButton}>
+                                        <button onClick={handlePromoClick}>
                                             <div className="hover:text-foreground text-primary flex cursor-pointer items-center gap-2 transition-colors duration-300">
                                                 <TicketPercent className="h-4 w-4" />
                                                 Punya Kode Promo?

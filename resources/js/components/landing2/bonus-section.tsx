@@ -1,5 +1,7 @@
 import { IndividualBonusSection } from '@/components/landing/individual-bonus-section';
 import { CtaButton } from '@/components/ui/cta-button';
+import { useAnalytics } from '@/hooks/use-analytics';
+
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { Sparkles } from 'lucide-react';
@@ -166,8 +168,10 @@ export function BonusSection() {
     const [activePreview, setActivePreview] = useState(1);
     const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
+    const { trackCTA } = useAnalytics();
+
     const handleCtaClick = () => {
-        // scroll to pricing section
+        trackCTA('bonus_section', 'Gabung Sekarang', '#pricing-section');
         const pricingSection = document.getElementById('pricing-section');
         if (pricingSection) {
             pricingSection.scrollIntoView({ behavior: 'smooth' });
@@ -186,7 +190,7 @@ export function BonusSection() {
     }, []);
 
     const handleCtaClick2 = () => {
-        // scroll to pricing section
+        trackCTA('bonus_section_bottom', 'Ambil Bonus Sekarang', '#pricing-section');
         const pricingSection = document.getElementById('pricing-section');
         if (pricingSection) {
             pricingSection.scrollIntoView({ behavior: 'smooth' });

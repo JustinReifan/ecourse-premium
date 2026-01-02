@@ -1,10 +1,9 @@
 import { IndividualBonusSection } from '@/components/landing/individual-bonus-section';
 import { CtaButton } from '@/components/ui/cta-button';
 import { useAnalytics } from '@/hooks/use-analytics';
-import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { Sparkles } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export const bonusData = {
     premium: {
@@ -176,16 +175,16 @@ export function BonusSection() {
         }
     };
 
-    useEffect(() => {
-        AOS.init({
-            duration: 1000, // Animation duration in milliseconds
-            // easing: 'ease-in-out', // Easing function for the animation
-            // delay: 100,
-            once: true, // Whether animation should only happen once
-        });
-        // Optional: Call AOS.refresh() if your content changes dynamically after initial load
-        // AOS.refresh();
-    }, []);
+    // useEffect(() => {
+    //     AOS.init({
+    //         duration: 1000, // Animation duration in milliseconds
+    //         // easing: 'ease-in-out', // Easing function for the animation
+    //         // delay: 100,
+    //         once: true, // Whether animation should only happen once
+    //     });
+    //     // Optional: Call AOS.refresh() if your content changes dynamically after initial load
+    //     // AOS.refresh();
+    // }, []);
 
     const handleCtaClick2 = () => {
         trackCTA('bonus_section_bottom', 'Ambil Bonus Sekarang', '#pricing-section');
@@ -210,14 +209,14 @@ export function BonusSection() {
             <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 {/* Bonus Introduction */}
                 <div className="mb-16 space-y-8 text-center">
-                    <div className="animate-fade-in">
+                    <div>
                         <div className="bg-primary/10 border-primary/20 inline-flex items-center gap-2 rounded-full border px-4 py-2 backdrop-blur-sm">
                             <div className="bg-primary h-2 w-2 animate-pulse rounded-full" />
                             <span className="text-primary text-sm font-medium">Bonus Tambahan</span>
                         </div>
                     </div>
 
-                    <div className="animate-fade-in space-y-4" style={{ animationDelay: '200ms', animationFillMode: 'both' }}>
+                    <div className="space-y-4">
                         <h2 className="text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
                             <span className="text-foreground block">Takut Gak Bisa Praktek?</span>
                             <span className="mt-2 block">
@@ -235,8 +234,7 @@ export function BonusSection() {
 
                     {/* Bonus Preview Grid */}
                     <div
-                        className="animate-fade-in mx-auto grid max-w-3xl grid-cols-2 gap-4" // <-- UBAH DI SINI
-                        style={{ animationDelay: '400ms', animationFillMode: 'both' }}
+                        className="mx-auto grid max-w-3xl grid-cols-2 gap-4" // <-- UBAH DI SINI
                     >
                         {bonusImages.map((bonus) => (
                             <div
@@ -285,7 +283,7 @@ export function BonusSection() {
                         <div className="relative">
                             <div className="space-y-16">
                                 <div className="mb-16 space-y-6 text-center">
-                                    <div className="animate-fade-in mb-6">
+                                    <div className=" mb-6">
                                         <div className="bg-primary/10 border-primary/20 inline-flex items-center gap-2 rounded-full border px-4 py-2 backdrop-blur-sm">
                                             <div className="bg-primary h-2 w-2 animate-pulse rounded-full" />
                                             <span className="text-primary text-sm font-medium">{bonusData.premium.badge}</span>
@@ -403,7 +401,7 @@ export function BonusSection() {
                 ))}
 
                 {/* Value Summary */}
-                <div className="animate-fade-in text-center" style={{ animationDelay: '1400ms', animationFillMode: 'both' }}>
+                <div className="text-center">
                     <div className="from-primary/10 via-card/50 to-accent/10 border-primary/30 inline-block rounded-3xl border bg-gradient-to-br p-8 backdrop-blur-sm">
                         <div className="space-y-4">
                             <h3 className="text-foreground mb-2 text-2xl font-bold md:text-3xl">Total Value Yang Kamu Dapatkan</h3>
