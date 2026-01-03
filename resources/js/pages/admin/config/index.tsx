@@ -35,6 +35,7 @@ interface ConfigFormData {
     midtrans_merchant_id: string;
     midtrans_base_url: string;
     whatsapp_api_key: string;
+    whatsapp_account_key: string;
     whatsapp_base_url: string;
     affiliate_commission_percent: string;
     affiliate_minimum_payout: string;
@@ -67,6 +68,7 @@ export default function ConfigIndex({ settings }: ConfigPageProps) {
         midtrans_merchant_id: settings.midtrans_merchant_id || '',
         midtrans_base_url: settings.midtrans_base_url || '',
         whatsapp_api_key: settings.whatsapp_api_key || '',
+        whatsapp_account_key: settings.whatsapp_account_key || '',
         whatsapp_base_url: settings.whatsapp_base_url || '',
         affiliate_commission_percent: settings.affiliate_commission_percent || '10',
         affiliate_minimum_payout: settings.affiliate_minimum_payout || '100000',
@@ -218,7 +220,7 @@ export default function ConfigIndex({ settings }: ConfigPageProps) {
                                             onChange={(e) => setData('whatsapp_base_url', e.target.value)}
                                             placeholder="WhatsApp API base URL"
                                         />
-                                        {errors.whatsapp_base_url && <p className="text-destructive mt-1 text-sm">{errors.whatsapp_api_key}</p>}
+                                        {errors.whatsapp_base_url && <p className="text-destructive mt-1 text-sm">{errors.whatsapp_base_url}</p>}
                                     </div>
                                 </CardContent>
                                 <CardContent className="space-y-4">
@@ -232,6 +234,21 @@ export default function ConfigIndex({ settings }: ConfigPageProps) {
                                             placeholder="Your WhatsApp API key"
                                         />
                                         {errors.whatsapp_api_key && <p className="text-destructive mt-1 text-sm">{errors.whatsapp_api_key}</p>}
+                                    </div>
+                                </CardContent>
+                                <CardContent className="space-y-4">
+                                    <div>
+                                        <Label htmlFor="whatsapp_account_key">Account Key</Label>
+                                        <Input
+                                            id="whatsapp_account_key"
+                                            type="password"
+                                            value={data.whatsapp_account_key}
+                                            onChange={(e) => setData('whatsapp_account_key', e.target.value)}
+                                            placeholder="Your WhatsApp API key"
+                                        />
+                                        {errors.whatsapp_account_key && (
+                                            <p className="text-destructive mt-1 text-sm">{errors.whatsapp_account_key}</p>
+                                        )}
                                     </div>
                                 </CardContent>
                             </Card>

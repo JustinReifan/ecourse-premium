@@ -123,7 +123,7 @@ export default function Mbd() {
                 <section className="relative overflow-hidden py-8 lg:pt-12 lg:pb-24">
                     {/* Konten Utama */}
                     <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                        <div className="space-y-12">
+                        <div className="space-y-10">
                             <div data-aos="fade-up">
                                 {/* Video utama di atas background */}
                                 {/* <VideoPlayer
@@ -134,13 +134,13 @@ export default function Mbd() {
                                 /> */}
 
                                 {/* kalau gak ada vsl, thumbnail doang */}
-                                <div className="overflow-hidden rounded-2xl border border-neutral-800/60 bg-black shadow-2xl">
-                                    <img src="/storage/landing/hero/herosection.png" alt="" className="h-full w-full object-cover" />
+                                <div className="overflow-hidden rounded-2xl">
+                                    <img src="/storage/landing/hero/thumb2.png" alt="" className="h-full w-full object-cover" />
                                 </div>
                             </div>
 
                             {/* CTA Button */}
-                            <div className="pt-6 text-center">
+                            <div className="text-center">
                                 <button onClick={() => handleCtaClick()}>
                                     <CtaButton
                                         variant="primary"

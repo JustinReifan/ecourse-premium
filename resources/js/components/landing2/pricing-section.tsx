@@ -85,7 +85,7 @@ export function PricingSection() {
 
     const handleButton = () => {
         trackCTA('pricing_card', 'Gabung Sekarang', route('register'));
-        router.visit(route('register'), {
+        router.visit(route('register', { type: 'lead-magnet' }), {
             method: 'get',
             preserveState: true,
             preserveScroll: true,
@@ -94,7 +94,7 @@ export function PricingSection() {
 
     const handlePromoClick = () => {
         trackCTA('pricing_promo_link', 'Punya Kode Promo?', route('register'));
-        router.visit(route('register'), {
+        router.visit(route('register', { type: 'lead-magnet' }), {
             method: 'get',
             preserveState: true,
             preserveScroll: true,

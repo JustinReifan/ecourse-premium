@@ -52,6 +52,7 @@ class WebConfigController extends Controller
             'duitku_script_url' => 'nullable|url|max:500',
             'duitku_sandbox_mode' => 'nullable|boolean',
             'midtrans_api_key' => 'nullable|string|max:500',
+            'whatsapp_account_key' => 'nullable|string|max:500',
             'midtrans_client_key' => 'nullable|string|max:500',
             'midtrans_merchant_id' => 'nullable|string|max:255',
             'midtrans_base_url' => 'nullable|url|max:500',
