@@ -50,7 +50,10 @@ class AffiliateController extends Controller
             'conversion_rate' => $affiliate->conversion_rate,
             'pending_balance' => $affiliate->pending_balance,
             'available_balance' => $affiliate->balance,
-            'total_earnings' => $affiliate->conversions()
+            'total_omset' => $affiliate->conversions()
+                ->whereIn('status', ['approved', 'paid'])
+                ->sum('order_amount'),
+            'total_commission' => $affiliate->conversions()
                 ->whereIn('status', ['approved', 'paid'])
                 ->sum('commission_amount'),
         ];

@@ -8,15 +8,15 @@ import { useState } from 'react';
 
 const benefits = [
     {
-        title: '50+ Modul Pembelajaran',
+        title: 'Pembelajaran 6 Bab',
         description: 'Tutorial step-by-step dari O sampai siap cuan',
     },
     {
-        title: 'Sertifikat Digital',
+        title: 'Dari Ragu Ke Yakin',
         description: 'Dapatkan sertifikat digital setelah menyelesaikan kelas',
     },
     {
-        title: 'Grup Telegram Eksklusif',
+        title: 'Peta Mulai Bisnis Digital',
         description: 'Bergabung dengan 12,000+ video creator di komunitas eksklusif',
     },
     {
@@ -28,7 +28,7 @@ const benefits = [
         description: 'Akses material course lengkap dari basic hingga advanced techniques',
     },
     {
-        title: 'Bimbingan 1 on 1',
+        title: 'Affiliate Komisi 50%',
         description: 'Dapatkan bimbingan langsung dari mentor terbaik',
     },
 ];
@@ -85,7 +85,7 @@ export function PricingSection() {
 
     const handleButton = () => {
         trackCTA('pricing_card', 'Gabung Sekarang', route('register'));
-        router.visit(route('register'), {
+        router.visit(route('register', { type: 'lead-magnet' }), {
             method: 'get',
             preserveState: true,
             preserveScroll: true,
@@ -94,7 +94,7 @@ export function PricingSection() {
 
     const handlePromoClick = () => {
         trackCTA('pricing_promo_link', 'Punya Kode Promo?', route('register'));
-        router.visit(route('register'), {
+        router.visit(route('register', { type: 'lead-magnet' }), {
             method: 'get',
             preserveState: true,
             preserveScroll: true,
@@ -122,12 +122,11 @@ export function PricingSection() {
 
                         <div className="animate-fade-in space-y-4" style={{ animationDelay: '200ms', animationFillMode: 'both' }}>
                             <h2 className="text-foreground text-4xl font-bold md:text-5xl lg:text-6xl">
-                                <span className="text-foreground block bg-clip-text">Investasi Sekali,</span>
-                                <span className="text-primary/80 bg-clip-text">Manfaat Selamanya</span>
+                                <span className="text-foreground block bg-clip-text">Dapat Manfaatnya,</span>
+                                <span className="text-primary/80 bg-clip-text">Bayar Suka Suka</span>
                             </h2>
                             <p className="text-muted-foreground mx-auto max-w-3xl text-xl leading-relaxed">
-                                Kamu akan dapat lifetime access ke semua materi premium & update-nya. Cukup bayar sekali, ilmunya bisa kamu akses
-                                seumur hidup.
+                                Kamu akan dapat akses selamanya ke materi kelasnya. Cukup bayar suka suka, ilmunya bisa kamu akses seumur hidup.
                             </p>
                         </div>
                     </div>
@@ -169,9 +168,11 @@ export function PricingSection() {
                                 {/* Price Display */}
                                 <div className="space-y-4 text-center">
                                     <div className="space-y-2">
-                                        <div className="flex items-center justify-center gap-2">
-                                            <span className="text-muted-foreground text-2xl line-through">Rp 749.000</span>
-                                            <span className="bg-destructive/20 text-destructive rounded-md px-2 py-1 text-sm font-medium">-60%</span>
+                                        <div className="flex items-center justify-center gap-2 py-2">
+                                            <span className="text-muted-foreground text-4xl font-medium line-through md:text-5xl lg:text-6xl">
+                                                Rp 749.000
+                                            </span>
+                                            <span className="bg-destructive/20 text-destructive rounded-md px-2 py-1 text-sm font-medium">-100%</span>
                                         </div>
                                         {/* <div className="flex items-center justify-center gap-2">
                                             <span className="text-primary/80 text-2xl line-through">Rp 29.000</span>
@@ -179,12 +180,13 @@ export function PricingSection() {
                                                 100 Orang Pertama
                                             </span>
                                         </div> */}
-                                        <div className="flex items-baseline justify-center gap-1">
+                                        {/* <div className="flex items-baseline justify-center gap-1">
                                             <span className="text-primary text-2xl font-medium">Rp</span>
-                                            {/* harusnya text-foreground */}
-                                            <span className="text-foreground text-6xl font-bold tracking-tight lg:text-7xl">299.000</span>
-                                        </div>
-                                        <p className="text-muted-foreground text-lg">Akses selamanya • Tanpa biaya bulanan</p>
+                                            <span className="text-foreground text-6xl font-bold tracking-tight line-through lg:text-7xl">
+                                                249.000
+                                            </span>
+                                        </div> */}
+                                        <p className="text-muted-foreground text-lg">Akses selamanya • Bayar suka-suka</p>
                                     </div>
                                 </div>
 
@@ -214,6 +216,10 @@ export function PricingSection() {
                                     </button>
 
                                     <div className="flex items-center justify-center gap-6 text-sm text-white">
+                                        {/* <div className="flex items-center gap-2">
+                                            <Check className="text-primary h-4 w-4" />
+                                            
+                                        </div> */}
                                         <button onClick={handlePromoClick}>
                                             <div className="hover:text-foreground text-primary flex cursor-pointer items-center gap-2 transition-colors duration-300">
                                                 <TicketPercent className="h-4 w-4" />

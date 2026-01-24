@@ -37,6 +37,14 @@ Route::get('/test1', function () {
     return Inertia::render('test1-hero');
 })->name('test1');
 
+Route::get('/test2', function () {
+    return Inertia::render('test2');
+})->name('test2');
+
+Route::get('/test3', function () {
+    return Inertia::render('test3');
+})->name('test3');
+
 
 
 Route::post('/register/get-snap-token', [RegisteredUserController::class, 'getSnapToken'])->name('register.get-snap-token');

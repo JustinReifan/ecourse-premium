@@ -33,7 +33,7 @@ interface Order {
     status: 'pending' | 'completed' | 'failed' | 'refunded';
     type: 'registration' | 'product_purchase';
     payment_method: string | null;
-    meta: { product?: { id: number; title: string } } | null;
+    meta: { product?: { id: number; title: string }; form_data?: { name: string; phone: string; username: string } } | null;
     user?: User;
     created_at: string;
 }
@@ -141,10 +141,12 @@ export default function OrdersPage({ orders, products, users }: OrdersPageProps)
                             className="text-foreground font-medium transition-colors hover:text-blue-400 hover:underline"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            {order.user?.name || 'N/A'}
+                            {order.status != 'completed' ? order?.meta?.form_data?.phone || 'N/A' : order?.user?.name}
                         </Link>
                         <p className="text-xs text-gray-400">
-                            @{value || '-'} ({order.user?.customer_age || '0'})
+                            {order.status === 'completed'
+                                ? `${value} - (${order.user?.customer_age || '?'})`
+                                : order?.meta?.form_data?.username || 'N/A'}
                         </p>
                     </div>
                 </div>

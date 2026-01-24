@@ -1,12 +1,13 @@
 import { Head, useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
 
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface ResetPasswordProps {
     token: string;
@@ -35,6 +36,8 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
         });
     };
 
+    const [showPassword, setShowPassword] = useState(false);
+
     return (
         <AuthLayout title="Reset password" description="Please enter your new password below">
             <Head title="Reset password" />
@@ -60,7 +63,7 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                         <Label htmlFor="password">Password</Label>
                         <Input
                             id="password"
-                            type="password"
+                            type={showPassword ? 'text' : 'password'}
                             name="password"
                             autoComplete="new-password"
                             value={data.password}
@@ -69,6 +72,13 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                             onChange={(e) => setData('password', e.target.value)}
                             placeholder="Password"
                         />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                        >
+                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
                         <InputError message={errors.password} />
                     </div>
 

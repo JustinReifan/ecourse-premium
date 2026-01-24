@@ -1,9 +1,11 @@
-import { IndividualBonusSection } from '@/components/landing2/individual-bonus-section';
+import { IndividualBonusSection } from '@/components/landing/individual-bonus-section';
 import { CtaButton } from '@/components/ui/cta-button';
 import { useAnalytics } from '@/hooks/use-analytics';
+
+import AOS from 'aos';
 import 'aos/dist/aos.css';
-import { ArrowBigDown, Sparkles } from 'lucide-react';
-import { useState } from 'react';
+import { Sparkles } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export const bonusData = {
     premium: {
@@ -165,6 +167,7 @@ const bonusImages = [
 export function BonusSection() {
     const [activePreview, setActivePreview] = useState(1);
     const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+
     const { trackCTA } = useAnalytics();
 
     const handleCtaClick = () => {
@@ -175,16 +178,16 @@ export function BonusSection() {
         }
     };
 
-    // useEffect(() => {
-    //     AOS.init({
-    //         duration: 1000, // Animation duration in milliseconds
-    //         // easing: 'ease-in-out', // Easing function for the animation
-    //         // delay: 100,
-    //         once: true, // Whether animation should only happen once
-    //     });
-    //     // Optional: Call AOS.refresh() if your content changes dynamically after initial load
-    //     // AOS.refresh();
-    // }, []);
+    useEffect(() => {
+        AOS.init({
+            duration: 1000, // Animation duration in milliseconds
+            // easing: 'ease-in-out', // Easing function for the animation
+            // delay: 100,
+            once: true, // Whether animation should only happen once
+        });
+        // Optional: Call AOS.refresh() if your content changes dynamically after initial load
+        // AOS.refresh();
+    }, []);
 
     const handleCtaClick2 = () => {
         trackCTA('bonus_section_bottom', 'Ambil Bonus Sekarang', '#pricing-section');
@@ -209,14 +212,14 @@ export function BonusSection() {
             <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 {/* Bonus Introduction */}
                 <div className="mb-16 space-y-8 text-center">
-                    <div>
+                    <div className="animate-fade-in">
                         <div className="bg-primary/10 border-primary/20 inline-flex items-center gap-2 rounded-full border px-4 py-2 backdrop-blur-sm">
                             <div className="bg-primary h-2 w-2 animate-pulse rounded-full" />
                             <span className="text-primary text-sm font-medium">Bonus Tambahan</span>
                         </div>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="animate-fade-in space-y-4" style={{ animationDelay: '200ms', animationFillMode: 'both' }}>
                         <h2 className="text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
                             <span className="text-foreground block">Takut Gak Bisa Praktek?</span>
                             <span className="mt-2 block">
@@ -234,7 +237,8 @@ export function BonusSection() {
 
                     {/* Bonus Preview Grid */}
                     <div
-                        className="mx-auto grid max-w-3xl grid-cols-2 gap-4" // <-- UBAH DI SINI
+                        className="animate-fade-in mx-auto grid max-w-3xl grid-cols-2 gap-4" // <-- UBAH DI SINI
+                        style={{ animationDelay: '400ms', animationFillMode: 'both' }}
                     >
                         {bonusImages.map((bonus) => (
                             <div
@@ -283,7 +287,7 @@ export function BonusSection() {
                         <div className="relative">
                             <div className="space-y-16">
                                 <div className="mb-16 space-y-6 text-center">
-                                    <div className=" mb-6">
+                                    <div className="animate-fade-in mb-6">
                                         <div className="bg-primary/10 border-primary/20 inline-flex items-center gap-2 rounded-full border px-4 py-2 backdrop-blur-sm">
                                             <div className="bg-primary h-2 w-2 animate-pulse rounded-full" />
                                             <span className="text-primary text-sm font-medium">{bonusData.premium.badge}</span>
@@ -401,16 +405,16 @@ export function BonusSection() {
                 ))}
 
                 {/* Value Summary */}
-                <div className="text-center">
+                <div className="animate-fade-in text-center" style={{ animationDelay: '1400ms', animationFillMode: 'both' }}>
                     <div className="from-primary/10 via-card/50 to-accent/10 border-primary/30 inline-block rounded-3xl border bg-gradient-to-br p-8 backdrop-blur-sm">
                         <div className="space-y-4">
-                            <h3 className="text-foreground mb-2 text-2xl font-bold md:text-3xl">Total Bonus Yang Kamu Dapatkan Senilai</h3>
+                            <h3 className="text-foreground mb-2 text-2xl font-bold md:text-3xl">Total Value Yang Kamu Dapatkan</h3>
                             <div className="from-primary via-primary/80 to-accent bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent md:text-5xl">
                                 Rp {totalValue.toLocaleString('id-ID')}
                             </div>
-                            <p className="text-foreground mx-auto max-w-2xl text-xl font-bold">
-                                <ArrowBigDown className="text-primary inline-block h-12 w-12" />
-                                <span className="text-primary block py-2 text-4xl underline">GRATIS</span> saat bergabung di kelas ini!
+                            <p className="text-muted-foreground mx-auto max-w-2xl">
+                                Semua bonus senilai <span className="text-primary font-bold">Rp {totalValue.toLocaleString('id-ID')}</span> ini kamu
+                                dapatkan <span className="text-primary font-bold">GRATIS</span> saat bergabung di kelas ini!
                             </p>
 
                             <div className="pt-4">

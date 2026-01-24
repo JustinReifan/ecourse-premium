@@ -6,74 +6,99 @@ use GuzzleHttp\Client;
 use App\Models\Setting;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class WhatsappService
 {
     protected $client;
-    protected $apiKey;
-    protected $accountKey;
+    protected $mainApiKey;
     protected $baseUrl;
 
     public function __construct()
     {
-        // Ambil konfigurasi dari database
-        $this->apiKey = Setting::get('whatsapp_api_key');
+        // Ambil API Key Utama (Account Key) dari database
+        // Pastikan Anda mengupdate nilai 'whatsapp_api_key' di database dengan API Key Starsender Anda
+        $this->mainApiKey = Setting::get('whatsapp_api_key');
 
-        $this->accountKey = Setting::get('whatsapp_account_key') ?? '869f8353-3fce-4601-82fe-0330b1421c61';
-
+        // Base URL Starsender
         $this->baseUrl = Setting::get('whatsapp_base_url');
 
-        if (!$this->baseUrl) {
-            Log::error('WA Service: Base URL is not set.');
-            return;
+        if (!$this->mainApiKey) {
+            Log::error('WA Service: Starsender API Key is not set in Settings.');
         }
 
         $this->client = new Client([
             'base_uri' => $this->baseUrl,
-            'timeout'  => 15.0,
-            'http_errors' => false
+            'timeout'  => 30.0,
+            'http_errors' => false,
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ]
         ]);
     }
 
     /**
      * Mengambil satu waKey secara acak dari device yang statusnya 'connected'.
      */
-    private function getRandomActiveWaKey()
+    /**
+     * Mengambil device key secara bergantian (Round Robin).
+     * Device A -> Device B -> Device A -> dst...
+     */
+    private function getRandomActiveDeviceKey()
     {
+        if (!$this->mainApiKey) {
+            return null;
+        }
+
         try {
-            $response = $this->client->request('POST', 'devices', [
-                'form_params' => [
-                    'account_key' => $this->accountKey
+            $response = $this->client->request('GET', 'devices', [
+                'headers' => [
+                    'Authorization' => $this->mainApiKey
                 ]
             ]);
 
             $body = json_decode($response->getBody()->getContents(), true);
 
-            // Cek apakah request sukses dan data tersedia
-            if (isset($body['statusCode']) && $body['statusCode'] == 200 && !empty($body['data'])) {
+            if (isset($body['success']) && $body['success'] == true && !empty($body['data']['devices'])) {
 
-                // Filter hanya device yang statusnya 'connected'
-                $activeDevices = array_filter($body['data'], function ($device) {
+                $activeDevices = array_filter($body['data']['devices'], function ($device) {
                     return isset($device['status']) && $device['status'] === 'connected';
                 });
 
+                $activeDevices = array_values($activeDevices);
+
                 if (empty($activeDevices)) {
-                    Log::warning('WA Service: Tidak ada device yang statusnya connected.');
+                    Log::warning('WA Service: Tidak ada device connected.');
                     return null;
                 }
 
-                // Acak device yang aktif
-                $randomDevice = Arr::random($activeDevices);
+                $totalDevices = count($activeDevices);
 
-                Log::info("WA Service: Menggunakan device pengirim: " . ($randomDevice['name'] ?? 'Unknown') . " (" . ($randomDevice['number'] ?? '-') . ")");
+                $lastIndex = \Illuminate\Support\Facades\Cache::get('wa_last_device_index', -1);
 
-                return $randomDevice['waKey'] ?? null;
+                $nextIndex = $lastIndex + 1;
+
+                if ($nextIndex >= $totalDevices) {
+                    $nextIndex = 0;
+                }
+
+                Cache::put('wa_last_device_index', $nextIndex, 3600);
+
+                $selectedDevice = $activeDevices[$nextIndex];
+
+
+                $deviceKey = $selectedDevice['device_key'] ?? $selectedDevice['apikey'] ?? null;
+
+                if ($deviceKey) {
+                    Log::info("WA Service [Round Robin]: Menggunakan device ke-" . ($nextIndex + 1) . " dari $totalDevices: " . ($selectedDevice['name'] ?? '-'));
+                    return $deviceKey;
+                }
             }
 
-            Log::warning('WA Service: Gagal mengambil device active. Response: ' . json_encode($body));
             return null;
         } catch (\Exception $e) {
-            Log::error('WA Service (Get Devices) Error: ' . $e->getMessage());
+            Log::error('WA Service Error: ' . $e->getMessage());
             return null;
         }
     }
@@ -87,46 +112,45 @@ class WhatsappService
      */
     public function sendMessage(string $number, string $message): bool
     {
-        if (!$this->client) {
+        // 1. Coba ambil Random Device Key dari device aktif
+        $selectedDeviceKey = $this->getRandomActiveDeviceKey();
+
+        // 2. Fallback: Jika gagal ambil device aktif (misal API list error), 
+        // gunakan Main API Key (siapa tau Main Key juga bisa dipakai kirim/default device)
+        if (!$selectedDeviceKey) {
+            Log::error("WA Service: Tidak ada API Key yang tersedia.");
             return false;
         }
 
-        // 1. Coba ambil Random Key dari device aktif
-        $selectedWaKey = $this->getRandomActiveWaKey();
-
-        // 2. Jika gagal ambil random key (misal API devices error), pakai Default Key dari database
-        if (!$selectedWaKey) {
-            if ($this->apiKey) {
-                Log::warning("WA Service: Fallback menggunakan Default API Key database.");
-                $selectedWaKey = $this->apiKey;
-            } else {
-                Log::error("WA Service: Tidak ada waKey yang tersedia (Random gagal, Default kosong).");
-                return false;
-            }
-        }
-
         try {
-            // Bersihkan nomor telepon
+            // Bersihkan nomor telepon (Format Starsender support 628...)
             $number = preg_replace('/[^0-9]/', '', $number);
+
+            // Pastikan format 62
             if (substr($number, 0, 1) === '0') {
                 $number = '62' . substr($number, 1);
             }
 
-            // Kirim pesan menggunakan waKey terpilih
-            $response = $this->client->request('POST', 'send-message', [
-                'form_params' => [
-                    'id'    => $number,
-                    'text'  => $message,
-                    'type'  => 'Text',
-                    'waKey' => $selectedWaKey
+            // Kirim pesan ke Endpoint Send Message
+            // Header Authorization menggunakan Key Device yang terpilih
+            $response = $this->client->request('POST', 'send', [
+                'headers' => [
+                    'Authorization' => $selectedDeviceKey
+                ],
+                'json' => [
+                    'messageType' => 'text',
+                    'to'          => $number,
+                    'body'        => $message
                 ]
             ]);
 
             $statusCode = $response->getStatusCode();
-            $body = json_decode($response->getBody()->getContents());
+            $body = json_decode($response->getBody()->getContents(), true);
 
-            if ($statusCode === 200) {
-                Log::info("WA Service: Message sent to {$number} using key: " . substr($selectedWaKey, 0, 5) . "...");
+            // Cek sukses berdasarkan response Starsender
+            // Starsender return HTTP 200 dan body['success'] == true
+            if ($statusCode === 200 && isset($body['success']) && $body['success'] == true) {
+                Log::info("WA Service: Message sent to {$number}. Msg ID: " . ($body['data']['message_id'] ?? '-'));
                 return true;
             }
 

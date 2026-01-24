@@ -61,7 +61,7 @@ class OrderFinalizationService
         // 4. Berikan produk berdasarkan order meta (PWYW support)
         $productId = $order->meta['product_id'] ?? null;
         $product = $productId ? Product::find($productId) : Product::where('is_default', true)->first();
-        
+
         if ($product) {
             UserPurchase::create([
                 'user_id' => $user->id,
@@ -100,7 +100,7 @@ class OrderFinalizationService
 
         // 8. Kirim Notifikasi Sukses
         try {
-            $this->sendSuccessNotifications($user, $conversion);
+            $this->sendSuccessNotifications($user, $conversion, $product);
         } catch (\Exception $e) {
             // Jika WA gagal, jangan gagalkan registrasi. Cukup catat.
             Log::error('Gagal mengirim WA/Email notifikasi sukses: ' . $e->getMessage(), [
@@ -173,11 +173,11 @@ class OrderFinalizationService
     {
         try {
             // Kita coba ambil session ID dari request saat ini (karena triggered by axios dari frontend)
-            $sessionId = $order->meta['session_id'] 
-            ?? (request()->hasSession() ? request()->session()->getId() : null);
+            $sessionId = $order->meta['session_id']
+                ?? (request()->hasSession() ? request()->session()->getId() : null);
 
             if (!$sessionId) {
-                $sessionId = 'webhook_' . $order->order_id; 
+                $sessionId = 'webhook_' . $order->order_id;
             }
 
             // Extract landing_source from order meta for attribution
@@ -215,12 +215,17 @@ class OrderFinalizationService
         }
     }
 
-    public function sendSuccessNotifications(User $user, $conversion): void
+    public function sendSuccessNotifications(User $user, $conversion, $product): void
     {
         // 1. Ke Member Baru
         $memberName = $user->name;
         $memberPhone = $user->phone;
         $loginUrl = route('login'); // Ambil URL login secara dinamis
+
+        if (!$product) {
+            Log::error("Product Not found: Product dengan ID " . $conversion['product_id'] . " tidak ditemukan.");
+            return;
+        }
 
         $messageToMember = "Haii {$memberName}, selamat dataang! 👋\n\n"
             . "Pembayaran kamu udah beress dan akun kamu udah jadii.\n\n"
@@ -234,7 +239,7 @@ class OrderFinalizationService
         try {
             // Pastikan email user valid sebelum mengirim
             if ($user->email) {
-                Mail::to($user->email)->send(new UserRegistrationMail($user));
+                Mail::to($user->email)->send(new UserRegistrationMail($user, $product->title));
                 Log::info("Email sukses dikirim ke: " . $user->email);
             }
         } catch (\Exception $e) {

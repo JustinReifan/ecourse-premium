@@ -15,12 +15,14 @@ class UserRegistrationMail extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
     public $user;
     public $loginUrl;
+    public $product_name;
     /**
      * Create a new message instance.
      */
-    public function __construct(User $user)
+    public function __construct(User $user, $product_name)
     {
         $this->user = $user;
+        $this->product_name = $product_name;
         $this->loginUrl = route('login');
     }
 

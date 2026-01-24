@@ -130,54 +130,7 @@ class AbTestingService
         return $funnel;
     }
 
-    /**
-     * Get Quality Analysis - Buyer vs Non-Buyer comparison
-     */
-    public function getQualityAnalysis(Carbon $startDate, Carbon $endDate, ?string $sourceFilter = null): Collection
-    {
-        $landingSources = $this->getValidLandingSources($startDate, $endDate, $sourceFilter);
 
-        if ($landingSources->isEmpty()) {
-            return collect([]);
-        }
-
-        $analysis = collect([]);
-
-        foreach ($landingSources as $source) {
-            $landingSource = $source->landing_source;
-
-            // Get all sessions for this landing source
-            $allSessions = $this->getSessionsBySource($landingSource, $startDate, $endDate, $sourceFilter);
-
-            // Segment A: Buyers (sessions with payment)
-            $buyerSessions = $this->getSessionsByEventAndSource('payment', $landingSource, $startDate, $endDate, $sourceFilter);
-
-            // Segment B: Non-Buyers (sessions without payment)
-            $nonBuyerSessions = $allSessions->diff($buyerSessions);
-
-            // Calculate metrics for Buyers
-            $buyerMetrics = $this->calculateQualityMetrics($buyerSessions, $startDate, $endDate);
-
-            // Calculate metrics for Non-Buyers
-            $nonBuyerMetrics = $this->calculateQualityMetrics($nonBuyerSessions, $startDate, $endDate);
-
-            $analysis->push([
-                'landing_source' => $landingSource,
-                'buyers' => [
-                    'count' => $buyerSessions->count(),
-                    'avg_scroll_depth' => $buyerMetrics['avg_scroll_depth'],
-                    'avg_dwell_time' => $buyerMetrics['avg_dwell_time'],
-                ],
-                'non_buyers' => [
-                    'count' => $nonBuyerSessions->count(),
-                    'avg_scroll_depth' => $nonBuyerMetrics['avg_scroll_depth'],
-                    'avg_dwell_time' => $nonBuyerMetrics['avg_dwell_time'],
-                ],
-            ]);
-        }
-
-        return $analysis;
-    }
 
     /**
      * Get Device Performance - Compare Mobile vs Desktop
@@ -417,6 +370,55 @@ class AbTestingService
         }
 
         return $heatmap;
+    }
+
+    /**
+     * Get Quality Analysis - Buyer vs Non-Buyer comparison
+     */
+    public function getQualityAnalysis(Carbon $startDate, Carbon $endDate, ?string $sourceFilter = null): Collection
+    {
+        $landingSources = $this->getValidLandingSources($startDate, $endDate, $sourceFilter);
+
+        if ($landingSources->isEmpty()) {
+            return collect([]);
+        }
+
+        $analysis = collect([]);
+
+        foreach ($landingSources as $source) {
+            $landingSource = $source->landing_source;
+
+            // Get all sessions for this landing source
+            $allSessions = $this->getSessionsBySource($landingSource, $startDate, $endDate, $sourceFilter);
+
+            // Segment A: Buyers (sessions with payment)
+            $buyerSessions = $this->getSessionsByEventAndSource('payment', $landingSource, $startDate, $endDate, $sourceFilter);
+
+            // Segment B: Non-Buyers (sessions without payment)
+            $nonBuyerSessions = $allSessions->diff($buyerSessions);
+
+            // Calculate metrics for Buyers
+            $buyerMetrics = $this->calculateQualityMetrics($buyerSessions, $startDate, $endDate);
+
+            // Calculate metrics for Non-Buyers
+            $nonBuyerMetrics = $this->calculateQualityMetrics($nonBuyerSessions, $startDate, $endDate);
+
+            $analysis->push([
+                'landing_source' => $landingSource,
+                'buyers' => [
+                    'count' => $buyerSessions->count(),
+                    'avg_scroll_depth' => $buyerMetrics['avg_scroll_depth'],
+                    'avg_dwell_time' => $buyerMetrics['avg_dwell_time'],
+                ],
+                'non_buyers' => [
+                    'count' => $nonBuyerSessions->count(),
+                    'avg_scroll_depth' => $nonBuyerMetrics['avg_scroll_depth'],
+                    'avg_dwell_time' => $nonBuyerMetrics['avg_dwell_time'],
+                ],
+            ]);
+        }
+
+        return $analysis;
     }
 
     /**

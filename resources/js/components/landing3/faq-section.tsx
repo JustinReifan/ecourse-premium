@@ -7,46 +7,51 @@ import { useState } from 'react';
 const faqs = [
     {
         id: '1',
+        question: 'Cuma pake HP, emang bisa ikut?',
+        answer: 'Bisa banget! Aku juga ngonten, bikin produk digital semua pake HP, tanpa perlu laptop. Semua praktek di kelas ini bisa di lakukan dengan HP.',
+    },
+    {
+        id: '2',
         question: 'Apa sih yang dipelajari di kelas ini?',
         answer: 'Di kelas ini kamu akan belajar cara jualan online dari nol sampai bisa hasilin cuan, langsung dari mentor yang sudah 13 tahun berpengalaman jualan produk fisik dan digital, serta berhasil mendapatkan 100 juta pertamanya dari Lynk.id!',
     },
     {
-        id: '2',
+        id: '3',
         question: 'Kelas ini cocok untuk siapa?',
         answer: 'Kelas ini cocok banget untuk: Ibu rumah tangga yang ingin punya penghasilan tambahan dari rumah, Pemula yang belum pernah jualan online, Creator yang ingin tahu cara hasilin uang dari konten, Dan siapa pun yang mau mulai bangun personal branding dan income digital tanpa bingung dari mana memulai',
     },
     {
-        id: '3',
+        id: '4',
         question: 'Apa yang saya dapat setelah ikut kelas?',
         answer: 'Kamu akan mendapatkan paket lengkap belajar jualan digital, antara lain: 🎥 30+ video tutorial lengkap (Lynk.ID, Canva, CapCut, dan strategi jualan), 🧠 Video panduan membuat eBook & Storybook dari nol sampai siap jual, 🎬 Free 170+ video aesthetic untuk bahan latihan konten, 📚 Free eBook Lead Magnet, eBook panduan bisnis digital & strategi Reels viral, 💬 Free grup bimbingan Telegram berisi latihan HOOK, caption, hashtag, template konten, dan update materi, 🎙️ Live Telegram 2 minggu sekali untuk interaksi dengan mentor & member, 📲 Free bimbingan grup WA khusus untuk praktek per 10 orang jadi sangat exclusif',
     },
     {
-        id: '4',
+        id: '5',
         question: 'Apakah ada bimbingan 1-on-1?',
         answer: 'Setiap 10 peserta baru akan otomatis tergabung dalam grup WhatsApp bimbingan eksklusif bersama mentor, jadi bebas tanya² selagi mini class sedang berlangsung. Di grup ini kamu akan mendapatkan: 📹 Video pembelajaran eksklusif siap tonton, 📝 10 tugas praktek yang bisa langsung dieksekusi. Seluruh proses bimbingan ini berjalan selama kurang lebih 2 bulan, dan sudah terbukti efektif membantu banyak member benar-benar paham dan praktik.',
     },
     {
-        id: '5',
+        id: '6',
         question: 'Kalau saya gaptek, bisa ikut?',
         answer: 'Justru kelas ini dirancang untuk yang gaptek dan baru mulai! Materi dibuat step-by-step, dari O sampai siap jual, bahkan disertai video latihan & template siap pakai.',
     },
     {
-        id: '6',
+        id: '7',
         question: 'Kapan kelas ini mulai?',
         answer: 'Sebenarnya begitu kamu checkout dan bergabung, kamu langsung bisa mulai belajar lewat dashboard yang sudah disiapkan. Tinggal menunggu undangan grup WhatsApp bimbingan per 10 orang setelah berhasil cekout dan payment.',
     },
     {
-        id: '7',
+        id: '8',
         question: 'Apakah ada garansi?',
         answer: 'Tidak ada garansi, karena hasil tiap peserta berbeda-beda tergantung usaha, waktu yang disediakan untuk belajarnya dan kecepatan praktiknya. Tapi yang pasti, semua materi sudah terbukti membantu ratusan emak² lain yang sebelumnya juga mulai dari nol — dan kini sudah bisa menghasilkan cuan dari konten digital mereka sendiri.',
     },
     {
-        id: '8',
+        id: '9',
         question: 'Gimana cara daftar?',
         answer: 'Klik tombol “DAFTAR SEKARANG” di bawah ini, Pilih metode pembayaranmu, lalu nikmati semua fasilitas belajar dan bimbingan langsung dari mentor berpengalaman!',
     },
     {
-        id: '9',
+        id: '10',
         question: 'Apakah harga sudah termasuk langganan Canva PRO?',
         answer: 'Tentu saja TIDAK, kamu bisa berlangganan di aplikasinya secara langsung atau melalui Canvassador resmi yang tersebar di seluruh Indonesia.',
     },
@@ -107,7 +112,7 @@ export function FaqSection() {
     const { trackCTA } = useAnalytics();
 
     const handleCtaClick = () => {
-        trackCTA('faq_section', 'Join Sekarang', '#pricing-section');
+        trackCTA('faq_section', 'Gabung Sekarang', '#pricing-section');
 
         // scroll to pricing section
         const pricingSection = document.getElementById('pricing-section');
@@ -176,7 +181,7 @@ export function FaqSection() {
                                     onClick={handleCtaClick}
                                     className="bg-primary/10 hover:bg-primary/20 text-primary border-primary/30 hover:border-primary/50 w-full rounded-xl border px-4 py-3 font-medium transition-all duration-300"
                                 >
-                                    Join Sekarang
+                                    Gabung Sekarang
                                 </button>
                             </div>
                         </div>

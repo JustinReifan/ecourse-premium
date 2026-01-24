@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Award, BookCheck, Briefcase, Heart, Sparkles, TrendingUp, Users } from 'lucide-react';
+import { Briefcase, Heart, Sparkles, TicketPercent, TrendingUp, Users } from 'lucide-react';
 
 interface BenefitCardProps {
     icon: React.ReactNode;
@@ -63,29 +63,29 @@ export function ReasonJoinSection() {
     const benefits = [
         {
             icon: <Users className="h-7 w-7" />,
-            title: 'Mentor Praktisi, Bukan Teoretisi',
-            description:
-                'Dibimbing langsung oleh praktisi 13 tahun pengalaman yang sudah terbukti mencetak 100 Juta pertamanya dari Lynk.id. Ilmu yang diajarkan murni dari pengalaman lapangan.',
+            title: 'Step by step bikin produk digital pertama',
+            description: 'Step by step kamu faham bisnis produk digital secara sederhana',
             gradient: 'from-blue-500/10 via-purple-500/10 to-pink-500/10',
         },
         {
             icon: <TrendingUp className="h-7 w-7" />,
-            title: 'Track Record Penjualan Nyata',
+            title: 'Ide produk yang bisa laku & bermanfaat',
             description:
-                'Bukan orang baru. Mentor memiliki portofolio bisnis yang konsisten menjual ribuan produk setiap tahunnya selama lebih dari satu dekade.',
+                'Bingung mau jual apa? Kita akan gali potensi dirimu untuk nemuin ide produk yang nggak cuma laku, tapi juga bawa manfaat buat orang lain',
             gradient: 'from-emerald-500/10 via-teal-500/10 to-cyan-500/10',
         },
         {
             icon: <Heart className="h-7 w-7" />,
-            title: 'Circle Positif & Mentor Tersertifikasi',
+            title: 'Belajar branding dan jualan halus, tanpa maksa',
             description:
-                'Gabung bareng 500+ Emak-emak produktif di komunitas. Mentornya juga Certified BNSP & Resmi aktif sebagai Canvassador (Duta Canva Indonesia)',
+                'Jualan nggak harus nyepam atau ganggu teman. Kamu bakal belajar cara elegan biar pembeli yang nyari kamu, bukan kamu yang ngejar-ngejar mereka',
             gradient: 'from-pink-500/10 via-purple-500/10 to-red-500/10',
         },
         {
             icon: <Briefcase className="h-7 w-7" />,
-            title: 'Peluang Cuan Affiliate',
-            description: 'Sambil belajar, bisa langsung cuan! Dapatkan akses eksklusif affiliate dengan komisi jumbo 50% (khusus member kelas ini)',
+            title: 'Mindset & manajemen waktu biar gak burnout',
+            description:
+                'Bangun bisnis bukan berarti ninggalin kewajiban rumah. Kita benahi pola pikir dan cara atur waktu biar tetap produktif tanpa harus burnout.',
             gradient: 'from-blue-500/10 via-pink-500/10 to-purple-500/10',
         },
     ];
@@ -108,14 +108,14 @@ export function ReasonJoinSection() {
                 <div className="animate-fade-in mb-16 text-center" style={{ animationDelay: '200ms', animationFillMode: 'both' }}>
                     <div className="bg-primary/10 border-primary/20 text-primary mb-6 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium backdrop-blur-sm">
                         <Sparkles className="h-4 w-4" />
-                        Gabung Affiliate Jago Jualan
+                        Tempat Belajar Terbaik
                     </div>
-                    <h2 className="text-foreground mb-6 text-4xl font-bold lg:text-6xl">
-                        Bingung Harus <span className="text-primary">Mulai dari Mana?</span>
+                    <h2 className="text-foreground mb-6 text-4xl font-bold capitalize lg:text-6xl">
+                        Kamu ibu rumah tangga, <span className="text-primary">pengen bantu suami tapi takut karena gaptek?</span>
                     </h2>
                     <p className="text-muted-foreground mx-auto max-w-3xl text-lg leading-relaxed">
-                        Tenang, kamu nggak sendirian. Aku paham banget rasanya ingin mulai tapi takut salah langkah. Makanya, kelas ini disusun
-                        pelan-pelan, urut dari dasar, dengan bahasa yang paling mudah dimengerti.
+                        Tenang. Di kelas ini kamu gak cuma belajar teknis, tapi juga dipandu lewat video step by step dari yang gak tau apa itu produk
+                        digital sampe beneran ngerti dan praktek.
                     </p>
                 </div>
 
@@ -127,7 +127,7 @@ export function ReasonJoinSection() {
                             {/* Main image */}
                             <div className="border-border/20 shadow-primary/5 relative overflow-hidden rounded-3xl border shadow-2xl">
                                 <img
-                                    src="/storage/landing/whyjoin.png"
+                                    src="/storage/landing/whyjoin2.webp"
                                     alt="Professional designer working with Canva interface creating stunning designs"
                                     className="h-[400px] w-full object-cover transition-transform duration-1000 hover:scale-110"
                                     loading="lazy"
@@ -137,16 +137,16 @@ export function ReasonJoinSection() {
                                 {/* Stats overlay */}
                                 <div className="absolute right-4 bottom-4 left-4">
                                     <div className="flex items-center justify-between gap-4">
-                                        <div className="bg-primary/10 border-border/20 rounded-xl border px-4 py-2 backdrop-blur-xl">
+                                        {/* <div className="bg-primary/10 border-border/20 rounded-xl border px-4 py-2 backdrop-blur-xl">
                                             <div className="flex items-center gap-2">
                                                 <Award className="text-primary h-4 w-4" />
                                                 <span className="text-foreground text-sm font-semibold">E-certificate</span>
                                             </div>
-                                        </div>
+                                        </div> */}
                                         <div className="bg-primary/10 border-border/20 rounded-xl border px-4 py-2 backdrop-blur-xl">
                                             <div className="flex items-center gap-2">
-                                                <BookCheck className="h-4 w-4 text-emerald-400" />
-                                                <span className="text-foreground text-sm font-semibold">Free E-book</span>
+                                                <TicketPercent className="h-4 w-4 text-emerald-400" />
+                                                <span className="text-foreground text-sm font-semibold">Bayar Suka Suka</span>
                                             </div>
                                         </div>
                                     </div>
@@ -184,10 +184,12 @@ export function ReasonJoinSection() {
                 {/* Bottom CTA */}
                 <div className="animate-fade-in mt-16 text-center" style={{ animationDelay: '1400ms', animationFillMode: 'both' }}>
                     <div className="from-primary/10 via-primary/5 to-accent/10 border-primary/20 rounded-2xl border bg-gradient-to-r p-8 backdrop-blur-xl">
-                        <h3 className="text-foreground mb-4 text-xl font-bold">Mungkin Ini Jawaban yang Kamu Cari Selama Ini...</h3>
+                        <h3 className="text-foreground mb-4 text-xl font-bold">💸 Bayar suka-suka aja.</h3>
                         <p className="text-muted-foreground leading-relaxed">
-                            Bukan kebetulan kamu membaca tulisan ini. Mungkin ini adalah sinyal kalau sudah saatnya kamu berhenti bingung dan mulai
-                            melangkah. Mentornya sudah jelas, jalannya sudah ada. Sayang banget kan, kalau peluang sebaik ini dilewatkan begitu aja?
+                            Aku buatin ini khusus biar kamu bisa kenal dulu sama potensi digital, tanpa takut pusing, tanpa tekanan.
+                        </p>
+                        <p className="text-muted-foreground leading-relaxed">
+                            Mau Rp. 10 ribu, mau 50 ribu, terserah — yang penting kamu niat mulai.{' '}
                         </p>
                     </div>
                 </div>

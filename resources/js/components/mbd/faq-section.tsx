@@ -7,48 +7,33 @@ import { useState } from 'react';
 const faqs = [
     {
         id: '1',
-        question: 'Apa sih yang dipelajari di kelas ini?',
-        answer: 'Di kelas ini kamu akan belajar cara jualan online dari nol sampai bisa hasilin cuan, langsung dari mentor yang sudah 13 tahun berpengalaman jualan produk fisik dan digital, serta berhasil mendapatkan 100 juta pertamanya dari Lynk.id!',
+        question: 'Ini beneran cocok buat pemula yang gaptek?',
+        answer: 'Iya. Kelas ini dibuat dari nol banget. Bahkan buat kamu yang baru kenal istilah produk digital pun masih aman. Semua dijelasin pelan, step by step, dan bisa diputar ulang kapan aja.',
     },
     {
         id: '2',
-        question: 'Kelas ini cocok untuk siapa?',
-        answer: 'Kelas ini cocok banget untuk: Ibu rumah tangga yang ingin punya penghasilan tambahan dari rumah, Pemula yang belum pernah jualan online, Creator yang ingin tahu cara hasilin uang dari konten, Dan siapa pun yang mau mulai bangun personal branding dan income digital tanpa bingung dari mana memulai',
+        question: 'Kenapa bayarnya suka-suka? Seriusan?',
+        answer: 'Serius. Karena tujuan kelas ini bukan langsung jualan besar, tapi bantu kamu mulai dulu dan percaya sama potensi diri. Mau Rp10 ribu atau Rp50 ribu, yang penting kamu niat belajar dan praktek.',
     },
     {
         id: '3',
-        question: 'Apa yang saya dapat setelah ikut kelas?',
-        answer: 'Kamu akan mendapatkan paket lengkap belajar jualan digital, antara lain: 🎥 30+ video tutorial lengkap (Lynk.ID, Canva, CapCut, dan strategi jualan), 🧠 Video panduan membuat eBook & Storybook dari nol sampai siap jual, 🎬 Free 170+ video aesthetic untuk bahan latihan konten, 📚 Free eBook Lead Magnet, eBook panduan bisnis digital & strategi Reels viral, 💬 Free grup bimbingan Telegram berisi latihan HOOK, caption, hashtag, template konten, dan update materi, 🎙️ Live Telegram 2 minggu sekali untuk interaksi dengan mentor & member, 📲 Free bimbingan grup WA khusus untuk praktek per 10 orang jadi sangat exclusif',
+        question: 'Ini ada bimbingan atau mentoring langsung?',
+        answer: 'Tidak ada. Ini pure course video yang bisa kamu pelajari mandiri. Justru cocok buat kamu yang pengen belajar tanpa tekanan dan tanpa takut salah.',
     },
     {
         id: '4',
-        question: 'Apakah ada bimbingan 1-on-1?',
-        answer: 'Setiap 10 peserta baru akan otomatis tergabung dalam grup WhatsApp bimbingan eksklusif bersama mentor, jadi bebas tanya² selagi mini class sedang berlangsung. Di grup ini kamu akan mendapatkan: 📹 Video pembelajaran eksklusif siap tonton, 📝 10 tugas praktek yang bisa langsung dieksekusi. Seluruh proses bimbingan ini berjalan selama kurang lebih 2 bulan, dan sudah terbukti efektif membantu banyak member benar-benar paham dan praktik.',
+        question: 'Harus jago ngonten atau tampil di kamera?',
+        answer: 'Nggak sama sekali. Di kelas ini dibahas ngonten tanpa muka dan cara bikin konten simple pakai bantuan AI, jadi tetap bisa jalan walau sambil ngurus rumah.',
     },
     {
         id: '5',
-        question: 'Kalau saya gaptek, bisa ikut?',
-        answer: 'Justru kelas ini dirancang untuk yang gaptek dan baru mulai! Materi dibuat step-by-step, dari O sampai siap jual, bahkan disertai video latihan & template siap pakai.',
+        question: 'Setelah ikut kelas ini, aku langsung bisa jualan?',
+        answer: 'Targetnya: kamu paham + tau harus ngapain aja + bisa praktek. Kamu akan tau arah, jenis produk digital yang cocok buatmu, dan cara mulai jualannya. Hasil tiap orang beda, tapi kamu nggak lagi bingung harus mulai dari mana.',
     },
     {
         id: '6',
-        question: 'Kapan kelas ini mulai?',
-        answer: 'Sebenarnya begitu kamu checkout dan bergabung, kamu langsung bisa mulai belajar lewat dashboard yang sudah disiapkan. Tinggal menunggu undangan grup WhatsApp bimbingan per 10 orang setelah berhasil cekout dan payment.',
-    },
-    {
-        id: '7',
-        question: 'Apakah ada garansi?',
-        answer: 'Tidak ada garansi, karena hasil tiap peserta berbeda-beda tergantung usaha, waktu yang disediakan untuk belajarnya dan kecepatan praktiknya. Tapi yang pasti, semua materi sudah terbukti membantu ratusan emak² lain yang sebelumnya juga mulai dari nol — dan kini sudah bisa menghasilkan cuan dari konten digital mereka sendiri.',
-    },
-    {
-        id: '8',
-        question: 'Gimana cara daftar?',
-        answer: 'Klik tombol “DAFTAR SEKARANG” di bawah ini, Pilih metode pembayaranmu, lalu nikmati semua fasilitas belajar dan bimbingan langsung dari mentor berpengalaman!',
-    },
-    {
-        id: '9',
-        question: 'Apakah harga sudah termasuk langganan Canva PRO?',
-        answer: 'Tentu saja TIDAK, kamu bisa berlangganan di aplikasinya secara langsung atau melalui Canvassador resmi yang tersebar di seluruh Indonesia.',
+        question: 'Ini cocok buat siapa aja?',
+        answer: 'Khusus buat muslimah, terutama ibu rumah tangga yang pengen punya karya, penghasilan tambahan, dan tetap waras secara mental — tanpa harus ninggalin peran utama di rumah.',
     },
 ];
 

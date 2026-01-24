@@ -1,31 +1,32 @@
 // src/components/sections/TestimonialsSection.tsx
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { CtaButton } from '@/components/ui/cta-button';
+import { useAnalytics } from '@/hooks/use-analytics';
 
 import { cn } from '@/lib/utils';
+import Autoplay from 'embla-carousel-autoplay';
 import { Star } from 'lucide-react';
 import * as React from 'react';
-// --- Ganti path import ini ---
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'; // <-- Sesuaikan path ke file yg Anda buat
-import { CtaButton } from '@/components/ui/cta-button';
-import Autoplay from 'embla-carousel-autoplay'; // Plugin untuk autoplay
 
-// --- 1. Data Dummy untuk Testimoni ---
 interface Testimonial {
     id: string;
     imageUrl: string;
     alt: string;
+    subtitle: string;
 }
 
-// Ganti path ini dengan path ke gambar testimoni 9:16 Anda
 const testimonials: Testimonial[] = [
-    { id: '1', imageUrl: '/storage/landing/testimonials2/1.jpeg', alt: 'Testimonial 1' },
-    { id: '2', imageUrl: '/storage/landing/testimonials2/2.jpeg', alt: 'Testimonial 2' },
-    { id: '3', imageUrl: '/storage/landing/testimonials2/3.jpeg', alt: 'Testimonial 3' },
-    { id: '4', imageUrl: '/storage/landing/testimonials2/4.jpeg', alt: 'Testimonial 4' },
-    { id: '5', imageUrl: '/storage/landing/testimonials2/5.jpeg', alt: 'Testimonial 5' },
-    { id: '6', imageUrl: '/storage/landing/testimonials2/6.jpeg', alt: 'Testimonial 6' },
+    { id: '1', imageUrl: '/storage/landing/testimonials/testimoni1.png', alt: 'Testimonial 1', subtitle: 'tes' },
+    { id: '2', imageUrl: '/storage/landing/testimonials/testimoni2.png', alt: 'Testimonial 2', subtitle: 'tes' },
+    { id: '3', imageUrl: '/storage/landing/testimonials/testimoni3.png', alt: 'Testimonial 3', subtitle: 'tes' },
+    { id: '4', imageUrl: '/storage/landing/testimonials/testimoni4.png', alt: 'Testimonial 4', subtitle: 'tes' },
+    { id: '5', imageUrl: '/storage/landing/testimonials/testimoni5.png', alt: 'Testimonial 5', subtitle: 'tes' },
+    { id: '6', imageUrl: '/storage/landing/testimonials/testimoni6.png', alt: 'Testimonial 6', subtitle: 'tes' },
+    { id: '7', imageUrl: '/storage/landing/testimonials/testimoni7.png', alt: 'Testimonial 7', subtitle: 'tes' },
+    { id: '8', imageUrl: '/storage/landing/testimonials/testimoni8.png', alt: 'Testimonial 8', subtitle: 'tes' },
+    { id: '9', imageUrl: '/storage/landing/testimonials/testimoni9.png', alt: 'Testimonial 9', subtitle: 'tes' },
 ];
 
-// --- 2. Komponen Card untuk Carousel Item ---
 interface TestimonialCardProps {
     testimonial: Testimonial;
 }
@@ -37,7 +38,7 @@ function TestimonialCard({ testimonial }: TestimonialCardProps) {
         <div
             className={cn(
                 'group relative overflow-hidden rounded-2xl',
-                'aspect-[3/4]', // Aspek rasio 9:16 (potret)
+                'aspect-[9/16]', // Aspek rasio 9:16 (potret)
                 'from-card/80 to-card/40 bg-gradient-to-br backdrop-blur-sm',
                 'border-border/30 border',
                 'transition-all duration-700',
@@ -67,7 +68,10 @@ function TestimonialCard({ testimonial }: TestimonialCardProps) {
 // --- 3. Komponen Section Utama ---
 
 export function TestimonialsSection() {
+    const { trackVisit, trackCTA } = useAnalytics();
+
     const handleCtaClick = () => {
+        trackCTA('testimonial_section', 'Gabung Sekarang', '#pricing-section');
         // scroll to pricing section
         const pricingSection = document.getElementById('pricing-section');
         if (pricingSection) {
@@ -93,14 +97,14 @@ export function TestimonialsSection() {
 
                         <div className="animate-fade-in space-y-4" style={{ animationDelay: '200ms', animationFillMode: 'both' }}>
                             <h2 className="text-foreground text-4xl font-bold md:text-5xl lg:text-6xl">
-                                <span className="block">Ini Kata Mereka</span>
+                                <span className="block">Jangan Percaya Sama Aku,</span>
                                 <span className="from-primary via-primary/80 to-primary bg-gradient-to-r bg-clip-text text-transparent">
-                                    Yang Udah Gabung Kelas ini
+                                    Tapi Lihat Kata Mereka!
                                 </span>
                             </h2>
                             <p className="text-muted-foreground mx-auto max-w-3xl text-xl leading-relaxed">
-                                Awalnya mereka juga ragu dan merasa gaptek, persis seperti yang kamu rasakan. Tapi karena berani mencoba, sekarang
-                                mereka sudah bisa menghasilkan meskipun dari rumah
+                                Aku nggak mau kasih janji manis. Biar alumni yang kasih bukti nyata gimana materi ini bisa mengubah isi rekening
+                                mereka, walau awalnya gaptek parah.
                             </p>
                         </div>
                     </div>
@@ -150,8 +154,9 @@ export function TestimonialsSection() {
                         </Carousel>
                     </div>
 
-                    <div className="pt-6 text-center">
-                        <button onClick={handleCtaClick}>
+                    {/* CTA Button */}
+                    <div className="text-center">
+                        <button onClick={() => handleCtaClick()}>
                             <CtaButton
                                 variant="primary"
                                 size="lg"

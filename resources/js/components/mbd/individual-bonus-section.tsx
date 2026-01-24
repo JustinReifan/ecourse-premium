@@ -1,6 +1,6 @@
 import { CtaButton } from '@/components/ui/cta-button';
 import { useAnalytics } from '@/hooks/use-analytics';
-import { Gift, Tag } from 'lucide-react';
+import { Tag } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 interface BonusData {
@@ -105,7 +105,7 @@ export function IndividualBonusSection({ bonus, index }: IndividualBonusSectionP
                     {/* Content Section */}
                     <div className={`space-y-8 lg:col-span-3 ${!isEven ? 'lg:order-2' : ''}`}>
                         {/* Floating Bonus Badge */}
-                        <div>
+                        <div className="animate-fade-in">
                             <div className="border-primary/20 bg-primary/10 inline-flex items-center gap-2 rounded-full border px-4 py-2 backdrop-blur-sm">
                                 <div className="bg-primary h-2 w-2 animate-pulse rounded-full" />
                                 <span className="text-primary text-sm font-medium">{bonus.badge}</span>
@@ -114,7 +114,6 @@ export function IndividualBonusSection({ bonus, index }: IndividualBonusSectionP
 
                         {/* Bold Title */}
                         <div className="space-y-4">
-                            {/* Title Section */}
                             <h2 className="text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
                                 <span className="text-foreground block">{bonus.title.split(' ').slice(0, 2).join(' ')}</span>
                                 <span className="from-primary via-primary/80 to-primary mt-2 block bg-gradient-to-r bg-clip-text text-transparent">
@@ -122,19 +121,10 @@ export function IndividualBonusSection({ bonus, index }: IndividualBonusSectionP
                                 </span>
                             </h2>
 
-                            {/* Price & Free Badge Container */}
-                            <div className="mt-2 flex flex-wrap items-center gap-3">
-                                {/* 1. Badge "Senilai" (Tampilan Redup/Coret) */}
-                                <div className="border-muted-foreground/30 bg-muted/20 text-muted-foreground inline-flex items-center gap-2 rounded-full border px-4 py-2">
-                                    <Tag className="h-4 w-4" />
-                                    <span className="decoration-destructive/60 font-medium line-through decoration-2">{bonus.value}</span>
-                                </div>
-
-                                {/* 2. Badge "Gratis" (Tampilan Menonjol) */}
-                                <div className="bg-primary/15 border-primary/20 text-primary inline-flex items-center gap-2 rounded-full border px-4 py-2 shadow-[0_0_15px_rgba(var(--primary),0.3)]">
-                                    <Gift className="h-4 w-4" /> {/* Gunakan icon Gift/Kado biar lebih relevan */}
-                                    <span className="font-bold tracking-wider uppercase">GRATIS</span>
-                                </div>
+                            {/* Value Badge */}
+                            <div className="border-primary/30 bg-primary/10 inline-flex items-center gap-2 rounded-full border px-6 py-3">
+                                <Tag className="text-foreground h-5 w-5" />
+                                <span className="text-foreground font-bold">Value Senilai {bonus.value}</span>
                             </div>
                         </div>
 
@@ -201,7 +191,7 @@ export function IndividualBonusSection({ bonus, index }: IndividualBonusSectionP
 
                                     {/* Floating Value Badge on Image */}
                                     <div className="absolute top-6 right-6">
-                                        <div className="from-primary to-primary/80 border-foreground/50 text-primary-foreground rounded-full border bg-gradient-to-r px-4 py-2 text-sm font-bold line-through backdrop-blur-sm">
+                                        <div className="from-primary to-primary/80 border-foreground/50 text-primary-foreground rounded-full border bg-gradient-to-r px-4 py-2 text-sm font-bold backdrop-blur-sm">
                                             {bonus.value}
                                         </div>
                                     </div>

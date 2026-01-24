@@ -211,7 +211,7 @@ export function MentorProfile() {
                                 </span>
                             </h2>
                             <p className="text-muted-foreground mx-auto max-w-3xl text-xl leading-relaxed">
-                                Kamu bakal dipandu sama mentor terbaik yang udah punya pengalaman jualan online 13 tahun
+                                Gak perlu bingung karena kamu bakal dipandu sama mentor terbaik yang udah punya pengalaman jualan online 13 tahun
                             </p>
                         </div>
                     </div>
@@ -283,7 +283,7 @@ export function MentorProfile() {
                                     </div> */}
                                     <div className="bg-card/30 border-border/30 flex items-center gap-2 rounded-full border px-3 py-2 backdrop-blur-sm">
                                         <Instagram className="h-4 w-4 text-pink-500" />
-                                        <span className="text-muted-foreground text-sm">48K+ Followers</span>
+                                        <span className="text-muted-foreground text-sm">50K+ Followers</span>
                                     </div>
                                 </div>
                             </div>

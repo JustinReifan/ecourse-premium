@@ -22,19 +22,20 @@ const curriculumModules: CurriculumModule[] = [
     {
         id: '1',
         number: '01.',
-        title: 'Cara Sederhana Menentukan Niche di Awal',
+        title: 'SADARIN DIRI DULU',
         videoCount: 12,
         duration: '2.5 jam',
         description:
-            'Dulu: Bingung berminggu-minggu mikirin mau jualan apa, ujung-ujungnya ragu dan berhenti. Sekarang: Pakai Wheels of Life dan bantuan AI, kamu bisa temukan winning niche cuma dalam hitungan menit! Jangan sampai buang waktu bangun bisnis di kolam yang kering. Di sini kita bedah cara validasi ide biar nggak boncos di tengah jalan.',
-        thumbnail: '/storage/landing/curriculum/14.png',
+            'Sering ngerasa "Ah, aku cuma ibu rumah tangga, bisa apa?" atau "Aku gaptek banget, mana mungkin bisa bisnis?" Stop. Tarik napas dulu, Di bab pertama ini, kita gak akan langsung bahas teknis yang bikin pusing. Kita akan benerin dulu fondasinya. Kita akan ubah mindset kamu lewat materi-materi ini:',
+        thumbnail: '/storage/landing/curriculum2/1.png',
         topics: [
-            'Fundamental: Menentukan Niche & Target Audience',
-            "Menggunakan Framework 'Wheels of Life' untuk Validasi Niche",
-            'Panduan Instalasi & Personalisasi ChatGPT',
-            'Brainstorming Ide Niche & Konten dengan Bantuan AI',
-            'Dasar Branding: Membuat Logo & Palet Warna',
-            'Strategi Affiliate Marketing Produk Digital',
+            '🎬 “Aku Cuma Ibu Rumah Tangga? Salah Besar!”',
+            'Apa Itu Produk Digital & Kenapa Ini Jalan Termurah Buat Muslimah Mulai Bisnis',
+            'Bedanya Jualan Online Biasa vs Bisnis Produk Digital (No Modal, No Gudang!)',
+            'Perbedaan punya produk sendiri dan Affiliate produk digital',
+            'Apa itu MRR dan PLR?',
+            'Apa itu konten? dan kenapa harus ngonten?',
+            'Aku Gaptek Tapi Mau Belajar — Harus Mulai dari Mana?',
         ],
         difficulty: 'Beginner',
         students: 15420,
@@ -42,26 +43,16 @@ const curriculumModules: CurriculumModule[] = [
     {
         id: '2',
         number: '02.',
-        title: 'Tutorial Lengkap LYNK.ID',
+        title: 'TEMUKAN POTENSIMU',
         videoCount: 18,
         duration: '4.2 jam',
         description:
-            'Punya followers banyak tapi nggak ada tempat jualan? Sama aja bohong. Ubah bio link kamu jadi MESIN UANG otomatis. Kita bakal setup Lynk.id dari nol sampai jadi toko online profesional yang siap terima duit 24 jam. Nggak perlu jago coding, nggak perlu bayar programmer mahal. Tinggal klik, geser, jadi!',
-        thumbnail: '/storage/landing/curriculum/15.png',
+            'Sering bingung kalau ditanya, "Keahlianmu apa?" Terus jadi insecure karena ngerasa nggak punya bakat spesial kayak orang-orang di sosmed? Padahal, percaya deh, Allah itu adil. Setiap dari kita pasti dikasih kelebihan. Cuma kadang, kitanya aja yang nggak sadar atau menganggap itu hal sepele. Lewat materi ini, kita bakal panen ide dari keseharian kamu!',
+        thumbnail: '/storage/landing/curriculum2/2.png',
         topics: [
-            'Setup Akun: Pendaftaran, Profil, dan Tautkan Sosmed',
-            'Kustomisasi Tampilan (Font, Button, Warna) & Statistik',
-            'Integrasi WhatsApp & Landing Page Builder',
-            'Desain Landing Page Estetik dengan Canva',
-            'Manajemen Lead Magnet & Tautan Video',
-            'Setting Bahasa & Update Informasi Rekening',
-            'Manajemen Produk: Urutan, Komisi Affiliate, & Voucher',
-            'Menambahkan Elemen Visual & Teks pada Halaman',
-            'Integrasi Link Eksternal (Shopee, Grup WA, Youtube)',
-            'Fitur Appointment & Penarikan Komisi (Withdrawal)',
-            'Strategi Affiliate Produk Orang Lain & Produk Fisik',
-            'Fitur Monetisasi Tambahan: Traktir Kopi & Subscription',
-            'Verifikasi Akun untuk Membuka Peluang Affiliate',
+            'Kamu Bisa Apa Sih? Nih Cara Tahu Bakatmu Buat Bisnis Digital',
+            'Jangan Remehkan Diri Sendiri: Hal Receh yang Bisa Jadi Produk Digital!',
+            'Rumus 3 Lingkaran Emas: Ketemu Ide Produk yang Laku dan Bermanfaat',
         ],
         difficulty: 'Intermediate',
         students: 12850,
@@ -69,22 +60,17 @@ const curriculumModules: CurriculumModule[] = [
     {
         id: '3',
         number: '03.',
-        title: 'Cara Membuat Konten dari Nol',
+        title: 'PRAKTIK BIKIN PRODUK DIGITAL',
         videoCount: 24,
         duration: '6.8 jam',
         description:
-            'Masih ngedit video berjam-jam sampai mata pedes? Stop cara lama! Aku kasih tau jalan pintasnya: Bikin konten visual di Canva + edit video sat-set di CapCut. Bahkan kalau kamu blank ide, kita suruh AI mikir buat kamu. Hasilnya? Konten high quality serasa punya tim editor profesional, padahal cuma modal HP!',
-        thumbnail: '/storage/landing/curriculum/16.png',
+            'Ide udah ada di tangan, sekarang saatnya kita masak idenya jadi produk beneran! Buat yang dari kemarin bilang "Aduh aku gaptek, takut salah pencet"... Tenang aja di sini kita nggak akan pakai software canggih yang bikin otak ngebul. Kita bakal pakai tools yang ramah banget buat pemula.',
+        thumbnail: '/storage/landing/curriculum2/3.png',
         topics: [
-            'Riset Ide Hook & Caption Reels Menggunakan ChatGPT',
-            'Batching Content: Strategi Konsistensi Tanpa Burnout',
-            'Produksi Konten Visual Canva (Carousel, Single Post, & Animasi)',
-            'Teknik ATM (Amati Tiru Modifikasi) Kreator Viral',
-            'Tutorial Editing CapCut Mobile: Basic (Cut, Audio, Text)',
-            'Tutorial Editing CapCut Mobile: Advanced (Overlay, Keyframe, BG Removal)',
-            'Tutorial Editing CapCut Mobile: Finishing (Auto Caption, Color Grading, AI Avatar)',
-            'Strategi Konten Faceless dengan Presentasi Canva',
-            'Fast Track: 7 Langkah Editing Konten Tutorial',
+            'Tutorial Bikin E-Book di Canva, Step by Step Buat Pemula',
+            'Cara Riset Produk Digital yang Laku: Gak Usah Nebak-nebak!',
+            'Bikin Template Lucu Tapi Bermanfaat — Cuma Modal Canva Gratisan',
+            'Cara Simpen, Export, dan Siapin Produk Digital Biar Siap Dijual',
         ],
         difficulty: 'Advanced',
         students: 9640,
@@ -92,20 +78,17 @@ const curriculumModules: CurriculumModule[] = [
     {
         id: '4',
         number: '04.',
-        title: 'Optimasi Akun Instagram',
+        title: 'BRANDING & NGONTEN TANPA MUKA',
         videoCount: 16,
         duration: '3.7 jam',
         description:
-            'Main Instagram jangan cuma ngejar likes, tapi kejar trust. Algoritma berubah terus? Nggak masalah kalau pondasi branding kamu kuat. Di bab ini, kita bongkar rahasia bikin profil yang "mahal", strategi konten Faceless (buat yang malu tampil), sampai cara baca sinyal algoritma biar konten kamu terus disorong ke audience yang tepat.',
-        thumbnail: '/storage/landing/curriculum/17.png',
+            'Suka minder kalau harus ngomong di depan kamera? Tos dulu! ✋ Kamu nggak sendirian. Di dunia produk digital, kamu gak perlu tampil muka juga gapapa kok. Yang penting itu value (manfaat) yang kamu kasih. Di bab ini, aku ajarin caranya bangun personal branding yang kuat tanpa perlu nunjukin wajah di sosmed!',
+        thumbnail: '/storage/landing/curriculum2/4.png',
         topics: [
-            'Optimasi Bio & Integrasi Link LYNK.ID',
-            'Strategi Akun Creator & Transisi Akun Lama vs Baru',
-            'Produksi Konten: Reels Faceless & IG Story Engagement',
-            'Desain Cover/Sampul Hook di Canva & CapCut',
-            'Membangun Loyal Audience & Memahami Algoritma IG',
-            'Ekosistem Threads: Login, Mirroring, & Konten AI',
-            'Memahami Journey Audience & KPI FYP',
+            'Bikin Nama Brand & Bio Instagram yang Langsung Dikenal Orang',
+            'Ngonten Tanpa Tampil Wajah: Caraku Tetap Dapet Cuannya!',
+            '1 Hari 1 Konten — Rahasia Biar Gak Burnout & Tetep Konsisten',
+            'Bikin Caption yang Bikin Orang ‘Ngerasa Disindir Tapi Tersadar',
         ],
         difficulty: 'Advanced',
         students: 8320,
@@ -113,110 +96,33 @@ const curriculumModules: CurriculumModule[] = [
     {
         id: '5',
         number: '05.',
-        title: 'Optimasi Akun Tiktok',
+        title: 'CARA JUALAN TANPA MAKSA',
         videoCount: 14,
         duration: '3.1 jam',
         description:
-            'TikTok itu tambang emas, tapi banyak yang kena banned karena asal main. Jangan sampai akun yang udah capek dibangun hilang gitu aja. Pelajari cara main aman, teknik hook yang bikin orang betah nonton sampai habis, dan strategi naruh link jualan biar nggak dianggap spam sama TikTok. Main cerdas, bukan main ganas.',
-        thumbnail: '/storage/landing/curriculum/18.png',
-        topics: ['Strategi Penautan Link Bio (Di bawah & Di atas 1k Followers)', 'Teknik Recording & Hack Algoritma TikTok Anti Pelanggaran'],
+            'Kita buang jauh-jauh cara jualan yang agresif dan bikin orang kabur. Di bab ini, kita belajar cara jualan yang elegan. Prinsipnya kita nggak nodong orang buat beli, tapi kita bikin mereka yang butuh dan nyariin produk kamu.',
+        thumbnail: '/storage/landing/curriculum2/5.png',
+        topics: ['Soft Selling: Cara Jualan Halus Tapi Bikin Orang Pengen Beli', 'Platform Jual Produk Digital: Dari LYNK ID sampe WhatsApp Catalog'],
         difficulty: 'Intermediate',
         students: 7890,
     },
     {
         id: '6',
         number: '06.',
-        title: 'Automasi dengan ManyChat',
+        title: 'HIDUP SEIMBANG, BISNIS JALAN',
         videoCount: 8,
         duration: '1.8 jam',
         description:
-            'Masih balesin DM satu-satu secara manual? Big No! Waktumu terlalu berharga buat jadi CS seharian. Aktifkan "Asisten Robot" kamu sekarang. Mau jam 2 pagi atau lagi liburan, ManyChat bakal bantu jawab calon pembeli dan arahkan mereka sampai closing. Otomatisasi adalah kunci passive income yang sebenarnya!',
-        thumbnail: '/storage/landing/curriculum/19.png',
-        topics: ['Setup Auto Reply Instagram (via HP & Laptop)', 'Setup DM Automation TikTok', 'Integrasi Lanjutan dengan DIBALES.AI'],
-        difficulty: 'Beginner',
-        students: 11250,
-    },
-    {
-        id: '7',
-        number: '07.',
-        title: 'WhatsApp Marketing',
-        videoCount: 8,
-        duration: '1.8 jam',
-        description:
-            'Sosmed bisa hilang, tapi database kontak adalah aset abadi. Pelajari seni closing di WhatsApp tanpa terlihat maksa. Kita bahas strategi funneling, cara bikin status WA yang bikin orang kepo dan beli, sampai manajemen database pakai AI. Sekali broadcast, orderan langsung deras!',
-        thumbnail: '/storage/landing/curriculum/20.png',
+            'Bisnis jalan terus, tapi cucian numpuk dan anak rewel? Duh, jangan sampai kejadian ya Bun. Tujuan kita belajar bisnis digital itu biar punya waktu lebih banyak sama keluarga, bukan malah jadi stres sendiri. Kita nggak perlu jadi Superwoman yang sempurna 24 jam. Kita cuma perlu strategi yang pas buat ibu-ibu kayak kita. ',
+        thumbnail: '/storage/landing/curriculum2/6.png',
         topics: [
-            'Strategi Funneling & Closing Cepat di WhatsApp',
-            'Optimasi WhatsApp Story untuk Jangkauan Maksimal',
-            'Manajemen Kolam Audience (Grup) dengan Bantuan AI',
+            'Gimana Aku Ngatur Waktu Antara Dapur, Anak, & Bisnis Digital',
+            'Checklist Mingguan Biar Hidup Gak Berantakan',
+            'Waktu Hasil Belum Kelihatan: Cara Biar Gak Patah Semangat',
+            'Kenapa Komunitas Penting Buat Ibu Rumah Tangga yang Belajar Digital',
+            'Level Up Biar Makin Expert',
+            'Bonus Grup Bimbingan per 10 Orang [EXCLUSIF]',
         ],
-        difficulty: 'Beginner',
-        students: 11250,
-    },
-    {
-        id: '8',
-        number: '08.',
-        title: 'Evaluasi & Analisis Konten',
-        videoCount: 8,
-        duration: '1.8 jam',
-        description:
-            'Bikin konten capek-capek tapi nggak tau kenapa sepi? Atau ramai tapi nggak ada yang beli? Masalahnya satu: Kamu nggak bisa baca data. Di sini kita belajar bedah insight. Cari tahu mana yang winning, mana yang sampah. Stop main tebak-tebakan, mulailah ambil keputusan bisnis berdasarkan data nyata!',
-        thumbnail: '/storage/landing/curriculum/21.png',
-        topics: ['Cara Membaca & Menganalisis Data Performa Konten', 'Evaluasi Strategi Berdasarkan Insight Data'],
-        difficulty: 'Beginner',
-        students: 11250,
-    },
-    {
-        id: '9',
-        number: '09.',
-        title: 'Panduan Materi Cuan dari Konten',
-        videoCount: 8,
-        duration: '1.8 jam',
-        description: 'Disini kamu akan belajar gimana caranya bisa mulai hasilkan uang pertama mu dengan konten',
-        thumbnail: '/storage/landing/curriculum/22.png',
-        topics: ['Materi cuan dari konten'],
-        difficulty: 'Beginner',
-        students: 11250,
-    },
-    {
-        id: '10',
-        number: '10.',
-        title: 'Checklist Materi',
-        videoCount: 8,
-        duration: '1.8 jam',
-        description: 'Checklist Materi',
-        thumbnail: '/storage/landing/curriculum/23.png',
-        topics: ['Checklist Materi'],
-        difficulty: 'Beginner',
-        students: 11250,
-    },
-    {
-        id: '11',
-        number: '11.',
-        title: 'Bonus!! Cara Membuat Produk Digital Sendiri',
-        videoCount: 8,
-        duration: '1.8 jam',
-        description: 'Disini kamu akan di siapkan untuk mulai membuat produk digital kamu sendiri.',
-        thumbnail: '/storage/landing/curriculum/24.png',
-        topics: [
-            'Panduan membuat ebook profesional sampai layout',
-            'Panduan membuat story book yang hasilin cuan',
-            'Panduan membuat worksheet anak',
-            'Leading the viewers eye',
-            'Cara membuat game AI',
-        ],
-        difficulty: 'Beginner',
-        students: 11250,
-    },
-    {
-        id: '12',
-        number: '12.',
-        title: 'Hukum Asal Affiliator',
-        videoCount: 8,
-        duration: '1.8 jam',
-        description: 'Hukum asal affiliator',
-        thumbnail: '/storage/landing/curriculum/24.png',
-        topics: ['Hukum asal affiliator'],
         difficulty: 'Beginner',
         students: 11250,
     },
@@ -414,20 +320,20 @@ export function CurriculumSection() {
                         <div className="animate-fade-in">
                             <div className="bg-primary/10 border-primary/20 inline-flex items-center gap-2 rounded-full border px-4 py-2 backdrop-blur-sm">
                                 <div className="bg-primary h-2 w-2 animate-pulse rounded-full" />
-                                <span className="text-primary text-sm font-medium">Kurikulum Komprehensif</span>
+                                <span className="text-primary text-sm font-medium">Belajar Tanpa Ribet</span>
                             </div>
                         </div>
 
                         <div className="animate-fade-in space-y-4" style={{ animationDelay: '200ms', animationFillMode: 'both' }}>
                             <h2 className="text-foreground text-4xl font-bold md:text-5xl lg:text-6xl">
-                                <span className="block">Kurikulum Affiliate</span>
+                                <span className="block">Kurikulum Manisnya</span>
                                 <span className="from-primary via-primary/80 to-primary bg-gradient-to-r bg-clip-text text-transparent">
-                                    Jago Jualan
+                                    Produk Digital
                                 </span>
                             </h2>
                             <p className="text-muted-foreground mx-auto max-w-3xl text-xl leading-relaxed">
-                                Aku udah susun materinya dari A-Z biar kamu bisa ikuti polanya, praktekkan strateginya, dan siap-siap tembus income 5
-                                juta pertamamu dengan lebih cepat.
+                                Aku udah susun materinya dari A-Z dengan terstruktur. Tujuannya biar kamu paham dan punya bekal buat dapet cuan dari
+                                bisnis digital ini
                             </p>
                         </div>
 

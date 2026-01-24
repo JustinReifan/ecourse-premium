@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
-import { CheckCircle2, Clock, Copy, DollarSign, Megaphone, MousePointerClick, Trophy } from 'lucide-react';
+import { Banknote, CheckCircle2, Clock, Copy, DollarSign, HandCoins, Megaphone, MousePointerClick, Trophy } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface Stats {
@@ -17,7 +17,8 @@ interface Stats {
     conversion_rate: number;
     pending_balance: number;
     available_balance: number;
-    total_earnings: number;
+    total_omset: number;
+    total_commission: number;
 }
 
 interface Conversion {
@@ -172,17 +173,34 @@ export default function AffiliateDashboard({
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Clicks</CardTitle>
+                            <CardTitle className="text-sm font-medium">Total Omset</CardTitle>
+                            <Banknote className="text-muted-foreground h-4 w-4" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">Rp {stats.total_omset}</div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Total Komisi</CardTitle>
+                            <HandCoins className="text-muted-foreground h-4 w-4" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">Rp {stats.total_commission}</div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Total Klik</CardTitle>
                             <MousePointerClick className="text-muted-foreground h-4 w-4" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{stats.total_clicks}</div>
                         </CardContent>
                     </Card>
-
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Conversions</CardTitle>
+                            <CardTitle className="text-sm font-medium">Penjualan</CardTitle>
                             <CheckCircle2 className="text-muted-foreground h-4 w-4" />
                         </CardHeader>
                         <CardContent>
@@ -193,7 +211,7 @@ export default function AffiliateDashboard({
 
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Available Balance</CardTitle>
+                            <CardTitle className="text-sm font-medium">Saldo Tersedia</CardTitle>
                             <DollarSign className="text-muted-foreground h-4 w-4" />
                         </CardHeader>
                         <CardContent>
