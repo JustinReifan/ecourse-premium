@@ -112,7 +112,7 @@ export function TestimonialsSection() {
     };
 
     return (
-        <section className="relative py-12 lg:py-32">
+        <section className="relative py-6 lg:py-32">
             {/* Background */}
             <div className="via-primary/5 absolute inset-0 bg-gradient-to-b from-transparent to-transparent" />
 

@@ -15,7 +15,7 @@ export function LearningBenefits() {
     };
 
     return (
-        <section className="relative py-16 lg:py-32">
+        <section className="relative py-6 lg:py-32">
             {/* Background Effect */}
             <div className="via-primary/5 pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent to-transparent" />
 

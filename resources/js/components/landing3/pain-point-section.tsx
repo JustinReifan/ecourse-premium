@@ -14,11 +14,11 @@ export function PainPointSection() {
     const { trackCTA } = useAnalytics();
 
     const painPoints = [
-        'Bingung mulai dari mana',
-        'Udah coba jualan & ngonten tapi sepi',
-        'Nyoba iklan berbayar tapi boncos',
-        'Udah coba affiliate/bikin produk digital tapi gatau cara promosiin nya',
-        'Malu nampilin wajah buat ngonten',
+        'Mau mulai dari mana?',
+        'Udah coba jualan & ngonten tapi sepi?',
+        'Nyoba iklan berbayar tapi boncos?',
+        'Udah coba affiliate/bikin produk digital tapi ga tau cara promosiin nya?',
+        'Malu nampilin wajah buat ngonten?',
     ];
 
     const handleCtaClick = () => {
@@ -31,7 +31,7 @@ export function PainPointSection() {
     };
 
     return (
-        <section className="border-border/20 relative overflow-hidden border-t py-20 lg:py-32">
+        <section className="border-border/20 relative overflow-hidden border-t py-10 lg:py-32">
             <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 {/* Header Section */}
                 <div className="mb-6 text-center lg:mb-16">

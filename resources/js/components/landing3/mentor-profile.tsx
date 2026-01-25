@@ -187,7 +187,7 @@ export function MentorProfile() {
     const [profileImageLoaded, setProfileImageLoaded] = useState(false);
 
     return (
-        <section className="relative py-20 lg:py-32">
+        <section className="relative py-6 lg:py-32">
             {/* Background Effects */}
             <div className="from-primary/5 to-primary/5 absolute inset-0 bg-gradient-to-br via-transparent" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.1)_0%,transparent_50%)]" />

@@ -62,19 +62,16 @@ class AffiliateController extends Controller
         $recentConversions = $affiliate->conversions()
             ->with(['user', 'order', 'product'])
             ->orderBy('created_at', 'desc')
-            ->limit(20)
             ->get();
 
         // Ledger history
         $ledger = $affiliate->ledger()
             ->orderBy('created_at', 'desc')
-            ->limit(50)
             ->get();
 
         // Payout history
         $payouts = $affiliate->payouts()
             ->orderBy('created_at', 'desc')
-            ->limit(10)
             ->get();
 
         // Share link

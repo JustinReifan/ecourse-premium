@@ -168,7 +168,7 @@ export function BonusSection() {
     };
 
     return (
-        <section className="relative overflow-hidden py-12 lg:py-32">
+        <section className="relative overflow-hidden py-6 lg:py-32">
             {/* Background Effects */}
             <div className="from-background via-background to-primary/5 absolute inset-0 bg-gradient-to-br" />
             <div className="bg-primary/10 absolute top-1/4 left-1/4 h-96 w-96 animate-pulse rounded-full blur-3xl" />

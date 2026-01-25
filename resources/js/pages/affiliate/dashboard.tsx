@@ -7,8 +7,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
-import { Banknote, CheckCircle2, Clock, Copy, DollarSign, HandCoins, Megaphone, MousePointerClick, Trophy } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import {
+    Banknote,
+    CheckCircle2,
+    ChevronLeft,
+    ChevronRight,
+    Clock,
+    Copy,
+    DollarSign,
+    HandCoins,
+    Megaphone,
+    MousePointerClick,
+    Trophy,
+} from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
 interface Stats {
     total_clicks: number;
@@ -96,6 +108,27 @@ export default function AffiliateDashboard({
     const [showPayoutForm, setShowPayoutForm] = useState(false);
     const [payoutMethods, setPayoutMethods] = useState<PayoutMethod[]>([]);
     const { success, error } = useToast();
+
+    const itemsPerPage = 5;
+
+    const [conversionPage, setConversionPage] = useState(1);
+
+    const paginatedConversions = useMemo(() => {
+        const startIndex = (conversionPage - 1) * itemsPerPage;
+        return conversions.slice(startIndex, startIndex + itemsPerPage);
+    }, [conversions, conversionPage]);
+
+    const totalConversionPages = Math.ceil(conversions.length / itemsPerPage);
+
+    // 2. Pagination State untuk Payouts
+    const [payoutPage, setPayoutPage] = useState(1);
+
+    const paginatedPayouts = useMemo(() => {
+        const startIndex = (payoutPage - 1) * itemsPerPage;
+        return payouts.slice(startIndex, startIndex + itemsPerPage);
+    }, [payouts, payoutPage]);
+
+    const totalPayoutPages = Math.ceil(payouts.length / itemsPerPage);
 
     useEffect(() => {
         fetch('/api/payout-methods/active')
@@ -365,21 +398,57 @@ export default function AffiliateDashboard({
                             {conversions.length === 0 ? (
                                 <p className="text-muted-foreground py-8 text-center">No conversions yet</p>
                             ) : (
-                                conversions.map((conversion) => (
-                                    <div key={conversion.id} className="flex items-center justify-between rounded-lg border p-4">
-                                        <div className="space-y-1">
-                                            <p className="font-medium">Order #{conversion.order_id}</p>
-                                            <p className="text-muted-foreground text-sm">
-                                                {conversion.product ? conversion.product.title : 'Initial Registration'}
-                                            </p>
-                                            <p className="text-muted-foreground text-xs">{new Date(conversion.created_at).toLocaleDateString()}</p>
+                                <>
+                                    {/* Ubah 'conversions.map' menjadi 'paginatedConversions.map' */}
+                                    {paginatedConversions.map((conversion) => (
+                                        <div key={conversion.id} className="flex items-center justify-between rounded-lg border p-4">
+                                            <div className="space-y-1">
+                                                <p className="font-medium">Order #{conversion.order_id}</p>
+                                                <p className="text-muted-foreground text-sm">
+                                                    {conversion.product ? conversion.product.title : 'Initial Registration'}
+                                                </p>
+                                                <p className="text-muted-foreground text-xs">
+                                                    {new Date(conversion.created_at).toLocaleDateString()}
+                                                </p>
+                                            </div>
+                                            <div className="space-y-1 text-right">
+                                                <p className="text-primary font-bold">{formatCurrency(conversion.commission_amount)}</p>
+                                                <Badge variant={conversion.status === 'approved' ? 'default' : 'secondary'}>
+                                                    {conversion.status}
+                                                </Badge>
+                                            </div>
                                         </div>
-                                        <div className="space-y-1 text-right">
-                                            <p className="text-primary font-bold">{formatCurrency(conversion.commission_amount)}</p>
-                                            <Badge variant={conversion.status === 'approved' ? 'default' : 'secondary'}>{conversion.status}</Badge>
+                                    ))}
+
+                                    {/* Pagination Controls (Diambil style-nya dari data-table.tsx) */}
+                                    {totalConversionPages > 1 && (
+                                        <div className="flex items-center justify-center gap-4 pt-4">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setConversionPage(Math.max(1, conversionPage - 1))}
+                                                disabled={conversionPage === 1}
+                                                className="h-8 w-8 p-0"
+                                            >
+                                                <ChevronLeft className="h-4 w-4" />
+                                            </Button>
+
+                                            <div className="text-muted-foreground text-sm">
+                                                Page <span className="text-foreground font-medium">{conversionPage}</span> of {totalConversionPages}
+                                            </div>
+
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setConversionPage(Math.min(totalConversionPages, conversionPage + 1))}
+                                                disabled={conversionPage === totalConversionPages}
+                                                className="h-8 w-8 p-0"
+                                            >
+                                                <ChevronRight className="h-4 w-4" />
+                                            </Button>
                                         </div>
-                                    </div>
-                                ))
+                                    )}
+                                </>
                             )}
                         </div>
                     </CardContent>
@@ -395,15 +464,47 @@ export default function AffiliateDashboard({
                             {payouts.length === 0 ? (
                                 <p className="text-muted-foreground py-8 text-center">No payouts yet</p>
                             ) : (
-                                payouts.map((payout) => (
-                                    <div key={payout.id} className="flex items-center justify-between rounded-lg border p-4">
-                                        <div className="space-y-1">
-                                            <p className="font-medium">{formatCurrency(payout.amount)}</p>
-                                            <p className="text-muted-foreground text-sm">{new Date(payout.created_at).toLocaleDateString()}</p>
+                                <>
+                                    {/* Ubah 'payouts.map' menjadi 'paginatedPayouts.map' */}
+                                    {paginatedPayouts.map((payout) => (
+                                        <div key={payout.id} className="flex items-center justify-between rounded-lg border p-4">
+                                            <div className="space-y-1">
+                                                <p className="font-medium">{formatCurrency(payout.amount)}</p>
+                                                <p className="text-muted-foreground text-sm">{new Date(payout.created_at).toLocaleDateString()}</p>
+                                            </div>
+                                            <Badge variant={payout.status === 'paid' ? 'default' : 'secondary'}>{payout.status}</Badge>
                                         </div>
-                                        <Badge variant={payout.status === 'paid' ? 'default' : 'secondary'}>{payout.status}</Badge>
-                                    </div>
-                                ))
+                                    ))}
+
+                                    {/* Pagination Controls untuk Payouts */}
+                                    {totalPayoutPages > 1 && (
+                                        <div className="flex items-center justify-center gap-4 pt-4">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setPayoutPage(Math.max(1, payoutPage - 1))}
+                                                disabled={payoutPage === 1}
+                                                className="h-8 w-8 p-0"
+                                            >
+                                                <ChevronLeft className="h-4 w-4" />
+                                            </Button>
+
+                                            <div className="text-muted-foreground text-sm">
+                                                Page <span className="text-foreground font-medium">{payoutPage}</span> of {totalPayoutPages}
+                                            </div>
+
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setPayoutPage(Math.min(totalPayoutPages, payoutPage + 1))}
+                                                disabled={payoutPage === totalPayoutPages}
+                                                className="h-8 w-8 p-0"
+                                            >
+                                                <ChevronRight className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </div>
                     </CardContent>

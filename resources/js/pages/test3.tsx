@@ -150,7 +150,7 @@ export default function Test1Hero() {
                 </section>
 
                 {/* image/video hero section */}
-                <section className="relative overflow-hidden py-8 lg:pt-12 lg:pb-24">
+                <section className="relative overflow-hidden py-0 lg:pt-12 lg:pb-24">
                     {/* Konten Utama */}
                     <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="space-y-6">

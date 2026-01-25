@@ -23,7 +23,14 @@ const faqs = [
     {
         id: '4',
         question: 'Apa yang saya dapat setelah ikut kelas?',
-        answer: 'Kamu akan mendapatkan paket lengkap belajar jualan digital, antara lain: 🎥 30+ video tutorial lengkap (Lynk.ID, Canva, CapCut, dan strategi jualan), 🧠 Video panduan membuat eBook & Storybook dari nol sampai siap jual, 🎬 Free 170+ video aesthetic untuk bahan latihan konten, 📚 Free eBook Lead Magnet, eBook panduan bisnis digital & strategi Reels viral, 💬 Free grup bimbingan Telegram berisi latihan HOOK, caption, hashtag, template konten, dan update materi, 🎙️ Live Telegram 2 minggu sekali untuk interaksi dengan mentor & member, 📲 Free bimbingan grup WA khusus untuk praktek per 10 orang jadi sangat exclusif',
+        answer: `Kamu akan mendapatkan paket lengkap belajar jualan digital, antara lain: 
+        <br />🎥 30+ video tutorial lengkap (Lynk.ID, Canva, CapCut, dan strategi jualan), 
+        <br />🧠 Video panduan membuat eBook & Storybook dari nol sampai siap jual, 
+        <br />🎬 Free 170+ video aesthetic untuk bahan latihan konten, 
+        <br />📚 Free eBook Lead Magnet, eBook panduan bisnis digital & strategi Reels viral, 
+        <br />💬 Free grup bimbingan Telegram berisi latihan HOOK, caption, hashtag, template konten, dan update materi, 
+        <br />🎙️ Live Telegram 2 minggu sekali untuk interaksi dengan mentor & member, 
+        <br />📲 Free bimbingan grup WA khusus untuk praktek per 10 orang jadi sangat exclusif`,
     },
     {
         id: '5',
@@ -99,7 +106,7 @@ function FaqItem({ faq, index }: FaqItemProps) {
                 <CollapsibleContent className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden">
                     <div className="px-6 pb-6">
                         <div className="border-primary/20 border-t pt-4">
-                            <p className="text-muted-foreground leading-relaxed">{faq.answer}</p>
+                            <div className="text-muted-foreground leading-relaxed" dangerouslySetInnerHTML={{ __html: faq.answer }} />{' '}
                         </div>
                     </div>
                 </CollapsibleContent>
@@ -122,7 +129,7 @@ export function FaqSection() {
     };
 
     return (
-        <section className="border-border/50 relative border-none py-20 lg:py-32">
+        <section className="border-border/50 relative border-none py-8 lg:py-32">
             {/* Background Effects */}
             <div className="absolute inset-0">
                 <div className="via-primary/5 absolute inset-0 bg-gradient-to-b from-transparent to-transparent" />

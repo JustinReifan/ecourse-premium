@@ -117,7 +117,7 @@ export function DataTable<T extends Record<string, any>>({
                     placeholder={searchPlaceholder}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="bg-primary/10 border-primary/30 placeholder:text-muted-foreground h-12 rounded-xl pl-12 text-white backdrop-blur-sm focus:border-cyan-400 focus:ring-cyan-400/20"
+                    className="bg-primary/10 border-primary/30 placeholder:text-muted-foreground text-foreground h-12 rounded-xl pl-12 backdrop-blur-sm focus:border-cyan-400 focus:ring-cyan-400/20"
                 />
                 <div className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/10 to-blue-500/10 opacity-0 transition-opacity hover:opacity-100"></div>
             </div>

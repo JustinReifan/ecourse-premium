@@ -1,10 +1,10 @@
-import { CtaButton } from '@/components/ui/cta-button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { cn } from '@/lib/utils';
 import { router } from '@inertiajs/react';
 import { Check, Rocket, Star, TicketPercent, Zap } from 'lucide-react';
 import { useState } from 'react';
+import { CtaButton2 } from './cta-button-2';
 
 const benefits = [
     {
@@ -28,7 +28,7 @@ const benefits = [
         description: 'Akses material course lengkap dari basic hingga advanced techniques',
     },
     {
-        title: 'Bimbingan 1 on 1',
+        title: 'Bimbingan 1 on 1 via chat',
         description: 'Dapatkan bimbingan langsung dari mentor terbaik',
     },
 ];
@@ -67,7 +67,7 @@ function BenefitItem({ benefit, index }: BenefitItemProps) {
                     </div>
                     <div className="flex-1 space-y-1">
                         <h4 className="text-foreground group-hover:text-primary leading-tight font-medium transition-colors duration-300">
-                            {benefit.title}
+                            {benefit.title == 'Bimbingan 1 on 1 via chat' ? <span className="font-bold">{benefit.title}</span> : benefit.title}
                         </h4>
                     </div>
                 </div>
@@ -102,7 +102,7 @@ export function PricingSection() {
     };
 
     return (
-        <section className="relative overflow-hidden py-20 lg:py-32" id="pricing-section">
+        <section className="relative overflow-hidden py-6 lg:py-32" id="pricing-section">
             {/* Background Effects */}
             {/* <div className="absolute inset-0">
                 <div className="via-primary/5 absolute inset-0 bg-gradient-to-b from-transparent to-transparent" />
@@ -198,8 +198,8 @@ export function PricingSection() {
                                 {/* CTA Button */}
                                 <div className="space-y-4 text-center">
                                     <button onClick={handleButton}>
-                                        <CtaButton
-                                            variant="primary"
+                                        <CtaButton2
+                                            withInstruction
                                             size="lg"
                                             className={cn(
                                                 'relative w-full overflow-hidden px-16 lg:w-auto',
@@ -210,7 +210,7 @@ export function PricingSection() {
                                             Gabung Sekarang
                                             <Rocket className="ms-2 inline h-5 w-5" />
                                             <div className="bg-primary absolute top-0 right-0 h-3 w-3 animate-ping rounded-full" />
-                                        </CtaButton>
+                                        </CtaButton2>
                                     </button>
 
                                     <div className="flex items-center justify-center gap-6 text-sm text-white">
